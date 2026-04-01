@@ -85,16 +85,20 @@ const PerfilPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Payload limpo para Upsert
-      const payload = {
+      // Payload limpo para Upsert - Incluindo o ID original se existir para garantir o Update
+      const payload: any = {
         imobiliaria_id: user.id,
-        nome_fantasia: profile.nome_fantasia,
-        cnpj: profile.cnpj,
-        endereco_completo: profile.endereco_completo,
-        whatsapp: profile.whatsapp,
-        email: profile.email,
-        logo_url: profile.logo_url
+        nome_fantasia: profile.nome_fantasia || "",
+        cnpj: profile.cnpj || "",
+        endereco_completo: profile.endereco_completo || "",
+        whatsapp: profile.whatsapp || "",
+        email: profile.email || "",
+        logo_url: profile.logo_url || ""
       };
+
+      if ((profile as any).id) {
+        payload.id = (profile as any).id;
+      }
 
       const { error } = await supabase
         .from('imobiliaria_perfil')
@@ -102,9 +106,10 @@ const PerfilPage = () => {
 
       if (error) throw error;
       toast.success("Configurações salvas com sucesso!");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Erro ao salvar perfil. Verifique os dados.");
+      const msg = error.message || "Erro desconhecido ao salvar perfil.";
+      toast.error(`Falha no banco: ${msg}`);
     } finally {
       setLoading(false);
     }
