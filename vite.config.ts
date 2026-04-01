@@ -18,8 +18,10 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'script',
       workbox: {
         maximumFileSizeToCacheInBytes: 5000000,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
       },
       includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png'],
       manifest: {
