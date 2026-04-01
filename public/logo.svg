@@ -1,0 +1,8 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo de fundo fluido -->
+  <path d="M75 50C75 63.8071 63.8071 75 50 75C36.1929 75 25 63.8071 25 50C25 36.1929 36.1929 25 50 25C54.5 25 58.7 26.2 62.3 28.3" stroke="#F29D35" stroke-width="10" stroke-linecap="round"/>
+  <!-- Seta/Check central fluida -->
+  <path d="M30 52L45 67L80 32" stroke="#F29D35" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Ponta da seta estilizada -->
+  <path d="M68 32H80V44" stroke="#F29D35" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
