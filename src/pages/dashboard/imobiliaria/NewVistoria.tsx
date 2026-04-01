@@ -15,6 +15,8 @@ import { toast } from "sonner";
 import { useVistoriaImage } from "@/hooks/useVistoriaImage";
 import { pdf } from '@react-pdf/renderer';
 import { VistoriaPDF } from "@/components/vistorias/VistoriaPDF";
+import { motion, AnimatePresence } from "framer-motion";
+import { Separator } from "@/components/ui/separator";
 
 interface Item {
   id: string;
@@ -621,9 +623,9 @@ const NewVistoria = () => {
                   {ambientes.map(a => {
                     const total = a.itens.length;
                     const evaluated = a.itens.filter(i => {
+                      const isNormal = i.estado === 'Novo' || i.estado === 'Bom';
                       const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
-                      if (isCritical) return i.fotos.length > 0 && i.observacao;
-                      return i.estado !== 'Bom' || i.observacao || i.fotos.length > 0;
+                      return isNormal || (isCritical && i.observacao.trim() !== "" && i.fotos.length > 0);
                     }).length;
                     
                     const progress = total > 0 ? (evaluated / total) * 100 : 0;
@@ -685,19 +687,50 @@ const NewVistoria = () => {
 
             {inspectionPhase === 'detail' && activeAmbienteId && (
               <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 pb-20">
-                <Button 
-                  variant="outline" 
-                  className="mb-4 gap-2 hover:bg-secondary/10 hover:text-secondary font-bold border-secondary/20 text-secondary" 
-                  onClick={() => setInspectionPhase('master')}
-                >
-                  <ChevronRight className="w-4 h-4 rotate-180" /> Dashboard de Progresso
-                </Button>
-
-                <div className="flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur-md z-10 py-4 border-b border-border/50">
-                  <h2 className="text-2xl font-bold">{ambientes.find(a => a.id === activeAmbienteId)?.nome}</h2>
-                  <Badge variant="secondary" className="bg-secondary/10 text-secondary border-secondary/20 uppercase text-[10px] font-extrabold">
-                    {ambientes.find(a => a.id === activeAmbienteId)?.itens.length} ITENS PARA AVALIAR
-                  </Badge>
+                <div className="sticky top-0 bg-background/95 backdrop-blur-md z-30 py-4 border-b border-border/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-secondary/10 hover:text-secondary h-8 w-8" 
+                        onClick={() => setInspectionPhase('master')}
+                      >
+                        <ChevronRight className="w-5 h-5 rotate-180" />
+                      </Button>
+                      <h2 className="text-xl font-black tracking-tight">{ambientes.find(a => a.id === activeAmbienteId)?.nome}</h2>
+                    </div>
+                    <Badge variant="secondary" className="bg-secondary/10 text-secondary border-secondary/20 uppercase text-[9px] font-extrabold tracking-widest px-2">
+                      {ambientes.find(a => a.id === activeAmbienteId)?.itens.length} ITENS
+                    </Badge>
+                  </div>
+                  
+                  {/* Barra de Progresso Real-Time Direbaixo do Header */}
+                  {(() => {
+                    const room = ambientes.find(a => a.id === activeAmbienteId);
+                    const total = room?.itens.length || 0;
+                    const evaluated = room?.itens.filter(i => {
+                      const isNormal = i.estado === 'Novo' || i.estado === 'Bom';
+                      const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
+                      return isNormal || (isCritical && i.observacao.trim() !== "" && i.fotos.length > 0);
+                    }).length || 0;
+                    const progress = total > 0 ? (evaluated / total) * 100 : 0;
+                    
+                    return (
+                      <div className="px-1 pt-1">
+                        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-500 ease-out ${progress === 100 ? 'bg-emerald-500' : 'bg-secondary'}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-[9px] font-bold text-muted-foreground uppercase">{progress === 100 ? 'Ambiente Validado' : 'Progresso da Vistoria'}</span>
+                          <span className="text-[9px] font-bold text-secondary">{Math.round(progress)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="space-y-12">
@@ -741,62 +774,72 @@ const NewVistoria = () => {
                           </div>
                         </div>
 
-                        {/* Expansão Condicional Suave com Glassmorphism */}
-                        {(isCritical || hasPhotos || hasObs) && (
-                          <div className="pl-4 border-l-4 border-secondary/20 space-y-6 animate-in slide-in-from-left-2 duration-300">
-                             <div className="space-y-3">
-                                <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
-                                  <span>📝 Observações Técnicas</span>
-                                  {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
-                                </Label>
-                                <Textarea 
-                                  disabled={isViewOnly}
-                                  placeholder="Ex: Riscos no piso, infiltração no teto..."
-                                  value={item.observacao}
-                                  className={`bg-muted/30 border-0 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${isCritical && !hasObs ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
-                                  onChange={e => {
-                                    setAmbientes(ambientes.map(a => 
-                                      a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
-                                    ));
-                                  }}
-                                />
-                             </div>
+                        {/* Expansão Condicional Suave com Framer Motion */}
+                        <AnimatePresence initial={false}>
+                          {(isCritical || hasPhotos || hasObs) && (
+                            <motion.div 
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="pl-4 border-l-4 border-secondary/20 space-y-6 pt-2 pb-4">
+                                 <div className="space-y-3">
+                                    <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                      <span>📝 Observações Técnicas</span>
+                                      {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
+                                    </Label>
+                                    <Textarea 
+                                      disabled={isViewOnly}
+                                      placeholder="Ex: Riscos no piso, infiltração no teto..."
+                                      value={item.observacao}
+                                      className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${isCritical && !item.observacao ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
+                                      onChange={e => {
+                                        setAmbientes(ambientes.map(a => 
+                                          a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
+                                        ));
+                                      }}
+                                    />
+                                 </div>
 
-                             <div className="space-y-3">
-                               <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
-                                 <span>📸 Registro Fotográfico</span>
-                                 {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
-                               </Label>
-                               <div className="flex gap-3 overflow-x-auto py-2 px-1">
-                                 {!isViewOnly && (
-                                   <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
-                                      <Camera className={`w-10 h-10 mb-1 ${isCritical && !hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
-                                      <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                      <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
-                                   </label>
-                                 )}
-                                 
-                                 {item.fotos.map((foto, fIdx) => (
-                                   <div key={fIdx} className="relative shrink-0 w-28 h-28 group shadow-md hover:shadow-xl transition-shadow">
-                                      <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
-                                      {!isViewOnly && (
-                                        <button 
-                                          className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-90 transition-transform"
-                                          onClick={() => {
-                                            setAmbientes(ambientes.map(a => 
-                                              a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
-                                            ));
-                                          }}
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      )}
+                                 <div className="space-y-3">
+                                   <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                     <span>📸 Registro Fotográfico</span>
+                                     {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
+                                   </Label>
+                                   <div className="flex gap-3 overflow-x-auto py-2 px-1">
+                                     {!isViewOnly && (
+                                       <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
+                                          <Camera className={`w-10 h-10 mb-1 ${isCritical && !hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                          <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
+                                          <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
+                                       </label>
+                                     )}
+                                     
+                                     {item.fotos.map((foto, fIdx) => (
+                                       <div key={fIdx} className="relative shrink-0 w-28 h-28 group shadow-md transition-shadow">
+                                          <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
+                                          {!isViewOnly && (
+                                            <button 
+                                              className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-90 transition-transform"
+                                              onClick={() => {
+                                                setAmbientes(ambientes.map(a => 
+                                                  a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
+                                                ));
+                                              }}
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          )}
+                                       </div>
+                                     ))}
                                    </div>
-                                 ))}
-                               </div>
-                             </div>
-                          </div>
-                        )}
+                                 </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                         <Separator className="opacity-30" />
                       </div>
                     );
@@ -804,18 +847,33 @@ const NewVistoria = () => {
                 </div>
 
                 {!isViewOnly && (
-                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-lg border-t border-border/50 z-30 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12 flex gap-4">
-                     {!vistoriaId && (
-                       <Button variant="outline" className="flex-1 py-8 h-auto font-bold gap-2" onClick={handleSaveDraft} disabled={loading}>
-                         <Save className="w-5 h-5" /> Rascunho
-                       </Button>
-                     )}
-                     <Button 
-                       className="flex-[2] bg-secondary py-8 h-auto text-lg font-black uppercase tracking-wider shadow-xl shadow-secondary/30" 
-                       onClick={() => setInspectionPhase('master')}
-                     >
-                       Salvar e Próximo
-                     </Button>
+                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-lg border-t border-border/50 z-30 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12">
+                     {(() => {
+                       const room = ambientes.find(a => a.id === activeAmbienteId);
+                       const total = room?.itens.length || 0;
+                       const evaluated = room?.itens.filter(i => {
+                         const isNormal = i.estado === 'Novo' || i.estado === 'Bom';
+                         const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
+                         return isNormal || (isCritical && i.observacao.trim() !== "" && i.fotos.length > 0);
+                       }).length || 0;
+                       const isComplete = total > 0 && evaluated === total;
+
+                       return (
+                         <Button 
+                           className={`w-full py-8 h-auto text-lg font-black uppercase tracking-wider shadow-xl transition-all ${
+                             isComplete ? 'bg-emerald-600 shadow-emerald-500/20 active:scale-95' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                           }`} 
+                           disabled={!isComplete}
+                           onClick={() => setInspectionPhase('master')}
+                         >
+                           {isComplete ? (
+                             <span className="flex items-center gap-2 tracking-widest"><CheckCircle2 className="w-6 h-6" /> Finalizar Ambiente</span>
+                           ) : (
+                             <span>Avaliação Pendente ({evaluated}/{total})</span>
+                           )}
+                         </Button>
+                       );
+                     })()}
                    </div>
                 )}
               </div>
