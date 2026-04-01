@@ -41,8 +41,9 @@ const NewVistoria = () => {
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [imobiliariaPerfil, setImobiliariaPerfil] = useState<any>(null);
   const [step, setStep] = useState(1);
+  const [inspectionPhase, setInspectionPhase] = useState<'setup' | 'master' | 'detail'>(vistoriaId ? 'master' : 'setup');
   const [status, setStatus] = useState<string>("rascunho");
-  const [activeAmbiente, setActiveAmbiente] = useState<string | null>(null);
+  const [activeAmbienteId, setActiveAmbienteId] = useState<string | null>(null);
 
   const isViewMode = searchParams.get("view") === "true";
   const isViewOnly = status === "concluida" || isViewMode;
@@ -134,7 +135,8 @@ const NewVistoria = () => {
         }))
       }));
       setAmbientes(loadedAmbientes);
-      if (loadedAmbientes.length > 0) setActiveAmbiente(loadedAmbientes[0].id);
+      setInspectionPhase('master');
+      if (loadedAmbientes.length > 0) setActiveAmbienteId(loadedAmbientes[0].id);
     } catch (error) {
       console.error(error);
       toast.error("Erro ao carregar dados da vistoria.");
@@ -238,17 +240,39 @@ const NewVistoria = () => {
     }
   };
 
-  const addAmbiente = () => {
+  const getStandardItems = (ambienteNome: string): Item[] => {
+    const common = ["Piso", "Pintura / Paredes", "Teto", "Portas / Batentes", "Janelas / Vidros", "Interruptores e Tomadas"];
+    if (ambienteNome.includes("Cozinha") || ambienteNome.includes("Banheiro") || ambienteNome.includes("Área de Serviço")) {
+      common.push("Torneiras / Sifão", "Ralos", "Revestimento Cerâmico");
+    }
+    if (ambienteNome.includes("Banheiro")) {
+      common.push("Vaso Sanitário", "Box / Chuveiro", "Bancada / Pia");
+    }
+    if (ambienteNome.includes("Cozinha")) {
+      common.push("Bancada / Pia", "Gabinete");
+    }
+    
+    return common.map(nome => ({
+      id: crypto.randomUUID(),
+      nome,
+      estado: "Bom",
+      observacao: "",
+      fotos: []
+    }));
+  };
+
+  const addAmbiente = (nome?: string) => {
     if (isViewOnly) return;
-    const nome = prompt("Nome do ambiente (ex: Sala, Quarto 1):");
-    if (nome) {
+    const finalNome = nome || prompt("Nome do ambiente (ex: Sala, Quarto 1):");
+    if (finalNome) {
       const newAmbiente: Ambiente = {
         id: crypto.randomUUID(),
-        nome,
-        itens: []
+        nome: finalNome,
+        itens: getStandardItems(finalNome)
       };
       setAmbientes([...ambientes, newAmbiente]);
-      setActiveAmbiente(newAmbiente.id);
+      setActiveAmbienteId(newAmbiente.id);
+      toast.success(`${finalNome} adicionado!`);
     }
   };
 
@@ -523,128 +547,277 @@ const NewVistoria = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="3">
-            <div className="grid md:grid-cols-[250px_1fr] gap-8">
-              <div className="space-y-4">
-                <h3 className="font-bold flex items-center gap-2"><LayoutGrid className="w-4 h-4" /> Ambientes</h3>
-                <div className="space-y-2">
-                  {ambientes.map(a => (
-                    <Button key={a.id} variant={activeAmbiente === a.id ? "secondary" : "outline"} 
-                      className="w-full justify-between font-bold" onClick={() => setActiveAmbiente(a.id)}>
-                      {a.nome} <Badge variant="outline" className="ml-2">{a.itens.length}</Badge>
+          <TabsContent value="3" className="space-y-6">
+            {inspectionPhase === 'setup' && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl font-bold text-primary">Quais ambientes este imóvel possui?</h2>
+                  <p className="text-muted-foreground">Toque para adicionar rapidamente.</p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { nome: "Sala", emoji: "🛋️" },
+                    { nome: "Quarto 1", emoji: "🛏️" },
+                    { nome: "Quarto 2", emoji: "🛏️" },
+                    { nome: "Cozinha", emoji: "🍳" },
+                    { nome: "Banheiro 1", emoji: "🚿" },
+                    { nome: "Banheiro 2", emoji: "🚿" },
+                    { nome: "Área de Serviço", emoji: "🧹" },
+                    { nome: "Varanda", emoji: "🌿" }
+                  ].map((quick) => (
+                    <Button 
+                      key={quick.nome} 
+                      variant="outline" 
+                      className="h-24 flex-col gap-2 border-2 hover:border-secondary/50 hover:bg-secondary/5 transition-all active:scale-95"
+                      onClick={() => addAmbiente(quick.nome)}
+                      disabled={ambientes.some(a => a.nome === quick.nome)}
+                    >
+                      <span className="text-2xl">{quick.emoji}</span>
+                      <span className="font-bold text-xs uppercase tracking-tight">{quick.nome}</span>
                     </Button>
                   ))}
-                  {!isViewOnly && (
-                    <Button variant="outline" className="w-full border-dashed border-2 py-6 gap-2" onClick={addAmbiente}>
-                      <Plus className="w-4 h-4" /> Adicionar
-                    </Button>
+                </div>
+
+                <div className="flex flex-col items-center gap-6">
+                  <Button variant="outline" className="gap-2 border-dashed" onClick={() => addAmbiente()}>
+                    <Plus className="w-4 h-4" /> Outro Ambiente
+                  </Button>
+
+                  {ambientes.length > 0 && (
+                    <div className="w-full max-w-md space-y-4">
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {ambientes.map(a => (
+                          <Badge key={a.id} variant="secondary" className="pl-3 pr-1 py-1 gap-1 text-sm bg-secondary/10 text-secondary border-secondary/20">
+                            {a.nome}
+                            <Button variant="ghost" size="icon" className="h-4 w-4 hover:bg-transparent" onClick={() => setAmbientes(ambientes.filter(amb => amb.id !== a.id))}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <Button className="w-full bg-secondary py-8 text-xl font-bold shadow-lg shadow-secondary/20 h-auto" onClick={() => setInspectionPhase('master')}>
+                        Iniciar Vistoria <ChevronRight className="ml-2" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
+            )}
 
-              <div className="space-y-6">
-                {activeAmbiente ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-bold">{ambientes.find(a => a.id === activeAmbiente)?.nome}</h2>
-                      {!isViewOnly && (
-                        <Button size="sm" variant="outline" className="gap-2" onClick={() => addItem(activeAmbiente)}>
-                          <Plus className="w-4 h-4" /> Novo Item
-                        </Button>
-                      )}
-                    </div>
+            {inspectionPhase === 'master' && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold">Painel de Progresso</h2>
+                    <p className="text-sm text-muted-foreground">Toque no card para avaliar.</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setInspectionPhase('setup')} className="gap-2 font-bold text-secondary">
+                    <Plus className="w-4 h-4" /> Ambientes
+                  </Button>
+                </div>
 
-                    <div className="space-y-4">
-                      {ambientes.find(a => a.id === activeAmbiente)?.itens.map(item => (
-                        <Card key={item.id} className="border-border/50 hover:border-secondary/20 transition-colors">
-                          <CardContent className="p-4 space-y-4">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold">{item.nome}</span>
-                              <Select disabled={isViewOnly} value={item.estado} onValueChange={(val: any) => {
-                                setAmbientes(ambientes.map(a => 
-                                  a.id === activeAmbiente ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, estado: val } : i) } : a
-                                ));
-                              }}>
-                                <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Novo">Novo</SelectItem>
-                                  <SelectItem value="Bom">Bom</SelectItem>
-                                  <SelectItem value="Regular">Regular</SelectItem>
-                                  <SelectItem value="Ruim">Ruim</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {ambientes.map(a => {
+                    const total = a.itens.length;
+                    const evaluated = a.itens.filter(i => {
+                      const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
+                      if (isCritical) return i.fotos.length > 0 && i.observacao;
+                      return i.estado !== 'Bom' || i.observacao || i.fotos.length > 0;
+                    }).length;
+                    
+                    const progress = total > 0 ? (evaluated / total) * 100 : 0;
+                    const isComplete = progress === 100;
 
+                    return (
+                      <Card 
+                        key={a.id} 
+                        className={`group cursor-pointer hover:border-secondary/50 transition-all border-2 active:bg-muted/10 ${isComplete ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-border/50'}`}
+                        onClick={() => {
+                          setActiveAmbienteId(a.id);
+                          setInspectionPhase('detail');
+                        }}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex justify-between items-start mb-4">
                             <div className="space-y-1">
-                              <div className="flex justify-between items-center">
-                                <Label className="text-xs font-bold">Observação {(item.estado === 'Regular' || item.estado === 'Ruim') && <span className="text-destructive">* Obrigatório</span>}</Label>
+                              <h3 className="font-bold text-lg group-hover:text-secondary transition-colors">{a.nome}</h3>
+                              <p className="text-xs text-muted-foreground">{evaluated} de {total} avaliados</p>
+                            </div>
+                            {isComplete ? (
+                              <div className="p-2 rounded-full bg-emerald-500/10"><CheckCircle2 className="text-emerald-500 w-6 h-6" /></div>
+                            ) : (
+                              <div className="p-2 rounded-full bg-muted text-muted-foreground group-hover:bg-secondary/10 group-hover:text-secondary transition-colors">
+                                <ChevronRight className="w-5 h-5" />
                               </div>
-                              <Textarea 
-                                disabled={isViewOnly} 
-                                placeholder={item.estado === 'Regular' || item.estado === 'Ruim' ? "Descreva a avaria detalhadamente..." : "Observação técnica (opcional)..."}
-                                className={(item.estado === 'Regular' || item.estado === 'Ruim') && !item.observacao ? "border-destructive/50 focus-visible:ring-destructive" : ""}
-                                value={item.observacao} 
-                                onChange={e => {
-                                  setAmbientes(ambientes.map(a => 
-                                    a.id === activeAmbiente ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
-                                  ));
-                                }} 
+                            )}
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full transition-all duration-700 ${isComplete ? 'bg-emerald-500' : 'bg-secondary'}`}
+                                style={{ width: `${progress}%` }}
                               />
                             </div>
-                            
-                            <div className="flex items-center gap-4">
-                              {!isViewOnly && (
-                                <label className="flex-1">
-                                  <div className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-24 ${(item.estado === 'Regular' || item.estado === 'Ruim') && item.fotos.length === 0 ? "border-destructive/50 bg-destructive/5" : "border-border"}`}>
-                                    <Camera className={`w-6 h-6 mb-1 ${(item.estado === 'Regular' || item.estado === 'Ruim') && item.fotos.length === 0 ? "text-destructive" : "text-muted-foreground"}`} />
-                                    <span className={`text-[10px] font-bold ${(item.estado === 'Regular' || item.estado === 'Ruim') && item.fotos.length === 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                                      {(item.estado === 'Regular' || item.estado === 'Ruim') ? 'FOTO OBRIGATÓRIA' : 'ADD FOTO'}
-                                    </span>
-                                  </div>
-                                  <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbiente, item.id, e)} />
-                                </label>
-                              )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
 
-                              <div className="flex-1 flex gap-2 overflow-x-auto pb-2">
-                                {item.fotos.map((foto, idx) => (
-                                  <div key={idx} className="relative w-20 h-20 shrink-0">
-                                    <img src={foto} className="w-full h-full object-cover rounded-lg border border-border" />
-                                    {!isViewOnly && (
-                                      <button className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
-                                        onClick={() => {
-                                          setAmbientes(ambientes.map(a => 
-                                            a.id === activeAmbiente ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, fIdx) => fIdx !== idx) } : i) } : a
-                                          ));
-                                        }}><Trash2 className="w-3 h-3" /></button>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="h-64 flex flex-col items-center justify-center text-center opacity-50">
-                    <LayoutGrid className="w-12 h-12 mb-4" />
-                    <p>Selecione ou adicione um ambiente para começar a detalhar itens.</p>
+                {!isViewOnly && (
+                  <div className="flex justify-center pt-8">
+                    <Button 
+                      size="lg" 
+                      className="bg-secondary font-bold gap-2 px-12 py-8 text-xl shadow-xl shadow-secondary/20 w-full md:w-auto h-auto" 
+                      onClick={handleFinish}
+                      disabled={loading || ambientes.length === 0}
+                    >
+                      {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
+                      Finalizar e Gerar Laudo
+                    </Button>
                   </div>
                 )}
               </div>
-            </div>
-            
-            {!isViewOnly && (
-              <div className="mt-12 flex justify-end gap-4 border-t border-border pt-8">
-                 <Button variant="outline" size="lg" className="font-bold gap-2" onClick={handleSaveDraft} disabled={loading}>
-                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                   Salvar Rascunho
-                 </Button>
-                 <Button size="lg" className="bg-secondary font-bold gap-2 px-8" onClick={handleFinish} disabled={loading}>
-                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                   Finalizar e Gerar Laudo
-                 </Button>
+            )}
+
+            {inspectionPhase === 'detail' && activeAmbienteId && (
+              <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 pb-20">
+                <Button 
+                  variant="outline" 
+                  className="mb-4 gap-2 hover:bg-secondary/10 hover:text-secondary font-bold border-secondary/20 text-secondary" 
+                  onClick={() => setInspectionPhase('master')}
+                >
+                  <ChevronRight className="w-4 h-4 rotate-180" /> Dashboard de Progresso
+                </Button>
+
+                <div className="flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur-md z-10 py-4 border-b border-border/50">
+                  <h2 className="text-2xl font-bold">{ambientes.find(a => a.id === activeAmbienteId)?.nome}</h2>
+                  <Badge variant="secondary" className="bg-secondary/10 text-secondary border-secondary/20 uppercase text-[10px] font-extrabold">
+                    {ambientes.find(a => a.id === activeAmbienteId)?.itens.length} ITENS PARA AVALIAR
+                  </Badge>
+                </div>
+
+                <div className="space-y-12">
+                  {ambientes.find(a => a.id === activeAmbienteId)?.itens.map((item, idx) => {
+                    const isCritical = item.estado === 'Regular' || item.estado === 'Ruim';
+                    const hasPhotos = item.fotos.length > 0;
+                    const hasObs = !!item.observacao;
+                    const isDone = (isCritical ? (hasPhotos && hasObs) : (item.estado !== 'Bom' || hasObs || hasPhotos));
+
+                    return (
+                      <div key={item.id} className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex flex-col gap-3">
+                          <div className="flex justify-between items-center">
+                            <Label className="text-lg font-extrabold flex items-center gap-2">
+                              {item.nome}
+                              {isDone && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+                            </Label>
+                            <Badge variant="outline" className="text-[9px] opacity-40 font-mono tracking-tighter">REF: {idx + 1}</Badge>
+                          </div>
+                          
+                          {/* Segmented Control para Status com Toque Otimizado */}
+                          <div className="flex p-1 bg-muted/60 rounded-2xl gap-1 border border-border/20">
+                            {["Novo", "Bom", "Regular", "Ruim"].map((statusOption) => (
+                              <button
+                                key={statusOption}
+                                onClick={() => {
+                                  if (isViewOnly) return;
+                                  setAmbientes(ambientes.map(a => 
+                                    a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, estado: statusOption as any } : i) } : a
+                                  ));
+                                }}
+                                className={`flex-1 py-4 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 active:scale-95 ${
+                                  item.estado === statusOption 
+                                    ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10') 
+                                    : 'text-muted-foreground hover:bg-background/40'
+                                }`}
+                              >
+                                {statusOption}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Expansão Condicional Suave com Glassmorphism */}
+                        {(isCritical || hasPhotos || hasObs) && (
+                          <div className="pl-4 border-l-4 border-secondary/20 space-y-6 animate-in slide-in-from-left-2 duration-300">
+                             <div className="space-y-3">
+                                <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                  <span>📝 Observações Técnicas</span>
+                                  {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
+                                </Label>
+                                <Textarea 
+                                  disabled={isViewOnly}
+                                  placeholder="Ex: Riscos no piso, infiltração no teto..."
+                                  value={item.observacao}
+                                  className={`bg-muted/30 border-0 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${isCritical && !hasObs ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
+                                  onChange={e => {
+                                    setAmbientes(ambientes.map(a => 
+                                      a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
+                                    ));
+                                  }}
+                                />
+                             </div>
+
+                             <div className="space-y-3">
+                               <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                 <span>📸 Registro Fotográfico</span>
+                                 {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
+                               </Label>
+                               <div className="flex gap-3 overflow-x-auto py-2 px-1">
+                                 {!isViewOnly && (
+                                   <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
+                                      <Camera className={`w-10 h-10 mb-1 ${isCritical && !hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                      <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
+                                      <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
+                                   </label>
+                                 )}
+                                 
+                                 {item.fotos.map((foto, fIdx) => (
+                                   <div key={fIdx} className="relative shrink-0 w-28 h-28 group shadow-md hover:shadow-xl transition-shadow">
+                                      <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
+                                      {!isViewOnly && (
+                                        <button 
+                                          className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-90 transition-transform"
+                                          onClick={() => {
+                                            setAmbientes(ambientes.map(a => 
+                                              a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
+                                            ));
+                                          }}
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                          </div>
+                        )}
+                        <Separator className="opacity-30" />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {!isViewOnly && (
+                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-lg border-t border-border/50 z-30 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12 flex gap-4">
+                     {!vistoriaId && (
+                       <Button variant="outline" className="flex-1 py-8 h-auto font-bold gap-2" onClick={handleSaveDraft} disabled={loading}>
+                         <Save className="w-5 h-5" /> Rascunho
+                       </Button>
+                     )}
+                     <Button 
+                       className="flex-[2] bg-secondary py-8 h-auto text-lg font-black uppercase tracking-wider shadow-xl shadow-secondary/30" 
+                       onClick={() => setInspectionPhase('master')}
+                     >
+                       Salvar e Próximo
+                     </Button>
+                   </div>
+                )}
               </div>
             )}
           </TabsContent>
