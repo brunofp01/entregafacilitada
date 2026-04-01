@@ -39,10 +39,21 @@ const Auth = () => {
       if (type === "signup") {
         toast.success("Conta criada! Verifique seu e-mail para confirmar.");
       } else {
-        const { data: profile } = await supabase
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Usuário não encontrado após login.");
+
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
+          .eq("id", user.id)
           .single();
+
+        if (profileError) {
+          console.error("Erro ao buscar perfil:", profileError);
+          // Fallback redirect or error
+          toast.error("Erro ao carregar seu perfil. Verifique as permissões de banco.");
+          return;
+        }
 
         toast.success("Login realizado com sucesso!");
         
