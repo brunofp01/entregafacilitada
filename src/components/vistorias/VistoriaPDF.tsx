@@ -1,9 +1,10 @@
-import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Link, Font } from '@react-pdf/renderer';
 
 // Configuração de Estilos Profissionais
 const styles = StyleSheet.create({
   page: {
     padding: 40,
+    paddingBottom: 75,
     backgroundColor: '#ffffff',
     fontFamily: 'Helvetica',
     fontSize: 10,
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 10,
     marginTop: 15,
+    marginBottom: 20,
     paddingLeft: 5,
     paddingRight: 5,
   },
@@ -188,6 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1e293b',
+    flex: 1,
   },
   promoText: {
     fontSize: 10,
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
-    maxWidth: '65%',
+    maxWidth: '70%',
   },
   footerPage: {
     fontSize: 9,
@@ -407,12 +410,15 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </Text>
         </View>
 
-        {/* Rodapé Fixo (Footer Universal) - 3 Colunas: Logo | Texto | Página */}
+        {/* Rodapé Fixo (Footer Universal) - 3 Colunas: Logo | Texto Interativo Centrado | Página */}
         <View style={styles.footer} fixed>
           <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.footerLogo} />
-          <Text style={styles.footerSales}>
-            Entrega Facilitada: Da contratação à desocupação descomplicada. Acesse: entregafacilitada.vercel.app
-          </Text>
+          <View style={styles.footerSales}>
+            <Text>Entrega Facilitada: Da contratação à desocupação descomplicada.</Text>
+            <Link src="https://entregafacilitada.vercel.app/" style={{ color: '#3b82f6', textDecoration: 'none' }}>
+              <Text>Acesse: entregafacilitada.vercel.app</Text>
+            </Link>
+          </View>
           <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => (
             `Página ${pageNumber} de ${totalPages}`
           )} />
