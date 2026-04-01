@@ -21,20 +21,21 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         maximumFileSizeToCacheInBytes: 5000000,
       },
-      includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png'],
       manifest: {
-        id: 'com.entregafacilitada.app',
         name: 'Entrega Facilitada - Gestão de Vistorias',
         short_name: 'Entrega Facilitada',
         description: 'Plataforma profissional para gestão de vistorias imobiliárias e segurança jurídica.',
         theme_color: '#142542',
         background_color: '#ffffff',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'minimal-ui'],
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
         lang: 'pt-BR',
         categories: ['business', 'productivity'],
+        prefer_related_applications: false,
         icons: [
           {
             src: '/icon-192.png',
@@ -62,6 +63,13 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png',
             form_factor: 'wide',
             label: 'Dashboard Profissional'
+          },
+          {
+            src: '/screenshot-mobile.png',
+            sizes: '1024x1024',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Dashboard Mobile'
           }
         ]
       }
