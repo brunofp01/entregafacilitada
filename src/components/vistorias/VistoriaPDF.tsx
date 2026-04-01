@@ -171,32 +171,48 @@ const styles = StyleSheet.create({
   },
   promoBanner: {
     marginTop: 40,
-    padding: 30,
+    padding: '30 40',
     backgroundColor: '#f8fafc',
     borderRadius: 12,
     border: '1pt solid #e2e8f0',
   },
   promoHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  promoLogo: {
-    width: 40,
-    height: 40,
-    marginRight: 12,
+    marginBottom: 25,
   },
   promoTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#0f172a',
+    textAlign: 'center',
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  iconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#fef3c7',
+    border: '1pt solid #f59e0b',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  stepContent: {
     flex: 1,
   },
-  promoText: {
-    fontSize: 10,
+  stepTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 2,
+  },
+  stepDescription: {
+    fontSize: 9,
     color: '#475569',
-    lineHeight: 1.6,
-    width: '100%',
+    lineHeight: 1.4,
   },
   footer: {
     position: 'absolute',
@@ -397,17 +413,37 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           );
         })}
 
-        {/* Selo de Fechamento (Última Página) */}
+        {/* Selo de Fechamento (Timeline Estilo Landing Page) */}
         <View style={styles.promoBanner} wrap={false}>
           <View style={styles.promoHeader}>
-            <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.promoLogo} />
-            <Text style={styles.promoTitle}>Entrega Facilitada — Da contratação à desocupação descomplicada.</Text>
+            <Text style={styles.promoTitle}>
+              Veja como funciona com a <Text style={{ color: '#3b82f6' }}>Entrega Facilitada</Text>:
+            </Text>
           </View>
-          <Text style={styles.promoText}>
-            Ao final do contrato, acione nosso app. Nós realizamos a vistoria de saída, 
-            executamos os reparos com profissionais credenciados e emitimos o seu Nada Consta. 
-            Entregue as chaves sem estresse e sem cobranças extras! Acesse: entregafacilitada.vercel.app
-          </Text>
+
+          <View style={styles.timelineItem}>
+            <View style={styles.iconBadge}><Text style={{ fontSize: 12 }}>📋</Text></View>
+            <View style={styles.stepContent}>
+              <Text style={styles.stepTitle}>Vistoria e diagnóstico</Text>
+              <Text style={styles.stepDescription}>Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.</Text>
+            </View>
+          </View>
+
+          <View style={styles.timelineItem}>
+            <View style={styles.iconBadge}><Text style={{ fontSize: 12 }}>🖌️</Text></View>
+            <View style={styles.stepContent}>
+              <Text style={styles.stepTitle}>Execução dos reparos</Text>
+              <Text style={styles.stepDescription}>Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.</Text>
+            </View>
+          </View>
+
+          <View style={styles.timelineItem}>
+            <View style={styles.iconBadge}><Text style={{ fontSize: 12 }}>🔑</Text></View>
+            <View style={styles.stepContent}>
+              <Text style={styles.stepTitle}>Chaves entregues, Nada Consta emitido</Text>
+              <Text style={styles.stepDescription}>Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.</Text>
+            </View>
+          </View>
         </View>
 
         {/* Rodapé Fixo (Footer Universal) - 3 Colunas: Logo | Texto Interativo Centrado | Página */}
