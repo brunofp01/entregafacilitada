@@ -42,7 +42,8 @@ const NewVistoria = () => {
   const [status, setStatus] = useState<string>("rascunho");
   const [activeAmbiente, setActiveAmbiente] = useState<string | null>(null);
 
-  const isViewOnly = status === "concluida";
+  const isViewMode = searchParams.get("view") === "true";
+  const isViewOnly = status === "concluida" || isViewMode;
 
   // Form State
   const [imovel, setImovel] = useState({ 
@@ -163,6 +164,33 @@ const NewVistoria = () => {
     }
   };
 
+  const syncVistoriaData = async (currentVistoriaId: string) => {
+    // Sync Ambientes and Itens
+    await supabase.from('vistoria_ambientes').delete().eq('vistoria_id', currentVistoriaId);
+    
+    for (const amb of ambientes) {
+      const { data: newAmb, error: ambError } = await supabase
+        .from('vistoria_ambientes')
+        .insert({ vistoria_id: currentVistoriaId, nome: amb.nome })
+        .select().single();
+      
+      if (ambError) throw ambError;
+
+      if (amb.itens.length > 0) {
+        const { error: itensError } = await supabase.from('vistoria_itens').insert(
+          amb.itens.map(i => ({
+            ambiente_id: newAmb.id,
+            nome: i.nome,
+            estado: i.estado,
+            observacao: i.observacao,
+            fotos: i.fotos
+          }))
+        );
+        if (itensError) throw itensError;
+      }
+    }
+  };
+
   const handleSaveDraft = async () => {
     setLoading(true);
     try {
@@ -191,29 +219,7 @@ const NewVistoria = () => {
         currentVistoriaId = data.id;
       }
 
-      // Sync Ambientes and Itens
-      await supabase.from('vistoria_ambientes').delete().eq('vistoria_id', currentVistoriaId);
-      
-      for (const amb of ambientes) {
-        const { data: newAmb, error: ambError } = await supabase
-          .from('vistoria_ambientes')
-          .insert({ vistoria_id: currentVistoriaId, nome: amb.nome })
-          .select().single();
-        
-        if (ambError) throw ambError;
-
-        if (amb.itens.length > 0) {
-          await supabase.from('vistoria_itens').insert(
-            amb.itens.map(i => ({
-              ambiente_id: newAmb.id,
-              nome: i.nome,
-              estado: i.estado,
-              observacao: i.observacao,
-              fotos: i.fotos
-            }))
-          );
-        }
-      }
+      await syncVistoriaData(currentVistoriaId);
 
       toast.success("Rascunho salvo!");
       if (!vistoriaId) navigate(`/imobiliaria/vistorias/nova?id=${currentVistoriaId}`, { replace: true });
@@ -333,6 +339,12 @@ const NewVistoria = () => {
 
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      const imobiliariaId = profile?.imobiliaria_id || profile?.id;
+
       const blob = await pdf(<VistoriaPDF data={{ 
         ...imovel,
         medidores, 
@@ -340,11 +352,11 @@ const NewVistoria = () => {
       }} />).toBlob();
       
       const pdfPath = `laudos/${crypto.randomUUID()}.pdf`;
-      await supabase.storage.from('vistorias').upload(pdfPath, blob);
+      const { error: uploadError } = await supabase.storage.from('vistorias').upload(pdfPath, blob);
+      if (uploadError) throw uploadError;
+      
       const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(pdfPath);
 
-      const imobiliariaId = currentUserProfile?.imobiliaria_id || currentUserProfile?.id;
-      
       const payload = {
         imobiliaria_id: imobiliariaId,
         ...imovel,
@@ -353,9 +365,13 @@ const NewVistoria = () => {
       };
 
       if (vistoriaId) {
-        await supabase.from('vistorias').update(payload).eq('id', vistoriaId);
+        const { error } = await supabase.from('vistorias').update(payload).eq('id', vistoriaId);
+        if (error) throw error;
+        await syncVistoriaData(vistoriaId);
       } else {
-        await supabase.from('vistorias').insert(payload);
+        const { data, error } = await supabase.from('vistorias').insert(payload).select().single();
+        if (error) throw error;
+        await syncVistoriaData(data.id);
       }
 
       toast.success("Vistoria finalizada e laudo gerado!");
@@ -383,11 +399,11 @@ const NewVistoria = () => {
       <div className="max-w-4xl mx-auto pb-20">
         <header className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-heading font-extrabold">{vistoriaId ? 'Editar Vistoria' : 'Nova Vistoria Professional'}</h1>
-            <p className="text-muted-foreground">{isViewOnly ? 'Esta vistoria foi finalizada e não pode ser editada.' : 'Preencha os dados em campo conforme solicitado.'}</p>
+            <h1 className="text-3xl font-heading font-extrabold">{vistoriaId ? (isViewOnly && !isViewMode ? 'Vistoria Finalizada' : (isViewMode ? 'Visualização' : 'Editar Vistoria')) : 'Nova Vistoria Professional'}</h1>
+            <p className="text-muted-foreground">{isViewOnly ? (isViewMode ? 'Modo de conferência de dados.' : 'Esta vistoria foi finalizada e não pode ser editada.') : 'Preencha os dados em campo conforme solicitado.'}</p>
           </div>
           <Badge className={isViewOnly ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-secondary/10 text-secondary border-secondary/20"}>
-            {isViewOnly ? 'Finalizada' : 'Modo Edição'}
+            {isViewMode ? 'Modo Visualização' : (isViewOnly ? 'Finalizada' : 'Modo Edição')}
           </Badge>
         </header>
 

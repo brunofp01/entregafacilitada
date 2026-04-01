@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardCheck, Calendar, FileText, Plus, Loader2 } from "lucide-react";
+import { ClipboardCheck, Calendar, FileText, Plus, Loader2, Eye } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
@@ -174,6 +174,11 @@ const VistoriasPage = () => {
                     </div>
 
                     <div className="flex gap-2">
+                       <Button variant="ghost" size="sm" className="text-blue-500 hover:bg-blue-500/10"
+                         onClick={() => navigate(`/imobiliaria/vistorias/nova?id=${vistoria.id}&view=true`)}>
+                         <Eye className="w-4 h-4" />
+                       </Button>
+
                        {vistoria.status === "aguardando_aprovacao" && (
                          <Button onClick={() => handleApproveVistoria(vistoria.id)} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
                            Aprovar
