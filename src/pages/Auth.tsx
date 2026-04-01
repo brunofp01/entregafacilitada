@@ -55,6 +55,7 @@ const Auth = () => {
         }
       }
     } catch (error: any) {
+      console.error("Erro detalhado de autenticação:", error);
       toast.error(error.message || "Ocorreu um erro na autenticação.");
     } finally {
       setLoading(false);
