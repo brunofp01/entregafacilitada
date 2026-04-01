@@ -37,6 +37,7 @@ const NewVistoria = () => {
   
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(!!vistoriaId);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState<string>("rascunho");
   const [activeAmbiente, setActiveAmbiente] = useState<string | null>(null);
@@ -59,10 +60,19 @@ const NewVistoria = () => {
   const [ambientes, setAmbientes] = useState<Ambiente[]>([]);
 
   useEffect(() => {
+    fetchProfile();
     if (vistoriaId) {
       loadVistoria();
     }
   }, [vistoriaId]);
+
+  const fetchProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      setCurrentUserProfile(data);
+    }
+  };
 
   const loadVistoria = async () => {
     try {
@@ -120,9 +130,10 @@ const NewVistoria = () => {
   const handleSaveDraft = async () => {
     setLoading(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
+      const imobiliariaId = currentUserProfile?.imobiliaria_id || currentUserProfile?.id;
+      
       const payload = {
-        imobiliaria_id: userData.user?.id,
+        imobiliaria_id: imobiliariaId,
         imovel_endereco: imovel.endereco,
         cliente_nome: imovel.cliente,
         medidores,
@@ -264,9 +275,10 @@ const NewVistoria = () => {
       await supabase.storage.from('vistorias').upload(pdfPath, blob);
       const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(pdfPath);
 
-      const { data: userData } = await supabase.auth.getUser();
+      const imobiliariaId = currentUserProfile?.imobiliaria_id || currentUserProfile?.id;
+      
       const payload = {
-        imobiliaria_id: userData.user?.id,
+        imobiliaria_id: imobiliariaId,
         imovel_endereco: imovel.endereco,
         cliente_nome: imovel.cliente,
         medidores,

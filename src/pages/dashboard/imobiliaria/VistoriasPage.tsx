@@ -24,9 +24,21 @@ const VistoriasPage = () => {
 
   const fetchVistorias = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, imobiliaria_id')
+        .eq('id', user.id)
+        .single();
+
+      const imobiliariaId = profile?.imobiliaria_id || profile?.id;
+
       const { data, error } = await supabase
         .from("vistorias")
         .select("*")
+        .eq("imobiliaria_id", imobiliariaId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
