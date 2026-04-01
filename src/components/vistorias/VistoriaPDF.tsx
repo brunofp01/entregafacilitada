@@ -104,9 +104,14 @@ const styles = StyleSheet.create({
 });
 
 interface VistoriaData {
-  imovel_endereco: string;
-  cliente_nome: string;
-  data: string;
+  cep: string;
+  rua: string;
+  numero: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  complemento?: string;
+  created_at?: string;
   medidores: any;
   ambientes: {
     nome: string;
@@ -119,26 +124,30 @@ interface VistoriaData {
   }[];
 }
 
-export const VistoriaPDF = ({ data }: { data: VistoriaData }) => (
-  <Document title={`Laudo de Vistoria - ${data.imovel_endereco}`}>
-    <Page size="A4" style={styles.page}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Laudo de Vistoria Digital</Text>
-        <Text style={styles.subtitle}>{data.imovel_endereco}</Text>
-      </View>
+export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
+  const fullAddress = `${data.rua}, nº ${data.numero}${data.complemento ? `, ${data.complemento}` : ''} - ${data.bairro}, ${data.cidade}/${data.estado} - CEP: ${data.cep}`;
+  const displayDate = data.created_at ? new Date(data.created_at).toLocaleDateString() : new Date().toLocaleDateString();
 
-      {/* Info Geral */}
-      <View style={{ marginBottom: 20 }}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Cliente:</Text>
-          <Text style={styles.value}>{data.cliente_nome}</Text>
+  return (
+    <Document title={`Laudo de Vistoria - ${data.rua}`}>
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Laudo de Vistoria Digital</Text>
+          <Text style={styles.subtitle}>{fullAddress}</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Data Realização:</Text>
-          <Text style={styles.value}>{data.data}</Text>
+  
+        {/* Info Geral */}
+        <View style={{ marginBottom: 20 }}>
+          <View style={styles.row}>
+            <Text style={styles.label}>Endereço:</Text>
+            <Text style={styles.value}>{fullAddress}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Data Realização:</Text>
+            <Text style={styles.value}>{displayDate}</Text>
+          </View>
         </View>
-      </View>
 
       {/* Medidores */}
       <Text style={styles.sectionTitle}>Leituras de Medidores</Text>
@@ -194,3 +203,4 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => (
     </Page>
   </Document>
 );
+}

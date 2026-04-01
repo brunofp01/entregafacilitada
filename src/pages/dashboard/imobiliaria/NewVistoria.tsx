@@ -46,9 +46,13 @@ const NewVistoria = () => {
 
   // Form State
   const [imovel, setImovel] = useState({ 
-    endereco: "", 
-    cliente: "", 
-    data: new Date().toISOString().split('T')[0] 
+    cep: "",
+    rua: "",
+    numero: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+    complemento: ""
   });
   
   const [medidores, setMedidores] = useState({
@@ -99,9 +103,13 @@ const NewVistoria = () => {
       if (error) throw error;
 
       setImovel({
-        endereco: data.imovel_endereco || "",
-        cliente: data.cliente_nome || "",
-        data: data.data_agendamento ? new Date(data.data_agendamento).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        cep: data.cep || "",
+        rua: data.rua || "",
+        numero: data.numero || "",
+        bairro: data.bairro || "",
+        cidade: data.cidade || "",
+        estado: data.estado || "",
+        complemento: data.complemento || ""
       });
       setMedidores(data.medidores || medidores);
       setStatus(data.status);
@@ -127,6 +135,34 @@ const NewVistoria = () => {
     }
   };
 
+  const handleCepSearch = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    setImovel(prev => ({ ...prev, cep: cleanCep }));
+    
+    if (cleanCep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await response.json();
+        
+        if (data.erro) {
+          toast.error("CEP não encontrado.");
+          return;
+        }
+
+        setImovel(prev => ({
+          ...prev,
+          rua: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade,
+          estado: data.uf
+        }));
+        toast.success("Endereço preenchido!");
+      } catch (error) {
+        toast.error("Erro ao buscar CEP.");
+      }
+    }
+  };
+
   const handleSaveDraft = async () => {
     setLoading(true);
     try {
@@ -134,11 +170,15 @@ const NewVistoria = () => {
       
       const payload = {
         imobiliaria_id: imobiliariaId,
-        imovel_endereco: imovel.endereco,
-        cliente_nome: imovel.cliente,
+        cep: imovel.cep,
+        rua: imovel.rua,
+        numero: imovel.numero,
+        bairro: imovel.bairro,
+        cidade: imovel.cidade,
+        estado: imovel.estado,
+        complemento: imovel.complemento,
         medidores,
-        status: 'rascunho',
-        data_agendamento: imovel.data
+        status: 'rascunho'
       };
 
       let currentVistoriaId = vistoriaId;
@@ -294,9 +334,7 @@ const NewVistoria = () => {
     setLoading(true);
     try {
       const blob = await pdf(<VistoriaPDF data={{ 
-        imovel_endereco: imovel.endereco, 
-        cliente_nome: imovel.cliente, 
-        data: imovel.data, 
+        ...imovel,
         medidores, 
         ambientes 
       }} />).toBlob();
@@ -309,12 +347,9 @@ const NewVistoria = () => {
       
       const payload = {
         imobiliaria_id: imobiliariaId,
-        imovel_endereco: imovel.endereco,
-        cliente_nome: imovel.cliente,
-        medidores,
+        ...imovel,
         relatorio_url: publicUrl,
-        status: 'aguardando_aprovacao',
-        data_agendamento: imovel.data
+        status: 'aguardando_aprovacao'
       };
 
       if (vistoriaId) {
@@ -367,21 +402,44 @@ const NewVistoria = () => {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader><CardTitle>Informações do Imóvel</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold">Endereço Completo</label>
-                  <Input disabled={isViewOnly} placeholder="Av. Paulista, 1000 - Apto 12..." value={imovel.endereco} onChange={e => setImovel({...imovel, endereco: e.target.value})} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold">Nome do Cliente/Locatário</label>
-                    <Input disabled={isViewOnly} placeholder="João Silva" value={imovel.cliente} onChange={e => setImovel({...imovel, cliente: e.target.value})} />
+                    <label className="text-sm font-bold">CEP</label>
+                    <Input disabled={isViewOnly} placeholder="00000-000" value={imovel.cep} onChange={e => handleCepSearch(e.target.value)} maxLength={9} />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold">Data</label>
-                    <Input disabled={isViewOnly} type="date" value={imovel.data} onChange={e => setImovel({...imovel, data: e.target.value})} />
+                  <div className="md:col-span-3 space-y-2">
+                    <label className="text-sm font-bold">Rua / Logradouro</label>
+                    <Input disabled={isViewOnly} placeholder="Rua..." value={imovel.rua} onChange={e => setImovel({...imovel, rua: e.target.value})} />
                   </div>
                 </div>
-                <Button className="w-full bg-secondary font-bold" onClick={() => setStep(2)}>Próximo Passo <ChevronRight className="w-4 h-4 ml-2" /></Button>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Número</label>
+                    <Input disabled={isViewOnly} placeholder="123" value={imovel.numero} onChange={e => setImovel({...imovel, numero: e.target.value})} />
+                  </div>
+                  <div className="md:col-span-3 space-y-2">
+                    <label className="text-sm font-bold">Complemento (opcional)</label>
+                    <Input disabled={isViewOnly} placeholder="Apto 12..." value={imovel.complemento} onChange={e => setImovel({...imovel, complemento: e.target.value})} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Bairro</label>
+                    <Input disabled={isViewOnly} placeholder="Bairro..." value={imovel.bairro} onChange={e => setImovel({...imovel, bairro: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Cidade</label>
+                    <Input disabled={isViewOnly} placeholder="Cidade..." value={imovel.cidade} onChange={e => setImovel({...imovel, cidade: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Estado (UF)</label>
+                    <Input disabled={isViewOnly} placeholder="SP" value={imovel.estado} onChange={e => setImovel({...imovel, estado: e.target.value})} maxLength={2} />
+                  </div>
+                </div>
+                
+                <Button className="w-full bg-secondary font-bold mt-4" onClick={() => setStep(2)}>Próximo Passo <ChevronRight className="w-4 h-4 ml-2" /></Button>
               </CardContent>
             </Card>
           </TabsContent>

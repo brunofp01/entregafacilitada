@@ -10,6 +10,13 @@ import { toast } from "sonner";
 interface Vistoria {
   id: string;
   status: "agendada" | "pendente" | "concluida" | "cancelada" | "rascunho" | "aguardando_aprovacao";
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  complemento?: string;
   data_agendamento: string | null;
   relatorio_url: string | null;
   created_at: string;
@@ -147,7 +154,9 @@ const VistoriasPage = () => {
                     
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-bold text-lg">Relatório de Vistoria #{vistoria.id.split("-")[0]}</h3>
+                        <h3 className="font-bold text-lg">
+                          {vistoria.rua ? `${vistoria.rua}, ${vistoria.numero}` : `Vistoria #${vistoria.id.split("-")[0]}`}
+                        </h3>
                         <Badge variant="outline" className={getStatusColor(vistoria.status)}>
                           {vistoria.status.replace("_", " ")}
                         </Badge>
