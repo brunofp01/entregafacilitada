@@ -2,37 +2,42 @@ import imageCompression from 'browser-image-compression';
 import heic2any from 'heic2any';
 
 export const useVistoriaImage = () => {
-  const processImage = async (file: File): Promise<File> => {
+  const processImage = async (file: File, isLogo: boolean = false): Promise<File> => {
     let imageToCompress = file;
 
-    // 1. Verificar se é HEIC e converter para JPEG
+    // 1. Verificar se é HEIC e converter
     if (file.type === 'image/heic' || file.name.toLocaleLowerCase().endsWith('.heic')) {
       const convertedBlob = await heic2any({
         blob: file,
-        toType: 'image/jpeg',
-        quality: 0.8
+        toType: isLogo ? 'image/png' : 'image/jpeg',
+        quality: isLogo ? 0.9 : 0.8
       });
       
       const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-      imageToCompress = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: 'image/jpeg' });
+      const ext = isLogo ? ".png" : ".jpg";
+      const type = isLogo ? "image/png" : "image/jpeg";
+      
+      imageToCompress = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ext, { type });
     }
 
     // 2. Opções de compressão e redimensionamento profissionais
     const options = {
-      maxSizeMB: 1, // Permitir até 1MB para manter nitidez em 1280px
-      maxWidthOrHeight: 1280, // Lado maior 1280px (Pilar 2)
+      maxSizeMB: isLogo ? 0.8 : 1, // Logos podem ser um pouco menores se possível
+      maxWidthOrHeight: 1280, // Lado maior 1280px
       useWebWorker: true,
-      initialQuality: 0.75, // Qualidade 75% (Pilar 2)
-      fileType: 'image/jpeg' as const // Garantir JPEG (Pilar 2)
+      initialQuality: 0.75, // Qualidade 75%
+      fileType: (isLogo ? 'image/png' : 'image/jpeg') as any
     };
 
     try {
       const compressedFile = await imageCompression(imageToCompress, options);
-      // Garantir que o nome termine em .jpg
+      const ext = isLogo ? ".png" : ".jpg";
+      const type = isLogo ? "image/png" : "image/jpeg";
+      
       const finalFile = new File(
         [compressedFile], 
-        file.name.replace(/\.[^/.]+$/, "") + ".jpg", 
-        { type: 'image/jpeg' }
+        file.name.replace(/\.[^/.]+$/, "") + ext, 
+        { type }
       );
       return finalFile;
     } catch (error) {

@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 import { Loader2, Save, Building2, Upload } from "lucide-react";
+import { useVistoriaImage } from "@/hooks/useVistoriaImage";
 
 const PerfilPage = () => {
+  const { processImage } = useVistoriaImage();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [profile, setProfile] = useState({
@@ -50,24 +52,29 @@ const PerfilPage = () => {
     if (!file) return;
 
     setLoading(true);
+    toast.info("Otimizando logo (preservando transparência)...");
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // 2. Otimizar mantendo PNG
+      const optimizedFile = await processImage(file, true);
+
       const fileName = `logos/${user.id}-${Date.now()}.png`;
       const { error: uploadError } = await supabase.storage
         .from('vistorias')
-        .upload(fileName, file);
+        .upload(fileName, optimizedFile);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(fileName);
       setProfile({ ...profile, logo_url: publicUrl });
-      toast.success("Logo enviada!");
+      toast.success("Logo enviada e otimizada!");
     } catch (error) {
+      console.error(error);
       toast.error("Erro ao subir logo.");
     } finally {
-      setLoading(true);
       setLoading(false);
     }
   };
@@ -76,20 +83,28 @@ const PerfilPage = () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Payload limpo para Upsert
+      const payload = {
+        imobiliaria_id: user.id,
+        nome_fantasia: profile.nome_fantasia,
+        cnpj: profile.cnpj,
+        endereco_completo: profile.endereco_completo,
+        whatsapp: profile.whatsapp,
+        email: profile.email,
+        logo_url: profile.logo_url
+      };
 
       const { error } = await supabase
         .from('imobiliaria_perfil')
-        .upsert({
-          imobiliaria_id: user.id,
-          ...profile
-        });
+        .upsert(payload, { onConflict: 'imobiliaria_id' });
 
       if (error) throw error;
-      toast.success("Perfil atualizado!");
+      toast.success("Configurações salvas com sucesso!");
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao salvar perfil.");
+      toast.error("Erro ao salvar perfil. Verifique os dados.");
     } finally {
       setLoading(false);
     }
