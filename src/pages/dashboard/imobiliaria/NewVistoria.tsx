@@ -342,34 +342,48 @@ const NewVistoria = () => {
   const handleFileUpload = async (ambienteId: string, itemId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     if (isViewOnly) return;
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    toast.info("Processando e otimizando imagem...");
+    const fileList = Array.from(files);
+    setLoading(true);
     
-    for (const file of Array.from(files)) {
-      const optimizedFile = await processImage(file);
-      
-      const fileName = `temp/${crypto.randomUUID()}.jpg`;
-      const { error } = await supabase.storage
-        .from('vistorias')
-        .upload(fileName, optimizedFile);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-      if (error) {
-        toast.error("Erro ao subir imagem");
-        continue;
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        toast.info(`Processando foto ${i + 1} de ${fileList.length}...`);
+        
+        const optimizedFile = await processImage(file);
+        const fileName = `vistorias/${crypto.randomUUID()}.jpg`; // Mantendo pasta vistorias
+        
+        const { error: uploadError } = await supabase.storage
+          .from('vistorias')
+          .upload(fileName, optimizedFile);
+
+        if (uploadError) {
+          toast.error(`Erro ao subir foto ${i + 1}`);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(fileName);
+
+        setAmbientes(prev => prev.map(a => 
+          a.id === ambienteId 
+            ? { ...a, itens: a.itens.map(item => 
+                item.id === itemId ? { ...item, fotos: [...item.fotos, publicUrl] } : item
+              ) } 
+            : a
+        ));
       }
-
-      const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(fileName);
-
-      setAmbientes(ambientes.map(a => 
-        a.id === ambienteId 
-          ? { ...a, itens: a.itens.map(i => 
-              i.id === itemId ? { ...i, fotos: [...i.fotos, publicUrl] } : i
-            ) } 
-          : a
-      ));
+      toast.success(`${fileList.length} foto(s) adicionada(s)!`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro no processamento das fotos.");
+    } finally {
+      setLoading(false);
     }
-    toast.success("Foto adicionada!");
   };
 
   const handleMeterUpload = async (key: 'agua' | 'luz' | 'gas', e: React.ChangeEvent<HTMLInputElement>) => {
@@ -985,9 +999,9 @@ const NewVistoria = () => {
                                          <span>📸 Registro Fotográfico</span>
                                          <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
                                        </Label>
-                                       <div className="flex gap-3 overflow-x-auto py-2 px-1">
+                                       <div className="flex gap-3 flex-wrap py-2 px-1">
                                          {!isViewOnly && (
-                                           <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
+                                           <label className="shrink-0 w-24 h-24 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
                                               <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
                                               <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
                                               <input type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
@@ -995,11 +1009,12 @@ const NewVistoria = () => {
                                          )}
                                          
                                          {item.fotos.map((foto, fIdx) => (
-                                           <div key={fIdx} className="relative shrink-0 w-28 h-28 group shadow-md transition-shadow">
+                                           <div key={fIdx} className="relative shrink-0 w-24 h-24 group shadow-md transition-shadow">
                                               <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
                                               {!isViewOnly && (
                                                 <button 
-                                                  className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-90 transition-transform"
+                                                  type="button"
+                                                   className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-95 transition-transform z-10"
                                                   onClick={() => {
                                                     setAmbientes(ambientes.map(a => 
                                                       a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
