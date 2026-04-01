@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logoIcon from "@/assets/logo-icon.png";
 
@@ -15,12 +16,12 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container flex h-16 items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <img src={logoIcon} alt="Entrega Facilitada" className="h-8 w-8" />
           <span className="font-heading font-bold text-lg text-foreground">
             Entrega <span className="text-secondary">Facilitada</span>
           </span>
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
@@ -28,9 +29,11 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
-            Acessar plataforma
-          </Button>
+          <Link to="/auth">
+            <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
+              Acessar plataforma
+            </Button>
+          </Link>
         </div>
 
         <button className="md:hidden p-2 text-foreground" onClick={() => setOpen(!open)}>
@@ -45,13 +48,15 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
-            Acessar plataforma
-          </Button>
+          <Link to="/auth" onClick={() => setOpen(false)}>
+            <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold">
+              Acessar plataforma
+            </Button>
+          </Link>
         </div>
       )}
     </nav>
-  );
+);
 };
 
 export default Navbar;
