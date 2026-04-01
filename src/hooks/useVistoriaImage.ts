@@ -17,18 +17,24 @@ export const useVistoriaImage = () => {
       imageToCompress = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: 'image/jpeg' });
     }
 
-    // 2. Opções de compressão e redimensionamento
+    // 2. Opções de compressão e redimensionamento profissionais
     const options = {
-      maxSizeMB: 0.5, // Alvo de ~500KB
-      maxWidthOrHeight: 1280, // Lado maior 1280px
+      maxSizeMB: 1, // Permitir até 1MB para manter nitidez em 1280px
+      maxWidthOrHeight: 1280, // Lado maior 1280px (Pilar 2)
       useWebWorker: true,
-      initialQuality: 0.75, // Qualidade 75%
-      fileType: 'image/jpeg'
+      initialQuality: 0.75, // Qualidade 75% (Pilar 2)
+      fileType: 'image/jpeg' as const // Garantir JPEG (Pilar 2)
     };
 
     try {
       const compressedFile = await imageCompression(imageToCompress, options);
-      return compressedFile;
+      // Garantir que o nome termine em .jpg
+      const finalFile = new File(
+        [compressedFile], 
+        file.name.replace(/\.[^/.]+$/, "") + ".jpg", 
+        { type: 'image/jpeg' }
+      );
+      return finalFile;
     } catch (error) {
       console.error("Erro na compressão:", error);
       return imageToCompress;

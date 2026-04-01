@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +39,7 @@ const NewVistoria = () => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(!!vistoriaId);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
+  const [imobiliariaPerfil, setImobiliariaPerfil] = useState<any>(null);
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState<string>("rascunho");
   const [activeAmbiente, setActiveAmbiente] = useState<string | null>(null);
@@ -76,6 +78,11 @@ const NewVistoria = () => {
     if (user) {
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       setCurrentUserProfile(data);
+      
+      // Carregar perfil da imobiliária para o PDF
+      const imobiliariaId = data?.imobiliaria_id || data?.id;
+      const { data: perfil } = await supabase.from('imobiliaria_perfil').select('*').eq('imobiliaria_id', imobiliariaId).maybeSingle();
+      setImobiliariaPerfil(perfil);
     }
   };
 
@@ -333,7 +340,8 @@ const NewVistoria = () => {
     );
 
     if (hasIncomplete) {
-      toast.error("Itens em estado 'Regular' ou 'Ruim' exigem observação e foto.");
+      toast.error("Existem itens com avarias (Regular/Ruim) sem foto ou observação. Por favor, revise os ambientes marcados.");
+      // Opcional: navegar para o primeiro ambiente incompleto
       return;
     }
 
@@ -348,7 +356,8 @@ const NewVistoria = () => {
       const blob = await pdf(<VistoriaPDF data={{ 
         ...imovel,
         medidores, 
-        ambientes 
+        ambientes,
+        perfil: imobiliariaPerfil
       }} />).toBlob();
       
       const pdfPath = `laudos/${crypto.randomUUID()}.pdf`;
@@ -566,19 +575,31 @@ const NewVistoria = () => {
                               </Select>
                             </div>
 
-                            <Textarea disabled={isViewOnly} placeholder="Observaçao técnica..." value={item.observacao} 
-                              onChange={e => {
-                                setAmbientes(ambientes.map(a => 
-                                  a.id === activeAmbiente ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
-                                ));
-                              }} />
+                            <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                <Label className="text-xs font-bold">Observação {(item.estado === 'Regular' || item.estado === 'Ruim') && <span className="text-destructive">* Obrigatório</span>}</Label>
+                              </div>
+                              <Textarea 
+                                disabled={isViewOnly} 
+                                placeholder={item.estado === 'Regular' || item.estado === 'Ruim' ? "Descreva a avaria detalhadamente..." : "Observação técnica (opcional)..."}
+                                className={(item.estado === 'Regular' || item.estado === 'Ruim') && !item.observacao ? "border-destructive/50 focus-visible:ring-destructive" : ""}
+                                value={item.observacao} 
+                                onChange={e => {
+                                  setAmbientes(ambientes.map(a => 
+                                    a.id === activeAmbiente ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
+                                  ));
+                                }} 
+                              />
+                            </div>
                             
                             <div className="flex items-center gap-4">
                               {!isViewOnly && (
                                 <label className="flex-1">
-                                  <div className="border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-24">
-                                    <Camera className="w-6 h-6 text-muted-foreground mb-1" />
-                                    <span className="text-xs text-muted-foreground">Add Foto</span>
+                                  <div className={`border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-24 ${(item.estado === 'Regular' || item.estado === 'Ruim') && item.fotos.length === 0 ? "border-destructive/50 bg-destructive/5" : "border-border"}`}>
+                                    <Camera className={`w-6 h-6 mb-1 ${(item.estado === 'Regular' || item.estado === 'Ruim') && item.fotos.length === 0 ? "text-destructive" : "text-muted-foreground"}`} />
+                                    <span className={`text-[10px] font-bold ${(item.estado === 'Regular' || item.estado === 'Ruim') && item.fotos.length === 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                                      {(item.estado === 'Regular' || item.estado === 'Ruim') ? 'FOTO OBRIGATÓRIA' : 'ADD FOTO'}
+                                    </span>
                                   </div>
                                   <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbiente, item.id, e)} />
                                 </label>

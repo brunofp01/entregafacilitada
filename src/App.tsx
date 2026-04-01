@@ -10,6 +10,7 @@ import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
 import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
 import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
 import NewVistoria from "./pages/dashboard/imobiliaria/NewVistoria.tsx";
+import PerfilPage from "./pages/dashboard/imobiliaria/PerfilPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -54,6 +55,12 @@ const App = () => (
           <Route path="/imobiliaria/vistorias/nova" element={
             <ProtectedRoute allowedRole="imobiliaria">
               <NewVistoria />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/imobiliaria/perfil" element={
+            <ProtectedRoute allowedRole="imobiliaria">
+              <PerfilPage />
             </ProtectedRoute>
           } />
           

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const ImobiliariaDashboard = () => {
   const modules = [
     {
-      title: "Gestão de Inquilinos",
+      title: "Gestão de Inquilinos com Entrega Facilitada",
       description: "Visualize e gerencie todos os inquilinos vinculados à sua imobiliária.",
       icon: Users,
       href: "/imobiliaria/inquilinos",
@@ -35,6 +35,13 @@ const ImobiliariaDashboard = () => {
       href: "/imobiliaria/seguros",
       color: "bg-orange-500/10 text-orange-500",
     },
+    {
+      title: "Perfil da Imobiliária",
+      description: "Configure sua logo e dados de contato para os laudos.",
+      icon: FileText,
+      href: "/imobiliaria/perfil",
+      color: "bg-pink-500/10 text-pink-500",
+    },
   ];
 
   return (
@@ -57,12 +64,12 @@ const ImobiliariaDashboard = () => {
                 <CardHeader className="flex flex-row items-start justify-between space-y-0">
                   <div className={i % 2 === 0 ? "space-y-1" : "space-y-1"}>
                     <div className="flex items-center gap-2">
-                       <CardTitle className="text-xl font-bold italic">{module.title}</CardTitle>
-                       {module.badge && (
-                         <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-wider">
-                           {module.badge}
-                         </span>
-                       )}
+                      <CardTitle className="text-xl font-bold italic">{module.title}</CardTitle>
+                      {module.badge && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-wider">
+                          {module.badge}
+                        </span>
+                      )}
                     </div>
                     <CardDescription className="text-sm leading-relaxed">
                       {module.description}
@@ -87,7 +94,7 @@ const ImobiliariaDashboard = () => {
             <div className="flex-1 space-y-4">
               <h2 className="text-2xl font-bold">Precisando de suporte?</h2>
               <p className="text-muted-foreground">
-                Nossa equipe técnica está pronta para ajudar com vistorias complexas, 
+                Nossa equipe técnica está pronta para ajudar com vistorias complexas,
                 dúvidas sobre a plataforma ou integrações de API.
               </p>
               <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary/10">
@@ -95,10 +102,10 @@ const ImobiliariaDashboard = () => {
               </Button>
             </div>
             <div className="w-full md:w-1/3 aspect-video bg-gradient-to-br from-secondary/20 to-primary/20 rounded-2xl border border-secondary/20 flex items-center justify-center p-6 text-center">
-               <p className="text-xs font-medium text-muted-foreground italic">
-                 "A Entrega Facilitada reduziu nosso tempo de vistoria em 70%." 
-                 <br />— Imobiliária Exemplo
-               </p>
+              <p className="text-xs font-medium text-muted-foreground italic">
+                "A Entrega Facilitada reduziu nosso tempo de vistoria em 70%."
+                <br />— Imobiliária Exemplo
+              </p>
             </div>
           </div>
         </Card>
