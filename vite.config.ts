@@ -21,30 +21,47 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         maximumFileSizeToCacheInBytes: 5000000,
       },
-      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
+        id: 'com.entregafacilitada.app',
         name: 'Entrega Facilitada - Gestão de Vistorias',
         short_name: 'Entrega Facilitada',
-        description: 'Plataforma profissional para gestão de vistorias imobiliárias.',
-        theme_color: '#10b981', // Emerald 500
+        description: 'Plataforma profissional para gestão de vistorias imobiliárias e segurança jurídica.',
+        theme_color: '#142542',
         background_color: '#ffffff',
         display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        lang: 'pt-BR',
+        categories: ['business', 'productivity'],
         icons: [
           {
-            src: '/favicon.png',
-            sizes: '128x128',
-            type: 'image/png'
+            src: '/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
           },
+          {
+            src: '/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        screenshots: [
           {
             src: '/og-image.png',
             sizes: '1200x630',
-            type: 'image/png'
-          },
-          {
-            src: '/favicon.png',
-            sizes: '128x128',
             type: 'image/png',
-            purpose: 'any maskable'
+            form_factor: 'wide',
+            label: 'Dashboard Profissional'
           }
         ]
       }
