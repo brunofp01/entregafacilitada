@@ -38,7 +38,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="Entrega Facilitada" className="h-8 w-8" />
+          <img src="/logo.png" alt="Entrega Facilitada" className="h-8 w-8" />
           <span className="font-heading font-bold text-lg text-foreground">
             Entrega <span className="text-secondary">Facilitada</span>
           </span>

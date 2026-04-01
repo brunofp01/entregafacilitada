@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Entrega Facilitada" className="h-6 w-6" />
+            <img src="/logo.png" alt="Entrega Facilitada" className="h-6 w-6" />
             <span className="font-heading font-bold text-foreground">
               Entrega <span className="text-secondary">Facilitada</span>
             </span>
