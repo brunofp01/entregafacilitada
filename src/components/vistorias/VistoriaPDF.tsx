@@ -193,10 +193,11 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#475569',
     lineHeight: 1.6,
+    width: '100%',
   },
   footer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 25,
     left: 40,
     right: 40,
     flexDirection: 'row',
@@ -204,15 +205,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderTop: '0.5pt solid #e5e7eb',
     paddingTop: 10,
+    gap: 10,
+  },
+  footerLogo: {
+    width: 25,
+    height: 25,
+    objectFit: 'contain',
   },
   footerSales: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#52525B',
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+    maxWidth: '65%',
   },
   footerPage: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#71717A',
+    width: 60,
+    textAlign: 'right',
   }
 });
 
@@ -316,7 +328,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
         {data.ambientes.map((ambiente, aIdx) => {
           let photoCounter = 0;
           return (
-            <View key={aIdx} wrap={false} style={{ marginBottom: 20 }}>
+            <View key={aIdx} style={{ marginBottom: 20 }}>
               <Text style={styles.roomHeader}>{ambiente.nome.toUpperCase()}</Text>
               
               {/* Subseção A: Relatório Textual */}
@@ -395,8 +407,9 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </Text>
         </View>
 
-        {/* Rodapé Fixo (Footer Universal) */}
+        {/* Rodapé Fixo (Footer Universal) - 3 Colunas: Logo | Texto | Página */}
         <View style={styles.footer} fixed>
+          <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.footerLogo} />
           <Text style={styles.footerSales}>
             Entrega Facilitada: Da contratação à desocupação descomplicada. Acesse: entregafacilitada.vercel.app
           </Text>
