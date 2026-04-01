@@ -44,7 +44,11 @@ const Hero = () => {
               Simular meu pacote
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 text-base px-8 py-6 transition-all">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-white text-white bg-transparent hover:bg-white hover:text-primary-foreground text-base px-8 py-6 transition-all"
+            >
               Como funciona
             </Button>
           </motion.div>
