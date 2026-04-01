@@ -7,6 +7,8 @@ import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import AdminDashboard from "./pages/dashboard/AdminDashboard.tsx";
 import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
+import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
+import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -33,6 +35,16 @@ const App = () => (
           <Route path="/imobiliaria/*" element={
             <ProtectedRoute allowedRole="imobiliaria">
               <ImobiliariaDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/imobiliaria/equipe" element={
+            <ProtectedRoute allowedRole="imobiliaria">
+              <EquipePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/imobiliaria/vistorias" element={
+            <ProtectedRoute allowedRole="imobiliaria">
+              <VistoriasPage />
             </ProtectedRoute>
           } />
           

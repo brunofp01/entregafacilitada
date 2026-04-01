@@ -1,72 +1,107 @@
+import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, FileText, TrendingUp, Handshake, Mail } from "lucide-react";
+import { Users, FileText, ClipboardCheck, UserPlus, ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ImobiliariaDashboard = () => {
-  const stats = [
-    { title: "Inquilinos Ativos", value: "86", icon: Users, color: "text-blue-500" },
-    { title: "Contratos Pendentes", value: "4", icon: FileText, color: "text-orange-500" },
-    { title: "Taxa de Conversão", value: "68%", icon: TrendingUp, color: "text-emerald-500" },
-    { title: "Sucesso de Entrega", value: "98%", icon: Handshake, color: "text-secondary" },
+  const modules = [
+    {
+      title: "Gestão de Inquilinos",
+      description: "Visualize e gerencie todos os inquilinos vinculados à sua imobiliária.",
+      icon: Users,
+      href: "/imobiliaria/inquilinos",
+      color: "bg-blue-500/10 text-blue-500",
+    },
+    {
+      title: "Módulo de Vistoria",
+      description: "Solicite vistorias gratuitas e acompanhe o status dos relatórios.",
+      icon: ClipboardCheck,
+      href: "/imobiliaria/vistorias",
+      color: "bg-emerald-500/10 text-emerald-500",
+      badge: "Grátis"
+    },
+    {
+      title: "Minha Equipe",
+      description: "Adicione funcionários e gerencie acessos da sua organização.",
+      icon: UserPlus,
+      href: "/imobiliaria/equipe",
+      color: "bg-purple-500/10 text-purple-500",
+    },
+    {
+      title: "Seguros e Garantias",
+      description: "Consulte apólices e coberturas ativas dos seus imóveis.",
+      icon: Shield,
+      href: "/imobiliaria/seguros",
+      color: "bg-orange-500/10 text-orange-500",
+    },
   ];
 
   return (
     <DashboardLayout role="imobiliaria">
-      <div className="space-y-8">
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Portal da Imobiliária</h1>
-            <p className="text-muted-foreground">Gerencie seus inquilinos e monitore o status das desocupações.</p>
+            <p className="text-muted-foreground">Bem-vindo ao seu centro de gestão e vistorias.</p>
           </div>
-          <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20 font-bold">
-            Novo Inquilino
+          <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20 font-bold">
+            <Link to="/imobiliaria/inquilinos/novo">Novo Inquilino</Link>
           </Button>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
-            <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-              </CardContent>
-            </Card>
+        <div className="grid md:grid-cols-2 gap-6">
+          {modules.map((module, i) => (
+            <Link key={i} to={module.href}>
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-secondary/30 transition-all group h-full">
+                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                  <div className={i % 2 === 0 ? "space-y-1" : "space-y-1"}>
+                    <div className="flex items-center gap-2">
+                       <CardTitle className="text-xl font-bold italic">{module.title}</CardTitle>
+                       {module.badge && (
+                         <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-wider">
+                           {module.badge}
+                         </span>
+                       )}
+                    </div>
+                    <CardDescription className="text-sm leading-relaxed">
+                      {module.description}
+                    </CardDescription>
+                  </div>
+                  <div className={`p-3 rounded-xl ${module.color} group-hover:scale-110 transition-transform`}>
+                    <module.icon className="w-6 h-6" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-sm font-bold text-secondary group-hover:translate-x-1 transition-transform">
+                    Acessar módulo <ArrowRight className="w-4 h-4 ml-2" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Inquilinos em Foco</CardTitle>
-              <CardDescription>Acompanhamento das próximas desocupações.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-40 flex items-center justify-center border-2 border-dashed border-border rounded-lg">
-                Lista de Inquilinos vindo em breve
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Suporte</CardTitle>
-              <CardDescription>Canal direto com a Entrega Facilitada.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Precisa de ajuda com uma vistoria ou negociação? Nossa equipe está à disposição.
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+          <div className="p-8 flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1 space-y-4">
+              <h2 className="text-2xl font-bold">Precisando de suporte?</h2>
+              <p className="text-muted-foreground">
+                Nossa equipe técnica está pronta para ajudar com vistorias complexas, 
+                dúvidas sobre a plataforma ou integrações de API.
               </p>
-              <Button variant="outline" className="w-full gap-2 transition-colors hover:bg-secondary/10">
-                <Mail className="w-4 h-4" />
-                Dúvidas ou Chamados
+              <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary/10">
+                Falar com Especialista
               </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <div className="w-full md:w-1/3 aspect-video bg-gradient-to-br from-secondary/20 to-primary/20 rounded-2xl border border-secondary/20 flex items-center justify-center p-6 text-center">
+               <p className="text-xs font-medium text-muted-foreground italic">
+                 "A Entrega Facilitada reduziu nosso tempo de vistoria em 70%." 
+                 <br />— Imobiliária Exemplo
+               </p>
+            </div>
+          </div>
+        </Card>
       </div>
     </DashboardLayout>
   );
