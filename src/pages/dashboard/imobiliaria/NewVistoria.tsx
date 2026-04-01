@@ -46,6 +46,7 @@ const NewVistoria = () => {
   const [inspectionPhase, setInspectionPhase] = useState<'setup' | 'master' | 'detail'>(vistoriaId ? 'master' : 'setup');
   const [status, setStatus] = useState<string>("rascunho");
   const [activeAmbienteId, setActiveAmbienteId] = useState<string | null>(null);
+  const [newItemName, setNewItemName] = useState("");
 
   const isViewMode = searchParams.get("view") === "true";
   const isViewOnly = status === "concluida" || isViewMode;
@@ -270,7 +271,7 @@ const NewVistoria = () => {
       const newAmbiente: Ambiente = {
         id: crypto.randomUUID(),
         nome: finalNome,
-        itens: getStandardItems(finalNome)
+        itens: []
       };
       setAmbientes([...ambientes, newAmbiente]);
       setActiveAmbienteId(newAmbiente.id);
@@ -278,22 +279,34 @@ const NewVistoria = () => {
     }
   };
 
-  const addItem = (ambienteId: string) => {
+  const addItem = (ambienteId: string, nomeOverride?: string) => {
     if (isViewOnly) return;
-    const nome = prompt("Nome do item (ex: Piso, Pintura, Janela):");
-    if (nome) {
+    const nome = nomeOverride || newItemName;
+    if (nome.trim()) {
       setAmbientes(ambientes.map(a => 
         a.id === ambienteId 
           ? { ...a, itens: [...a.itens, { 
               id: crypto.randomUUID(), 
-              nome, 
+              nome: nome.trim(), 
               estado: "Bom", 
               observacao: "", 
               fotos: [] 
             }] } 
           : a
       ));
+      setNewItemName("");
+      toast.success(`${nome} adicionado!`);
+    } else {
+      toast.error("Digite o nome do item.");
     }
+  };
+
+  const removeItem = (ambienteId: string, itemId: string) => {
+    if (isViewOnly) return;
+    setAmbientes(ambientes.map(a => 
+      a.id === ambienteId ? { ...a, itens: a.itens.filter(i => i.id !== itemId) } : a
+    ));
+    toast.success("Item removido");
   };
 
   const handleFileUpload = async (ambienteId: string, itemId: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -623,9 +636,8 @@ const NewVistoria = () => {
                   {ambientes.map(a => {
                     const total = a.itens.length;
                     const evaluated = a.itens.filter(i => {
-                      const isNormal = i.estado === 'Novo' || i.estado === 'Bom';
-                      const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
-                      return isNormal || (isCritical && i.observacao.trim() !== "" && i.fotos.length > 0);
+                      // Regra Universal Estrita: Status + Obs + Foto
+                      return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
                     }).length;
                     
                     const progress = total > 0 ? (evaluated / total) * 100 : 0;
@@ -710,9 +722,8 @@ const NewVistoria = () => {
                     const room = ambientes.find(a => a.id === activeAmbienteId);
                     const total = room?.itens.length || 0;
                     const evaluated = room?.itens.filter(i => {
-                      const isNormal = i.estado === 'Novo' || i.estado === 'Bom';
-                      const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
-                      return isNormal || (isCritical && i.observacao.trim() !== "" && i.fotos.length > 0);
+                      // Regra Universal Estrita: Status + Obs + Foto
+                      return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
                     }).length || 0;
                     const progress = total > 0 ? (evaluated / total) * 100 : 0;
                     
@@ -734,20 +745,53 @@ const NewVistoria = () => {
                 </div>
 
                 <div className="space-y-12">
+                  {/* Adição Livre de Item */}
+                  {!isViewOnly && (
+                    <div className="p-4 bg-muted/20 border border-secondary/20 rounded-2xl flex flex-col gap-3 shadow-sm">
+                      <Label className="text-xs font-black uppercase text-secondary tracking-widest px-1">Novo Item Personalizado</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          value={newItemName}
+                          onChange={e => setNewItemName(e.target.value)}
+                          placeholder="Ex: Filtro da Piscina, Piso, Porta..."
+                          className="bg-background/80 flex-1 h-12"
+                          onKeyDown={e => e.key === 'Enter' && addItem(activeAmbienteId)}
+                        />
+                        <Button 
+                          onClick={() => addItem(activeAmbienteId)} 
+                          className="bg-secondary px-6 font-bold h-12 active:scale-95 transition-all"
+                        >
+                          <Plus className="w-5 h-5 mr-1" /> ADICIONAR
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {ambientes.find(a => a.id === activeAmbienteId)?.itens.length === 0 && (
+                    <div className="py-20 text-center opacity-30 border-2 border-dashed border-border rounded-3xl">
+                      <Plus className="w-12 h-12 mx-auto mb-4" />
+                      <p className="font-bold">Nenhum item cadastrado.<br/>Adicione o primeiro acima.</p>
+                    </div>
+                  )}
+
                   {ambientes.find(a => a.id === activeAmbienteId)?.itens.map((item, idx) => {
-                    const isCritical = item.estado === 'Regular' || item.estado === 'Ruim';
                     const hasPhotos = item.fotos.length > 0;
-                    const hasObs = !!item.observacao;
-                    const isDone = (isCritical ? (hasPhotos && hasObs) : (item.estado !== 'Bom' || hasObs || hasPhotos));
+                    const hasObs = !!item.observacao.trim();
+                    const isDone = item.estado && hasPhotos && hasObs;
 
                     return (
                       <div key={item.id} className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="flex flex-col gap-3">
                           <div className="flex justify-between items-center">
-                            <Label className="text-lg font-extrabold flex items-center gap-2">
+                            <Label className="text-lg font-extrabold flex items-center gap-2 flex-1">
                               {item.nome}
                               {isDone && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
                             </Label>
+                            {!isViewOnly && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full" onClick={() => removeItem(activeAmbienteId, item.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
                             <Badge variant="outline" className="text-[9px] opacity-40 font-mono tracking-tighter">REF: {idx + 1}</Badge>
                           </div>
                           
@@ -774,9 +818,9 @@ const NewVistoria = () => {
                           </div>
                         </div>
 
-                        {/* Expansão Condicional Suave com Framer Motion */}
+                        {/* Expansão Condicional Universal (Sempre visível se tiver conteúdo ou para novo preenchimento) */}
                         <AnimatePresence initial={false}>
-                          {(isCritical || hasPhotos || hasObs) && (
+                          {(true) && (
                             <motion.div 
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
@@ -788,13 +832,13 @@ const NewVistoria = () => {
                                  <div className="space-y-3">
                                     <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
                                       <span>📝 Observações Técnicas</span>
-                                      {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
+                                      <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
                                     </Label>
                                     <Textarea 
                                       disabled={isViewOnly}
-                                      placeholder="Ex: Riscos no piso, infiltração no teto..."
+                                      placeholder="Ex: Condição do item, avarias, detalhes..."
                                       value={item.observacao}
-                                      className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${isCritical && !item.observacao ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
+                                      className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${!item.observacao.trim() ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
                                       onChange={e => {
                                         setAmbientes(ambientes.map(a => 
                                           a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
@@ -806,12 +850,12 @@ const NewVistoria = () => {
                                  <div className="space-y-3">
                                    <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
                                      <span>📸 Registro Fotográfico</span>
-                                     {isCritical && <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>}
+                                     <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
                                    </Label>
                                    <div className="flex gap-3 overflow-x-auto py-2 px-1">
                                      {!isViewOnly && (
                                        <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
-                                          <Camera className={`w-10 h-10 mb-1 ${isCritical && !hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                          <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
                                           <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
                                           <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
                                        </label>
@@ -852,9 +896,8 @@ const NewVistoria = () => {
                        const room = ambientes.find(a => a.id === activeAmbienteId);
                        const total = room?.itens.length || 0;
                        const evaluated = room?.itens.filter(i => {
-                         const isNormal = i.estado === 'Novo' || i.estado === 'Bom';
-                         const isCritical = i.estado === 'Regular' || i.estado === 'Ruim';
-                         return isNormal || (isCritical && i.observacao.trim() !== "" && i.fotos.length > 0);
+                         // Regra Universal Estrita: Status + Obs + Foto
+                         return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
                        }).length || 0;
                        const isComplete = total > 0 && evaluated === total;
 
