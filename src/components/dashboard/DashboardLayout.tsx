@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { MobileBottomNav } from "./MobileBottomNav";
+import { MobileMenuDrawer } from "./MobileMenuDrawer";
+import { PwaHandler } from "../pwa/PwaHandler";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,6 +27,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,6 +43,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
+        .eq("id", user.id)
         .single();
       
       setUserName(profile?.full_name || user.email?.split("@")[0] || "Usuário");
@@ -62,7 +67,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: Users, label: "Inquilinos", href: "/imobiliaria/inquilinos" },
-      { icon: FileText, label: "Contratos", href: "/imobiliaria/contratos" },
+      { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
       { icon: Settings, label: "Configurações", href: "/imobiliaria/configuracoes" },
     ],
     inquilino: [
@@ -72,14 +77,16 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
   };
 
-  const items = menuItems[role];
+  const items = menuItems[role] || [];
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">
-      {/* Sidebar */}
+      <PwaHandler />
+      
+      {/* Sidebar - Desktop Only */}
       <aside 
         className={cn(
-          "bg-card border-r border-border transition-all duration-300 z-30 flex flex-col",
+          "bg-card border-r border-border transition-all duration-300 z-30 hidden md:flex flex-col",
           isSidebarOpen ? "w-64" : "w-20"
         )}
       >
@@ -133,12 +140,18 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header */}
         <header className="h-16 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden md:block"
+            >
+              {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+            <div className="md:hidden flex items-center gap-2">
+              <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center text-secondary-foreground font-bold">EF</div>
+              <span className="font-bold text-foreground">Entrega Facilitada</span>
+            </div>
+          </div>
 
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="text-muted-foreground relative">
@@ -159,7 +172,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-2"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-2 hidden sm:flex"
               onClick={handleLogout}
               title="Sair da plataforma"
             >
@@ -169,11 +182,27 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-10">
+        <div className={cn(
+          "flex-1 overflow-y-auto p-6 md:p-10",
+          "pb-24 md:pb-10" // Padding extra para não cobrir pela Bottom Nav no mobile
+        )}>
           <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </div>
+
+        {/* Mobile Navigation Components */}
+        <MobileBottomNav 
+          role={role} 
+          onMenuOpen={() => setIsMobileMenuOpen(true)} 
+        />
+        
+        <MobileMenuDrawer 
+          open={isMobileMenuOpen} 
+          onOpenChange={setIsMobileMenuOpen}
+          userName={userName}
+          role={role}
+        />
       </main>
     </div>
   );
