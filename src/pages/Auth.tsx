@@ -92,8 +92,8 @@ const Auth = () => {
         </div>
 
         <Card className="border-border/50 shadow-2xl backdrop-blur-sm bg-card/80">
-          <CardHeader>
-            <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue="login" className="w-full">
+            <CardHeader>
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="login" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground font-semibold">
                   Entrar
@@ -103,50 +103,48 @@ const Auth = () => {
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="login">
+              <TabsContent value="login" className="mt-0">
                 <CardTitle className="text-2xl font-bold">Bem-vindo de volta</CardTitle>
                 <CardDescription>Insira suas credenciais para acessar a plataforma.</CardDescription>
               </TabsContent>
               
-              <TabsContent value="signup">
+              <TabsContent value="signup" className="mt-0">
                 <CardTitle className="text-2xl font-bold">Criar conta</CardTitle>
                 <CardDescription>Comece hoje mesmo a facilitar suas entregas.</CardDescription>
               </TabsContent>
-            </Tabs>
-          </CardHeader>
+            </CardHeader>
 
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="seu@email.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password">Senha</Label>
-                <Button variant="link" className="text-xs p-0 h-auto text-secondary hover:text-secondary/80">
-                  Esqueceu a senha?
-                </Button>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="seu@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background/50"
+                />
               </div>
-              <Input 
-                id="password" 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-background/50"
-              />
-            </div>
-          </CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password">Senha</Label>
+                  <Button variant="link" className="text-xs p-0 h-auto text-secondary hover:text-secondary/80">
+                    Esqueceu a senha?
+                  </Button>
+                </div>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-background/50"
+                />
+              </div>
+            </CardContent>
 
-          <CardFooter className="flex flex-col gap-4">
-            <Tabs defaultValue="login" className="w-full">
-              <TabsContent value="login" className="mt-0">
+            <CardFooter className="flex flex-col gap-4">
+              <TabsContent value="login" className="mt-0 w-full">
                 <Button 
                   className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
                   onClick={() => handleAuth("login")}
@@ -157,7 +155,7 @@ const Auth = () => {
                 </Button>
               </TabsContent>
               
-              <TabsContent value="signup" className="mt-0">
+              <TabsContent value="signup" className="mt-0 w-full">
                 <Button 
                   className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
                   onClick={() => handleAuth("signup")}
@@ -167,7 +165,6 @@ const Auth = () => {
                   Cadastrar
                 </Button>
               </TabsContent>
-            </Tabs>
             
             <div className="relative w-full py-4">
               <div className="absolute inset-0 flex items-center">
@@ -187,7 +184,8 @@ const Auth = () => {
               </Button>
             </div>
           </CardFooter>
-        </Card>
+        </Tabs>
+      </Card>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
           Ao continuar, você concorda com nossos{" "}
