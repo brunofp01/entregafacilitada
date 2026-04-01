@@ -3,7 +3,8 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardCheck, Calendar, FileText, Plus, Loader2, Eye } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ClipboardCheck, Calendar, FileText, Plus, Loader2, Eye, Search, SearchX, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
@@ -28,6 +29,7 @@ const VistoriasPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [vistorias, setVistorias] = useState<Vistoria[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchVistorias = async () => {
     try {
@@ -113,6 +115,69 @@ const VistoriasPage = () => {
     return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
   };
 
+  const formatEndereco = (vistoria: Vistoria) => {
+    const parts = [];
+    
+    // Rua, nº Número
+    if (vistoria.rua) {
+      let main = vistoria.rua;
+      if (vistoria.numero) main += `, nº ${vistoria.numero}`;
+      parts.push(main);
+    }
+
+    // Complemento (Conditional)
+    if (vistoria.complemento && vistoria.complemento.trim()) {
+      parts.push(vistoria.complemento.trim());
+    }
+
+    // Bairro
+    if (vistoria.bairro) {
+      parts.push(vistoria.bairro);
+    }
+
+    // Cidade/UF
+    if (vistoria.cidade) {
+      let loc = vistoria.cidade;
+      if (vistoria.estado) loc += `/${vistoria.estado}`;
+      parts.push(loc);
+    }
+
+    // CEP (Conditional)
+    const baseline = parts.join(", ");
+    let final = baseline.replace(/, ([^,]+)$/, " - $1"); // Replace last comma with dash for Bairro or Cidade separation
+    
+    // Ajuste fino para o formato solicitado: [Rua], nº [Número], [Complemento] - [Bairro], [Cidade]/[UF] - CEP: [CEP]
+    // Vamos reconstruir de forma mais granular para o formato exato:
+    const finalParts = [];
+    const ruaNum = vistoria.rua ? `${vistoria.rua}${vistoria.numero ? `, nº ${vistoria.numero}` : ''}` : "";
+    if (ruaNum) finalParts.push(ruaNum);
+    
+    if (vistoria.complemento && vistoria.complemento.trim()) finalParts.push(vistoria.complemento.trim());
+    
+    let result = finalParts.join(", ");
+    
+    if (vistoria.bairro) {
+      result += (result ? " - " : "") + vistoria.bairro;
+    }
+    
+    if (vistoria.cidade) {
+      result += (result ? ", " : "") + vistoria.cidade + (vistoria.estado ? `/${vistoria.estado}` : "");
+    }
+    
+    if (vistoria.cep) {
+      result += (result ? " - " : "") + `CEP: ${vistoria.cep}`;
+    }
+
+    return result || `Vistoria #${vistoria.id.split("-")[0]}`;
+  };
+
+  const filteredVistorias = vistorias.filter(v => {
+    if (!searchTerm.trim()) return true;
+    const search = searchTerm.toLowerCase();
+    const fullSearchString = `${v.rua} ${v.bairro} ${v.cidade} ${v.complemento} ${v.numero} ${v.id}`.toLowerCase();
+    return fullSearchString.includes(search);
+  });
+
   if (loading) {
     return (
       <DashboardLayout role="imobiliaria">
@@ -142,10 +207,31 @@ const VistoriasPage = () => {
           </Button>
         </div>
 
+        {/* Barra de Busca Dinâmica */}
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm p-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input 
+              placeholder="Buscar por rua, bairro, cidade ou complemento..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 pr-10 h-14 bg-background/50 border-border/50 focus-visible:ring-secondary/50 text-base rounded-xl"
+            />
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </Card>
+
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {vistorias.length > 0 ? (
-              vistorias.map((vistoria) => (
+            {filteredVistorias.length > 0 ? (
+              filteredVistorias.map((vistoria) => (
                 <Card key={vistoria.id} className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-secondary/30 transition-all group overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-center p-6 gap-6">
                     <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 border border-secondary/20">
@@ -153,11 +239,11 @@ const VistoriasPage = () => {
                     </div>
                     
                     <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-bold text-lg">
-                          {vistoria.rua ? `${vistoria.rua}, ${vistoria.numero}` : `Vistoria #${vistoria.id.split("-")[0]}`}
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <h3 className="font-bold text-base leading-tight md:text-lg max-w-md">
+                          {formatEndereco(vistoria)}
                         </h3>
-                        <Badge variant="outline" className={getStatusColor(vistoria.status)}>
+                        <Badge variant="outline" className={`${getStatusColor(vistoria.status)} shrink-0`}>
                           {vistoria.status.replace("_", " ")}
                         </Badge>
                       </div>
@@ -211,14 +297,32 @@ const VistoriasPage = () => {
                 </Card>
               ))
             ) : (
-              <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-2xl bg-muted/5 text-center p-8">
-                <ClipboardCheck className="w-12 h-12 text-muted-foreground/30 mb-4" />
-                <h3 className="font-bold text-lg mb-2">Nenhuma vistoria realizada</h3>
-                <p className="text-muted-foreground max-w-xs mb-6">
-                  Comece sua primeira vistoria profissional agora mesmo. Use nosso sistema e app de campo para gerar laudos automáticos.
-                </p>
-                <Button variant="outline" onClick={handleRequestVistoria}>Iniciar Vistoria</Button>
-              </div>
+              searchTerm ? (
+                /* Empty State de Busca */
+                <div className="h-80 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-3xl bg-muted/5 text-center p-8 animate-in fade-in zoom-in duration-300">
+                  <div className="w-20 h-20 rounded-full bg-muted/10 flex items-center justify-center mb-4">
+                    <SearchX className="w-10 h-10 text-muted-foreground/30" />
+                  </div>
+                  <h3 className="font-bold text-xl mb-2 italic">Não encontrado</h3>
+                  <p className="text-muted-foreground max-w-sm mb-8">
+                    Nenhuma vistoria encontrada para este endereço. <br />
+                    Tente buscar pelo bairro ou rua de forma simplificada.
+                  </p>
+                  <Button variant="secondary" onClick={() => setSearchTerm("")} className="font-bold px-8 rounded-full">
+                    Limpar Busca
+                  </Button>
+                </div>
+              ) : (
+                /* Empty State Geral */
+                <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-2xl bg-muted/5 text-center p-8">
+                  <ClipboardCheck className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                  <h3 className="font-bold text-lg mb-2">Nenhuma vistoria realizada</h3>
+                  <p className="text-muted-foreground max-w-xs mb-6">
+                    Comece sua primeira vistoria profissional agora mesmo. Use nosso sistema e app de campo para gerar laudos automáticos.
+                  </p>
+                  <Button variant="outline" onClick={handleRequestVistoria}>Iniciar Vistoria</Button>
+                </div>
+              )
             )}
           </div>
 
