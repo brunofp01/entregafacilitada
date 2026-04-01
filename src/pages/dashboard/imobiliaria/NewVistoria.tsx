@@ -402,6 +402,43 @@ const NewVistoria = () => {
     }
   };
 
+  const saveProgressAndNavigate = async (targetStep?: number) => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase.from('profiles').select('imobiliaria_id').eq('id', user.id).single();
+      const imobiliariaId = profile?.imobiliaria_id || user.id;
+
+      const payload = {
+        imobiliaria_id: imobiliariaId,
+        ...imovel,
+        medidores,
+        status: status || 'rascunho'
+      };
+
+      if (vistoriaId) {
+        const { error } = await supabase.from('vistorias').update(payload).eq('id', vistoriaId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.from('vistorias').insert(payload).select().single();
+        if (error) throw error;
+        if (data) {
+          navigate(`/imobiliaria/vistorias/nova?id=${data.id}`, { replace: true });
+        }
+      }
+      
+      if (targetStep) setStep(targetStep);
+      toast.success("Progresso salvo!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao salvar progresso.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFinish = async () => {
     if (isViewOnly) return;
     const hasIncomplete = ambientes.some(a => 
@@ -410,7 +447,6 @@ const NewVistoria = () => {
 
     if (hasIncomplete) {
       toast.error("Existem itens com avarias (Regular/Ruim) sem foto ou observação. Por favor, revise os ambientes marcados.");
-      // Opcional: navegar para o primeiro ambiente incompleto
       return;
     }
 
@@ -438,6 +474,7 @@ const NewVistoria = () => {
       const payload = {
         imobiliaria_id: imobiliariaId,
         ...imovel,
+        medidores,
         relatorio_url: publicUrl,
         status: 'aguardando_aprovacao'
       };
@@ -449,7 +486,7 @@ const NewVistoria = () => {
       } else {
         const { data, error } = await supabase.from('vistorias').insert(payload).select().single();
         if (error) throw error;
-        await syncVistoriaData(data.id);
+        if (data) await syncVistoriaData(data.id);
       }
 
       toast.success("Vistoria finalizada e laudo gerado!");
@@ -533,7 +570,10 @@ const NewVistoria = () => {
                   </div>
                 </div>
                 
-                <Button className="w-full bg-secondary font-bold mt-4" onClick={() => setStep(2)}>Próximo Passo <ChevronRight className="w-4 h-4 ml-2" /></Button>
+                <Button disabled={loading} className="w-full bg-secondary font-bold mt-4" onClick={() => saveProgressAndNavigate(2)}>
+                  {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
+                  Próximo Passo <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -572,7 +612,7 @@ const NewVistoria = () => {
                               </>
                             )}
                           </div>
-                          <input type="file" accept="image/*" className="hidden" onChange={e => handleMeterUpload(m.key as any, e)} />
+                          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleMeterUpload(m.key as any, e)} />
                         </label>
                       </div>
                     ) : (
@@ -588,7 +628,10 @@ const NewVistoria = () => {
             </div>
             <div className="mt-8 flex gap-4">
               <Button variant="ghost" onClick={() => setStep(1)}>Voltar</Button>
-              <Button className="flex-1 bg-secondary font-bold" onClick={() => setStep(3)}>Ir para Ambientes</Button>
+              <Button disabled={loading} className="flex-1 bg-secondary font-bold" onClick={() => saveProgressAndNavigate(3)}>
+                {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
+                Ir para Ambientes
+              </Button>
             </div>
           </TabsContent>
 
@@ -947,7 +990,7 @@ const NewVistoria = () => {
                                            <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
                                               <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
                                               <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                              <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
+                                              <input type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
                                            </label>
                                          )}
                                          

@@ -67,9 +67,26 @@ const VistoriasPage = () => {
     navigate("/imobiliaria/vistorias/nova");
   };
 
-  const handleOpenPDF = (url: string | null) => {
+  const handleOpenPDF = async (url: string | null) => {
     if (url) {
+      // 1. Abrir para visualização
       window.open(url, "_blank");
+      
+      // 2. Trigger Download (Blob approach for best cross-browser support)
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `Vistoria_${new Date().getTime()}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (error) {
+        console.error("Erro ao baixar PDF:", error);
+      }
     } else {
       toast.error("PDF ainda não disponível.");
     }
