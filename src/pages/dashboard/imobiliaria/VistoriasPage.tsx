@@ -15,7 +15,10 @@ interface Vistoria {
   created_at: string;
 }
 
+import { useNavigate } from "react-router-dom";
+
 const VistoriasPage = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [vistorias, setVistorias] = useState<Vistoria[]>([]);
 
@@ -40,7 +43,7 @@ const VistoriasPage = () => {
   }, []);
 
   const handleRequestVistoria = () => {
-    toast.success("Solicitação recebida! Nossa equipe entrará em contato em breve.");
+    navigate("/imobiliaria/vistorias/nova");
   };
 
   const getStatusColor = (status: string) => {
@@ -71,10 +74,10 @@ const VistoriasPage = () => {
             <div className="flex items-center gap-2 mb-2">
               <h1 className="text-3xl font-heading font-extrabold text-foreground">Vistorias</h1>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-bold uppercase tracking-wider text-[10px]">
-                Grátis na Plataforma
+                Plataforma Gestão
               </Badge>
             </div>
-            <p className="text-muted-foreground">Solicite e acompanhe os relatórios de vistoria dos seus imóveis.</p>
+            <p className="text-muted-foreground">Realize vistorias profissionais e gere laudos automáticos.</p>
           </div>
           <Button onClick={handleRequestVistoria} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20 font-bold gap-2">
             <Plus className="w-4 h-4" />
