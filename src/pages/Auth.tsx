@@ -7,14 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { LogIn, UserPlus, Loader2, ArrowLeft } from "lucide-react";
+import { LogIn, UserPlus, Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const isConfigMissing = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   useEffect(() => {
     // Check if user is already logged in
@@ -82,6 +85,17 @@ const Auth = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar para a home
         </Button>
+
+        {isConfigMissing && (
+          <Alert variant="destructive" className="mb-6 border-destructive/50 bg-destructive/10 backdrop-blur-sm">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Configuração Incompleta</AlertTitle>
+            <AlertDescription>
+              As chaves do Supabase não foram detectadas. Certifique-se de configurar 
+              <strong> VITE_SUPABASE_URL</strong> e <strong>VITE_SUPABASE_ANON_KEY</strong> na Vercel.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">
