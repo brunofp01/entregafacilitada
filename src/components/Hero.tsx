@@ -24,12 +24,12 @@ const Hero = () => {
               Sem surpresas na desocupação
             </span>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] tracking-tight text-primary-foreground mb-6">
-              Entregue seu imóvel{" "}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] tracking-tight text-white mb-6">
+              Entregue o imóvel alugado{" "}
               <span className="text-secondary">sem dor de cabeça.</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mb-10 leading-relaxed">
+            <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed">
               Transformamos os custos imprevisíveis de desocupação em uma assinatura mensal fixa e acessível. Pintura, reparos e manutenção — tudo coberto.
             </p>
           </motion.div>
@@ -40,11 +40,11 @@ const Hero = () => {
             transition={{ duration: 0.7, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 mb-16"
           >
-            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-semibold px-8 py-6 shadow-[var(--shadow-accent)]">
+            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-semibold px-8 py-6 shadow-[var(--shadow-accent)] transition-all">
               Simular meu pacote
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 py-6">
+            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 text-base px-8 py-6 transition-all">
               Como funciona
             </Button>
           </motion.div>
