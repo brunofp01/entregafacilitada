@@ -1,0 +1,80 @@
+import { motion } from "framer-motion";
+import { ArrowRight, Shield, Clock, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import heroImage from "@/assets/hero-building.jpg";
+
+const Hero = () => {
+  return (
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0">
+        <img src={heroImage} alt="Edifício moderno" className="w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(220 60% 10% / 0.88), hsl(220 50% 20% / 0.75))" }} />
+      </div>
+
+      <div className="container relative z-10 py-20">
+        <div className="max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-sm font-medium text-secondary mb-6">
+              <Shield className="w-4 h-4" />
+              Sem surpresas na desocupação
+            </span>
+
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] tracking-tight text-primary-foreground mb-6">
+              Entregue seu imóvel{" "}
+              <span className="text-secondary">sem dor de cabeça.</span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-primary-foreground/70 max-w-2xl mb-10 leading-relaxed">
+              Transformamos os custos imprevisíveis de desocupação em uma assinatura mensal fixa e acessível. Pintura, reparos e manutenção — tudo coberto.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4 mb-16"
+          >
+            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-semibold px-8 py-6 shadow-[var(--shadow-accent)]">
+              Simular meu pacote
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-base px-8 py-6">
+              Como funciona
+            </Button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.6 }}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+          >
+            {[
+              { icon: Wallet, label: "A partir de", value: "R$ 89/mês" },
+              { icon: Clock, label: "Desocupação em", value: "até 48h" },
+              { icon: Shield, label: "Cobertura", value: "100% garantida" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-4 rounded-xl bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10 p-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/20">
+                  <item.icon className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-xs text-primary-foreground/50 uppercase tracking-wider">{item.label}</p>
+                  <p className="text-lg font-heading font-bold text-primary-foreground">{item.value}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Hero;
