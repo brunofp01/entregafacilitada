@@ -142,19 +142,24 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => (
 
       {/* Medidores */}
       <Text style={styles.sectionTitle}>Leituras de Medidores</Text>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 }}>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Água</Text>
-          <Text style={{ fontSize: 12 }}>{data.medidores.agua.leitura || 'N/A'}</Text>
-        </View>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Luz</Text>
-          <Text style={{ fontSize: 12 }}>{data.medidores.luz.leitura || 'N/A'}</Text>
-        </View>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 10, fontWeight: 'bold' }}>Gás</Text>
-          <Text style={{ fontSize: 12 }}>{data.medidores.gas.leitura || 'N/A'}</Text>
-        </View>
+      <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+        {['agua', 'luz', 'gas'].map((mKey) => (
+          <View key={mKey} style={{ flex: 1, alignItems: 'center', border: '0.5pt solid #e5e7eb', padding: 10, borderRadius: 4 }}>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#4b5563', marginBottom: 2 }}>
+              {mKey === 'agua' ? 'Água' : mKey === 'luz' ? 'Luz' : 'Gás'}
+            </Text>
+            <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 10 }}>
+              {data.medidores[mKey].leitura || 'N/A'}
+            </Text>
+            {data.medidores[mKey].foto ? (
+              <Image src={data.medidores[mKey].foto} style={{ width: '100%', height: 80, objectFit: 'contain', borderRadius: 2 }} />
+            ) : (
+              <View style={{ width: '100%', height: 80, backgroundColor: '#f9fafb', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 8, color: '#9ca3af' }}>Sem foto</Text>
+              </View>
+            )}
+          </View>
+        ))}
       </View>
 
       {/* Ambientes e Itens */}
