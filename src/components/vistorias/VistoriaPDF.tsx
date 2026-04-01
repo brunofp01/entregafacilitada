@@ -144,27 +144,26 @@ const styles = StyleSheet.create({
   photoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
     marginTop: 15,
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: 5,
+    paddingRight: 5,
   },
   photoContainer: {
-    width: '23%', // 4 por linha
-    marginBottom: 10,
+    width: '31.3%', // Exatamente 3 colunas por linha
+    marginBottom: 15,
   },
   photo: {
     width: '100%',
-    height: 100,
-    objectFit: 'cover',
+    // Removendo altura fixa para manter a proporção original (aspect ratio) conforme solicitado
     borderRadius: 4,
     border: '0.5pt solid #e5e7eb',
   },
   photoLegend: {
-    fontSize: 6,
+    fontSize: 7, // Aumentado ligeiramente para acompanhar o novo tamanho da foto
     textAlign: 'center',
-    marginTop: 3,
-    color: '#6b7280',
+    marginTop: 5,
+    color: '#4b5563',
     fontWeight: 'bold',
   },
   promoBanner: {
