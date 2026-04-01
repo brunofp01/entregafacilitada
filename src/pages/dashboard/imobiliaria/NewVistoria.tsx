@@ -271,7 +271,7 @@ const NewVistoria = () => {
         cliente_nome: imovel.cliente,
         medidores,
         relatorio_url: publicUrl,
-        status: 'concluida',
+        status: 'aguardando_aprovacao',
         data_agendamento: imovel.data
       };
 

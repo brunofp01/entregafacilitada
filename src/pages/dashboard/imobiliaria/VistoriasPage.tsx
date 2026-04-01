@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 interface Vistoria {
   id: string;
-  status: "agendada" | "pendente" | "concluida" | "cancelada";
+  status: "agendada" | "pendente" | "concluida" | "cancelada" | "rascunho" | "aguardando_aprovacao";
   data_agendamento: string | null;
   relatorio_url: string | null;
   created_at: string;
@@ -67,10 +67,26 @@ const VistoriasPage = () => {
     }
   };
 
+  const handleApproveVistoria = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("vistorias")
+        .update({ status: "concluida" })
+        .eq("id", id);
+      
+      if (error) throw error;
+      toast.success("Vistoria aprovada e finalizada!");
+      fetchVistorias();
+    } catch (error) {
+      toast.error("Erro ao aprovar vistoria.");
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors = {
       agendada: "bg-blue-500/10 text-blue-500 border-blue-500/20",
       pendente: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+      aguardando_aprovacao: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 font-bold",
       concluida: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
       cancelada: "bg-destructive/10 text-destructive border-destructive/20",
       rascunho: "bg-muted text-muted-foreground border-muted-foreground/20",
@@ -121,7 +137,7 @@ const VistoriasPage = () => {
                       <div className="flex items-center gap-3">
                         <h3 className="font-bold text-lg">Relatório de Vistoria #{vistoria.id.split("-")[0]}</h3>
                         <Badge variant="outline" className={getStatusColor(vistoria.status)}>
-                          {vistoria.status}
+                          {vistoria.status.replace("_", " ")}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -137,6 +153,12 @@ const VistoriasPage = () => {
                     </div>
 
                     <div className="flex gap-2">
+                       {vistoria.status === "aguardando_aprovacao" && (
+                         <Button onClick={() => handleApproveVistoria(vistoria.id)} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
+                           Aprovar
+                         </Button>
+                       )}
+
                        {vistoria.status !== "concluida" ? (
                          <>
                            <Button variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10"
@@ -150,7 +172,7 @@ const VistoriasPage = () => {
                          </>
                        ) : (
                          <>
-                           <Button variant="ghost" size="sm" className="text-muted-foreground" disabled>
+                           <Button variant="ghost" size="sm" className="text-muted-foreground font-bold" disabled>
                              Finalizada
                            </Button>
                            <Button onClick={() => handleOpenPDF(vistoria.relatorio_url)} size="sm" className="bg-secondary text-secondary-foreground font-bold">
