@@ -39,8 +39,20 @@ const Auth = () => {
       if (type === "signup") {
         toast.success("Conta criada! Verifique seu e-mail para confirmar.");
       } else {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .single();
+
         toast.success("Login realizado com sucesso!");
-        navigate("/");
+        
+        if (profile?.role === "admin") {
+          navigate("/admin");
+        } else if (profile?.role === "imobiliaria") {
+          navigate("/imobiliaria");
+        } else {
+          navigate("/inquilino");
+        }
       }
     } catch (error: any) {
       toast.error(error.message || "Ocorreu um erro na autenticação.");
