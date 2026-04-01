@@ -18,7 +18,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileMenuDrawer } from "./MobileMenuDrawer";
-import { PwaHandler } from "../pwa/PwaHandler";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -81,7 +80,6 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">
-      <PwaHandler />
       
       {/* Sidebar - Desktop Only */}
       <aside 

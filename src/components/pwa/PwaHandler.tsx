@@ -19,8 +19,11 @@ export const PwaHandler = () => {
       e.preventDefault();
       setDeferredPrompt(e);
       
+      const allowedRoutes = ['/auth', '/imobiliaria', '/admin', '/inquilino'];
+      const isAllowed = allowedRoutes.some(route => location.pathname.startsWith(route));
+
       // Regra: Somente mostrar se NÃO for a Landing Page (/) e NÃO estiver instalado
-      if (location.pathname !== '/' && !checkStandalone) {
+      if (isAllowed && !checkStandalone) {
         setShowBanner(true);
       }
     };

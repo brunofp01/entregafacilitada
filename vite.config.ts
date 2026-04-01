@@ -31,18 +31,18 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         icons: [
           {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
+            src: '/favicon.png',
+            sizes: '128x128',
             type: 'image/png'
           },
           {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
+            src: '/og-image.png',
+            sizes: '1200x630',
             type: 'image/png'
           },
           {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
+            src: '/favicon.png',
+            sizes: '128x128',
             type: 'image/png',
             purpose: 'any maskable'
           }
