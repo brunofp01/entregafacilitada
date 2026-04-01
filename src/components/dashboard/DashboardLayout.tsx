@@ -141,18 +141,30 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           </button>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="text-muted-foreground">
+            <Button variant="ghost" size="icon" className="text-muted-foreground relative">
               <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background" />
             </Button>
+            
             <div className="flex items-center gap-3 pl-4 border-l border-border text-sm">
               <div className="text-right hidden sm:block">
-                <p className="font-bold text-foreground">{userName}</p>
-                <p className="text-xs text-muted-foreground capitalize">{role}</p>
+                <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{role}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-bold border border-secondary/30">
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner">
                 {userName.charAt(0).toUpperCase()}
               </div>
             </div>
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-2"
+              onClick={handleLogout}
+              title="Sair da plataforma"
+            >
+              <LogOut className="w-5 h-5" />
+            </Button>
           </div>
         </header>
 

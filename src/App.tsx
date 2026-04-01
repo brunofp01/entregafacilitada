@@ -8,6 +8,7 @@ import Auth from "./pages/Auth.tsx";
 import AdminDashboard from "./pages/dashboard/AdminDashboard.tsx";
 import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,10 +23,24 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           
-          {/* Dashboard Routes */}
-          <Route path="/admin/*" element={<AdminDashboard />} />
-          <Route path="/imobiliaria/*" element={<ImobiliariaDashboard />} />
-          <Route path="/inquilino/*" element={<InquilinoDashboard />} />
+          {/* Dashboard Routes with Protection */}
+          <Route path="/admin/*" element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/imobiliaria/*" element={
+            <ProtectedRoute allowedRole="imobiliaria">
+              <ImobiliariaDashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/inquilino/*" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <InquilinoDashboard />
+            </ProtectedRoute>
+          } />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
