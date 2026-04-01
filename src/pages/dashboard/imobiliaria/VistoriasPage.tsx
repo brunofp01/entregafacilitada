@@ -46,12 +46,34 @@ const VistoriasPage = () => {
     navigate("/imobiliaria/vistorias/nova");
   };
 
+  const handleOpenPDF = (url: string | null) => {
+    if (url) {
+      window.open(url, "_blank");
+    } else {
+      toast.error("PDF ainda não disponível.");
+    }
+  };
+
+  const handleDeleteVistoria = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.")) return;
+    
+    try {
+      const { error } = await supabase.from("vistorias").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Vistoria excluída!");
+      fetchVistorias();
+    } catch (error) {
+      toast.error("Erro ao excluir vistoria.");
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors = {
       agendada: "bg-blue-500/10 text-blue-500 border-blue-500/20",
       pendente: "bg-orange-500/10 text-orange-500 border-orange-500/20",
       concluida: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
       cancelada: "bg-destructive/10 text-destructive border-destructive/20",
+      rascunho: "bg-muted text-muted-foreground border-muted-foreground/20",
     };
     return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
   };
@@ -105,18 +127,37 @@ const VistoriasPage = () => {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5 font-medium">
                           <Calendar className="w-4 h-4" />
-                          {vistoria.data_agendamento ? new Date(vistoria.data_agendamento).toLocaleDateString() : "Não agendado"}
+                          {vistoria.data_agendamento || vistoria.created_at ? new Date(vistoria.data_agendamento || vistoria.created_at).toLocaleDateString() : "Não agendado"}
                         </div>
                         <div className="flex items-center gap-1.5 font-medium">
                           <FileText className="w-4 h-4" />
-                          PDF aguardando
+                          {vistoria.relatorio_url ? "Laudo disponível" : "Laudo em processamento"}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10">Ver Detalhes</Button>
-                      <Button disabled={!vistoria.relatorio_url} size="sm" className="bg-secondary text-secondary-foreground font-bold">PDF</Button>
+                       {vistoria.status !== "concluida" ? (
+                         <>
+                           <Button variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10"
+                             onClick={() => navigate(`/imobiliaria/vistorias/nova?id=${vistoria.id}`)}>
+                             Editar
+                           </Button>
+                           <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10"
+                             onClick={() => handleDeleteVistoria(vistoria.id)}>
+                             Excluir
+                           </Button>
+                         </>
+                       ) : (
+                         <>
+                           <Button variant="ghost" size="sm" className="text-muted-foreground" disabled>
+                             Finalizada
+                           </Button>
+                           <Button onClick={() => handleOpenPDF(vistoria.relatorio_url)} size="sm" className="bg-secondary text-secondary-foreground font-bold">
+                             PDF
+                           </Button>
+                         </>
+                       )}
                     </div>
                   </div>
                 </Card>
