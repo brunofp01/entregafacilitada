@@ -104,29 +104,30 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   roomHeader: {
-    backgroundColor: '#142542',
-    color: '#ffffff',
-    padding: '8 15',
-    fontSize: 12,
+    padding: '12 0',
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 20,
+    color: '#1A1A1A',
+    marginTop: 25,
     marginBottom: 10,
-    borderRadius: 4,
+    borderBottom: '1pt solid #E0E0E0',
+    width: '100%',
   },
   itemRow: {
     flexDirection: 'row',
-    padding: '6 10',
+    padding: '8 10',
     borderBottom: '0.5pt solid #f3f4f6',
     alignItems: 'flex-start',
   },
   statusBadge: {
-    width: 60,
-    padding: '2 4',
+    width: 65,
+    padding: '3 8',
     textAlign: 'center',
-    borderRadius: 4,
-    fontSize: 8,
+    borderRadius: 12,
+    fontSize: 9,
     fontWeight: 'bold',
-    marginRight: 10,
+    marginRight: 12,
+    textTransform: 'uppercase',
   },
   itemText: {
     flex: 1,
@@ -137,9 +138,10 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   itemObs: {
-    color: '#4b5563',
+    color: '#4A4A4A',
     fontStyle: 'italic',
-    marginTop: 2,
+    marginTop: 4,
+    fontSize: 9,
   },
   photoGrid: {
     flexDirection: 'row',
@@ -155,12 +157,11 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: '100%',
-    // Removendo altura fixa para manter a proporção original (aspect ratio) conforme solicitado
     borderRadius: 4,
     border: '0.5pt solid #e5e7eb',
   },
   photoLegend: {
-    fontSize: 7, // Aumentado ligeiramente para acompanhar o novo tamanho da foto
+    fontSize: 7,
     textAlign: 'center',
     marginTop: 5,
     color: '#4b5563',
@@ -168,41 +169,50 @@ const styles = StyleSheet.create({
   },
   promoBanner: {
     marginTop: 40,
-    padding: 20,
-    backgroundColor: '#f0f9ff',
-    borderRadius: 10,
-    border: '1pt solid #bae6fd',
+    padding: 30,
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    border: '1pt solid #e2e8f0',
   },
   promoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   promoLogo: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
+    width: 40,
+    height: 40,
+    marginRight: 12,
   },
   promoTitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#0c4a6e',
+    color: '#1e293b',
   },
   promoText: {
-    fontSize: 9,
-    color: '#075985',
-    lineHeight: 1.4,
+    fontSize: 10,
+    color: '#475569',
+    lineHeight: 1.6,
   },
   footer: {
     position: 'absolute',
     bottom: 30,
     left: 40,
     right: 40,
-    textAlign: 'center',
-    fontSize: 8,
-    color: '#9ca3af',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderTop: '0.5pt solid #e5e7eb',
     paddingTop: 10,
+  },
+  footerSales: {
+    fontSize: 10,
+    color: '#52525B',
+    fontWeight: 'bold',
+  },
+  footerPage: {
+    fontSize: 10,
+    color: '#71717A',
   }
 });
 
@@ -323,11 +333,11 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
                   const getStatusColor = (status: string) => {
                     switch(status) {
-                      case 'Novo': return { bg: '#d1fae5', text: '#065f46' };
-                      case 'Bom': return { bg: '#dcfce7', text: '#166534' };
-                      case 'Regular': return { bg: '#fef9c3', text: '#854d0e' };
-                      case 'Ruim': return { bg: '#fee2e2', text: '#991b1b' };
-                      default: return { bg: '#f3f4f6', text: '#374151' };
+                      case 'Novo': return { bg: 'rgba(209, 250, 229, 0.4)', text: '#065f46' }; // Green
+                      case 'Bom': return { bg: 'rgba(219, 234, 254, 0.4)', text: '#1e40af' }; // Blue
+                      case 'Regular': return { bg: 'rgba(254, 249, 195, 0.4)', text: '#854d0e' }; // Yellow
+                      case 'Ruim': return { bg: 'rgba(254, 226, 226, 0.4)', text: '#991b1b' }; // Red
+                      default: return { bg: 'rgba(243, 244, 246, 0.4)', text: '#374151' };
                     }
                   };
                   const colors = getStatusColor(item.estado);
@@ -372,7 +382,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           );
         })}
 
-        {/* Pilar 5: Rodapé de Alta Conversão */}
+        {/* Selo de Fechamento (Última Página) */}
         <View style={styles.promoBanner} wrap={false}>
           <View style={styles.promoHeader}>
             <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.promoLogo} />
@@ -381,13 +391,19 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           <Text style={styles.promoText}>
             Ao final do contrato, acione nosso app. Nós realizamos a vistoria de saída, 
             executamos os reparos com profissionais credenciados e emitimos o seu Nada Consta. 
-            Entregue as chaves sem estresse e sem cobranças extras!
+            Entregue as chaves sem estresse e sem cobranças extras! Acesse: entregafacilitada.vercel.app
           </Text>
         </View>
 
-        <Text style={styles.footer} render={({ pageNumber, totalPages }) => (
-          `Página ${pageNumber} de ${totalPages} - Laudo Rastreável Gerado via Entrega Facilitada`
-        )} fixed />
+        {/* Rodapé Fixo (Footer Universal) */}
+        <View style={styles.footer} fixed>
+          <Text style={styles.footerSales}>
+            Entrega Facilitada: Da contratação à desocupação descomplicada. Acesse: entregafacilitada.vercel.app
+          </Text>
+          <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => (
+            `Página ${pageNumber} de ${totalPages}`
+          )} />
+        </View>
       </Page>
     </Document>
   );
