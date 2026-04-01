@@ -250,6 +250,36 @@ const NewVistoria = () => {
     toast.success("Foto adicionada!");
   };
 
+  const handleMeterUpload = async (key: 'agua' | 'luz' | 'gas', e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isViewOnly) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    toast.info("Processando e otimizando imagem do medidor...");
+    
+    try {
+      const optimizedFile = await processImage(file);
+      const fileName = `medidores/${crypto.randomUUID()}.jpg`;
+      
+      const { error } = await supabase.storage
+        .from('vistorias')
+        .upload(fileName, optimizedFile);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(fileName);
+
+      setMedidores({
+        ...medidores,
+        [key]: { ...medidores[key], foto: publicUrl }
+      });
+      toast.success(`Foto de ${key} salva!`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao subir imagem do medidor");
+    }
+  };
+
   const handleFinish = async () => {
     if (isViewOnly) return;
     const hasIncomplete = ambientes.some(a => 
@@ -371,10 +401,34 @@ const NewVistoria = () => {
                   <CardContent className="space-y-4">
                     <Input disabled={isViewOnly} placeholder="Leitura (números)" value={(medidores as any)[m.key].leitura} 
                       onChange={e => setMedidores({...medidores, [m.key]: {...(medidores as any)[m.key], leitura: e.target.value}})} />
-                    {!isViewOnly && (
-                      <Button variant="outline" className="w-full gap-2 border-dashed border-2 h-16">
-                        <Camera className="w-5 h-5" /> Foto do Relógio
-                      </Button>
+                    
+                    {!isViewOnly ? (
+                      <div className="space-y-2">
+                        <label className="block cursor-pointer">
+                          <div className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}>
+                            { (medidores as any)[m.key].foto ? (
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <img src={(medidores as any)[m.key].foto} className="h-full object-contain rounded" />
+                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                  <Camera className="w-5 h-5 text-white" />
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <Camera className="w-5 h-5 text-muted-foreground mr-2" />
+                                <span className="text-xs font-bold text-muted-foreground">Foto do Relógio</span>
+                              </>
+                            )}
+                          </div>
+                          <input type="file" accept="image/*" className="hidden" onChange={e => handleMeterUpload(m.key as any, e)} />
+                        </label>
+                      </div>
+                    ) : (
+                      (medidores as any)[m.key].foto && (
+                        <div className="h-24 bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border border-border">
+                          <img src={(medidores as any)[m.key].foto} className="h-full object-contain" />
+                        </div>
+                      )
                     )}
                   </CardContent>
                 </Card>
