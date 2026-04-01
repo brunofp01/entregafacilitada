@@ -12,6 +12,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Camera, Trash2, CheckCircle2, ChevronRight, LayoutGrid, Droplets, Zap, Flame, Loader2, Save } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
 import { useVistoriaImage } from "@/hooks/useVistoriaImage";
 import { pdf } from '@react-pdf/renderer';
 import { VistoriaPDF } from "@/components/vistorias/VistoriaPDF";
@@ -24,6 +35,7 @@ interface Item {
   estado: "Novo" | "Bom" | "Regular" | "Ruim";
   observacao: string;
   fotos: string[];
+  isExpanded?: boolean;
 }
 
 interface Ambiente {
@@ -47,6 +59,7 @@ const NewVistoria = () => {
   const [status, setStatus] = useState<string>("rascunho");
   const [activeAmbienteId, setActiveAmbienteId] = useState<string | null>(null);
   const [newItemName, setNewItemName] = useState("");
+  const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
 
   const isViewMode = searchParams.get("view") === "true";
   const isViewOnly = status === "concluida" || isViewMode;
@@ -285,13 +298,14 @@ const NewVistoria = () => {
     if (nome.trim()) {
       setAmbientes(ambientes.map(a => 
         a.id === ambienteId 
-          ? { ...a, itens: [...a.itens, { 
+          ? { ...a, itens: [{ 
               id: crypto.randomUUID(), 
               nome: nome.trim(), 
               estado: "Bom", 
               observacao: "", 
-              fotos: [] 
-            }] } 
+              fotos: [],
+              isExpanded: true
+            }, ...a.itens] } 
           : a
       ));
       setNewItemName("");
@@ -307,6 +321,22 @@ const NewVistoria = () => {
       a.id === ambienteId ? { ...a, itens: a.itens.filter(i => i.id !== itemId) } : a
     ));
     toast.success("Item removido");
+  };
+
+  const removeAmbiente = (id: string) => {
+    if (isViewOnly) return;
+    setAmbientes(ambientes.filter(a => a.id !== id));
+    if (activeAmbienteId === id) setActiveAmbienteId(null);
+    toast.success("Ambiente removido");
+    setRoomToDelete(null);
+  };
+
+  const toggleItemExpansion = (ambienteId: string, itemId: string, force?: boolean) => {
+    setAmbientes(ambientes.map(a => 
+      a.id === ambienteId 
+        ? { ...a, itens: a.itens.map(i => i.id === itemId ? { ...i, isExpanded: force !== undefined ? force : !i.isExpanded } : i) } 
+        : a
+    ));
   };
 
   const handleFileUpload = async (ambienteId: string, itemId: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -620,9 +650,14 @@ const NewVistoria = () => {
               </div>
             )}
 
-            {inspectionPhase === 'master' && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                <div className="flex items-center justify-between">
+            {inspectionPhase === 'master' && (() => {
+              const totalItems = ambientes.reduce((acc, a) => acc + a.itens.length, 0);
+              const validatedItems = ambientes.reduce((acc, a) => acc + a.itens.filter(i => i.estado && i.observacao.trim() !== "" && i.fotos.length > 0).length, 0);
+              const totalProgress = totalItems > 0 ? (validatedItems / totalItems) * 100 : 0;
+
+              return (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                  <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-bold">Painel de Progresso</h2>
                     <p className="text-sm text-muted-foreground">Toque no card para avaliar.</p>
@@ -644,14 +679,25 @@ const NewVistoria = () => {
                     const isComplete = progress === 100;
 
                     return (
-                      <Card 
-                        key={a.id} 
-                        className={`group cursor-pointer hover:border-secondary/50 transition-all border-2 active:bg-muted/10 ${isComplete ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-border/50'}`}
-                        onClick={() => {
-                          setActiveAmbienteId(a.id);
-                          setInspectionPhase('detail');
-                        }}
-                      >
+                      <div key={a.id} className="relative group">
+                        {!isViewOnly && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRoomToDelete(a.id);
+                            }}
+                            className="absolute -top-2 -right-2 z-10 bg-destructive text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity active:scale-95"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <Card 
+                          className={`group cursor-pointer hover:border-secondary/50 transition-all border-2 active:bg-muted/10 ${isComplete ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-border/50'}`}
+                          onClick={() => {
+                            setActiveAmbienteId(a.id);
+                            setInspectionPhase('detail');
+                          }}
+                        >
                         <CardContent className="p-6">
                           <div className="flex justify-between items-start mb-4">
                             <div className="space-y-1">
@@ -677,25 +723,46 @@ const NewVistoria = () => {
                           </div>
                         </CardContent>
                       </Card>
+                    </div>
                     );
                   })}
                 </div>
 
                 {!isViewOnly && (
-                  <div className="flex justify-center pt-8">
+                  <div className="mt-8">
                     <Button 
-                      size="lg" 
-                      className="bg-secondary font-bold gap-2 px-12 py-8 text-xl shadow-xl shadow-secondary/20 w-full md:w-auto h-auto" 
-                      onClick={handleFinish}
-                      disabled={loading || ambientes.length === 0}
+                      className="w-full py-10 h-auto text-xl font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 shadow-2xl shadow-emerald-500/20 rounded-2xl" 
+                      onClick={handleFinish} 
+                      disabled={loading || totalProgress < 100}
                     >
-                      {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
-                      Finalizar e Gerar Laudo
+                      {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Gerar Laudo PDF Final"}
                     </Button>
                   </div>
                 )}
+
+                {/* AlertDialog para Confirmação de Exclusão de Ambiente */}
+                <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && setRoomToDelete(null)}>
+                  <AlertDialogContent className="rounded-3xl w-[95%] max-w-md mx-auto">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-xl font-black">Excluir Ambiente?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta ação removerá permanentemente este ambiente e todos os seus itens avaliados da vistoria.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex flex-row gap-3 mt-4">
+                      <AlertDialogCancel className="flex-1 rounded-2xl h-14 font-bold border-2">Não, Manter</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => roomToDelete && removeAmbiente(roomToDelete)}
+                        className="flex-1 bg-destructive hover:bg-destructive/90 rounded-2xl h-14 font-bold"
+                      >
+                        Sim, Excluir
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
-            )}
+            );
+          })()}
 
             {inspectionPhase === 'detail' && activeAmbienteId && (
               <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 pb-20">
@@ -778,113 +845,151 @@ const NewVistoria = () => {
                     const hasPhotos = item.fotos.length > 0;
                     const hasObs = !!item.observacao.trim();
                     const isDone = item.estado && hasPhotos && hasObs;
+                    const isExpanded = item.isExpanded !== false; // Padrão expanded se undefined
 
                     return (
-                      <div key={item.id} className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="flex flex-col gap-3">
-                          <div className="flex justify-between items-center">
-                            <Label className="text-lg font-extrabold flex items-center gap-2 flex-1">
-                              {item.nome}
-                              {isDone && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
-                            </Label>
-                            {!isViewOnly && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full" onClick={() => removeItem(activeAmbienteId, item.id)}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            )}
-                            <Badge variant="outline" className="text-[9px] opacity-40 font-mono tracking-tighter">REF: {idx + 1}</Badge>
+                      <div key={item.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        {/* Summary View (Collapsed) */}
+                        {!isExpanded ? (
+                          <div 
+                            className="flex items-center justify-between p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl cursor-pointer active:scale-95 transition-transform"
+                            onClick={() => toggleItemExpansion(activeAmbienteId, item.id)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                              <span className="font-bold text-sm">{item.nome}</span>
+                              <Badge variant="secondary" className="text-[8px] bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+                                {item.estado}
+                              </Badge>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-secondary">
+                              <ChevronRight className="w-5 h-5 rotate-90" />
+                            </Button>
                           </div>
-                          
-                          {/* Segmented Control para Status com Toque Otimizado */}
-                          <div className="flex p-1 bg-muted/60 rounded-2xl gap-1 border border-border/20">
-                            {["Novo", "Bom", "Regular", "Ruim"].map((statusOption) => (
-                              <button
-                                key={statusOption}
-                                onClick={() => {
-                                  if (isViewOnly) return;
-                                  setAmbientes(ambientes.map(a => 
-                                    a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, estado: statusOption as any } : i) } : a
-                                  ));
-                                }}
-                                className={`flex-1 py-4 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 active:scale-95 ${
-                                  item.estado === statusOption 
-                                    ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10') 
-                                    : 'text-muted-foreground hover:bg-background/40'
-                                }`}
-                              >
-                                {statusOption}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Expansão Condicional Universal (Sempre visível se tiver conteúdo ou para novo preenchimento) */}
-                        <AnimatePresence initial={false}>
-                          {(true) && (
-                            <motion.div 
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3, ease: "easeInOut" }}
-                              className="overflow-hidden"
-                            >
-                              <div className="pl-4 border-l-4 border-secondary/20 space-y-6 pt-2 pb-4">
-                                 <div className="space-y-3">
-                                    <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
-                                      <span>📝 Observações Técnicas</span>
-                                      <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
-                                    </Label>
-                                    <Textarea 
-                                      disabled={isViewOnly}
-                                      placeholder="Ex: Condição do item, avarias, detalhes..."
-                                      value={item.observacao}
-                                      className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${!item.observacao.trim() ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
-                                      onChange={e => {
-                                        setAmbientes(ambientes.map(a => 
-                                          a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
-                                        ));
-                                      }}
-                                    />
-                                 </div>
-
-                                 <div className="space-y-3">
-                                   <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
-                                     <span>📸 Registro Fotográfico</span>
-                                     <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
-                                   </Label>
-                                   <div className="flex gap-3 overflow-x-auto py-2 px-1">
-                                     {!isViewOnly && (
-                                       <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
-                                          <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
-                                          <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                          <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
-                                       </label>
-                                     )}
-                                     
-                                     {item.fotos.map((foto, fIdx) => (
-                                       <div key={fIdx} className="relative shrink-0 w-28 h-28 group shadow-md transition-shadow">
-                                          <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
-                                          {!isViewOnly && (
-                                            <button 
-                                              className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-90 transition-transform"
-                                              onClick={() => {
-                                                setAmbientes(ambientes.map(a => 
-                                                  a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
-                                                ));
-                                              }}
-                                            >
-                                              <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                          )}
-                                       </div>
-                                     ))}
-                                   </div>
-                                 </div>
+                        ) : (
+                          /* Full Form View (Expanded) */
+                          <div className="space-y-6">
+                            <div className="flex flex-col gap-3">
+                              <div className="flex justify-between items-center">
+                                <Label className="text-lg font-extrabold flex items-center gap-2 flex-1">
+                                  {item.nome}
+                                  {isDone && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+                                </Label>
+                                {!isViewOnly && (
+                                  <div className="flex items-center gap-1">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-full" onClick={() => removeItem(activeAmbienteId, item.id)}>
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                    <Badge variant="outline" className="text-[9px] opacity-40 font-mono tracking-tighter">REF: {idx + 1}</Badge>
+                                  </div>
+                                )}
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                        <Separator className="opacity-30" />
+                              
+                              {/* Segmented Control para Status com Toque Otimizado */}
+                              <div className="flex p-1 bg-muted/60 rounded-2xl gap-1 border border-border/20">
+                                {["Novo", "Bom", "Regular", "Ruim"].map((statusOption) => (
+                                  <button
+                                    key={statusOption}
+                                    onClick={() => {
+                                      if (isViewOnly) return;
+                                      setAmbientes(ambientes.map(a => 
+                                        a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, estado: statusOption as any } : i) } : a
+                                      ));
+                                    }}
+                                    className={`flex-1 py-4 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 active:scale-95 ${
+                                      item.estado === statusOption 
+                                        ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10') 
+                                        : 'text-muted-foreground hover:bg-background/40'
+                                    }`}
+                                  >
+                                    {statusOption}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Expansão Condicional Universal (Sempre visível se tiver conteúdo ou para novo preenchimento) */}
+                            <AnimatePresence initial={false}>
+                              {(true) && (
+                                <motion.div 
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="pl-4 border-l-4 border-secondary/20 space-y-6 pt-2 pb-4">
+                                     <div className="space-y-3">
+                                        <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                          <span>📝 Observações Técnicas</span>
+                                          <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
+                                        </Label>
+                                        <Textarea 
+                                          disabled={isViewOnly}
+                                          placeholder="Ex: Condição do item, avarias, detalhes..."
+                                          value={item.observacao}
+                                          className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${!item.observacao.trim() ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
+                                          onChange={e => {
+                                            setAmbientes(ambientes.map(a => 
+                                              a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
+                                            ));
+                                          }}
+                                        />
+                                     </div>
+
+                                     <div className="space-y-3">
+                                       <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                         <span>📸 Registro Fotográfico</span>
+                                         <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
+                                       </Label>
+                                       <div className="flex gap-3 overflow-x-auto py-2 px-1">
+                                         {!isViewOnly && (
+                                           <label className="shrink-0 w-28 h-28 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
+                                              <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                              <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
+                                              <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
+                                           </label>
+                                         )}
+                                         
+                                         {item.fotos.map((foto, fIdx) => (
+                                           <div key={fIdx} className="relative shrink-0 w-28 h-28 group shadow-md transition-shadow">
+                                              <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
+                                              {!isViewOnly && (
+                                                <button 
+                                                  className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-90 transition-transform"
+                                                  onClick={() => {
+                                                    setAmbientes(ambientes.map(a => 
+                                                      a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
+                                                    ));
+                                                  }}
+                                                >
+                                                  <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                              )}
+                                           </div>
+                                         ))}
+                                       </div>
+                                     </div>
+
+                                     {/* Botão Salvar e Recolher */}
+                                     {!isViewOnly && (
+                                       <div className="pt-4">
+                                         <Button 
+                                           className={`w-full py-6 h-auto font-black uppercase tracking-widest transition-all ${isDone ? 'bg-secondary hover:bg-secondary/90 shadow-lg shadow-secondary/20' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-40'}`} 
+                                           disabled={!isDone}
+                                           onClick={() => toggleItemExpansion(activeAmbienteId, item.id, false)}
+                                         >
+                                           Salvar e Recolher
+                                         </Button>
+                                       </div>
+                                     )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            <Separator className="opacity-30 mt-6" />
+                          </div>
+                        )}
                       </div>
                     );
                   })}
