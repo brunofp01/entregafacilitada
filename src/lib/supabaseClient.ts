@@ -4,10 +4,14 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    'ERRO CRÍTICO: VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não encontradas. ' +
-    'Certifique-se de que elas estão configuradas no painel da Vercel (Production & Preview) e faça um redeploy.'
+  console.warn(
+    'AVISO: VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não encontradas no ambiente atual. ' +
+    'Se você estiver na Vercel, verifique se as variáveis de ambiente estão marcadas para "Production" e "Preview".'
   );
 }
 
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder');
+// Fallback to placeholder only to avoid top-level crash, but real calls will fail until configured
+export const supabase = createClient(
+  supabaseUrl || 'https://dfwyyfsypgnxxgfqgswg.supabase.co', 
+  supabaseAnonKey || 'missing-key'
+);
