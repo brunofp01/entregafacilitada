@@ -25,8 +25,9 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ['favicon.png', 'robots.txt', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'screenshot-mobile.png'],
       manifest: {
+        id: 'entrega-facilitada-v1',
         name: 'Entrega Facilitada - Gestão de Vistorias',
-        short_name: 'Entrega Facilitada',
+        short_name: 'Ent. Facilit.',
         description: 'Plataforma profissional para gestão de vistorias imobiliárias e segurança jurídica.',
         theme_color: '#142542',
         background_color: '#ffffff',
