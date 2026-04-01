@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound.tsx";
 
 import { PwaHandler } from "./components/pwa/PwaHandler.tsx";
 
+// Deploy Force Sync: 2026-04-01 19:33
 const queryClient = new QueryClient();
 
 const App = () => (
