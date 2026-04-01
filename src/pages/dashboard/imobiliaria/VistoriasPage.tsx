@@ -199,11 +199,11 @@ const VistoriasPage = () => {
             ) : (
               <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-2xl bg-muted/5 text-center p-8">
                 <ClipboardCheck className="w-12 h-12 text-muted-foreground/30 mb-4" />
-                <h3 className="font-bold text-lg mb-2">Nenhuma vistoria por enquanto</h3>
+                <h3 className="font-bold text-lg mb-2">Nenhuma vistoria realizada</h3>
                 <p className="text-muted-foreground max-w-xs mb-6">
-                  Comece solicitando sua primeira vistoria gratuita clicando no botão acima.
+                  Comece sua primeira vistoria profissional agora mesmo. Use nosso sistema e app de campo para gerar laudos automáticos.
                 </p>
-                <Button variant="outline" onClick={handleRequestVistoria}>Solicitar Agora</Button>
+                <Button variant="outline" onClick={handleRequestVistoria}>Iniciar Vistoria</Button>
               </div>
             )}
           </div>
@@ -215,10 +215,10 @@ const VistoriasPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { step: "01", title: "Solicitação", desc: "Você preenche os dados do imóvel." },
-                    { step: "02", title: "Agendamento", desc: "Nossa equipe confirma a data com o inquilino." },
-                    { step: "03", title: "Execução", desc: "O perito realiza a vistoria presencial." },
-                    { step: "04", title: "Relatório", desc: "O PDF é liberado aqui no portal em 24h." },
+                    { step: "01", title: "Cadastro", desc: "Insira os dados do imóvel e locatário no portal." },
+                    { step: "02", title: "Vistoria", desc: "Use o checklist no celular para detalhar os ambientes." },
+                    { step: "03", title: "Fotos", desc: "Capture fotos otimizadas diretamente pelo sistema." },
+                    { step: "04", title: "Laudo", desc: "O PDF oficial é gerado instantaneamente após finalizar." },
                   ].map((item, i) => (
                     <div key={i} className="flex gap-4">
                       <span className="text-xl font-bold text-secondary/30">{item.step}</span>
@@ -233,11 +233,11 @@ const VistoriasPage = () => {
 
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                 <CardContent className="p-6">
-                   <h4 className="font-bold mb-2 uppercase tracking-widest text-[10px] text-muted-foreground">Precisa de Reparos?</h4>
+                   <h4 className="font-bold mb-2 uppercase tracking-widest text-[10px] text-muted-foreground">Laudos Jurídicos</h4>
                    <p className="text-sm text-foreground/80 mb-4 italic">
-                     "Identificamos problemas na vistoria? Oferecemos orçamentos imediatos para reparos."
+                     "Nossa metodologia garante laudos aceitos juridicamente, evitando contestações e trazendo segurança para sua imobiliária."
                    </p>
-                   <Button variant="link" className="p-0 h-auto text-secondary font-bold">Saiba mais sobre reparos</Button>
+                   <Button variant="link" className="p-0 h-auto text-secondary font-bold text-[10px] uppercase">Ver Modelo de Laudo</Button>
                 </CardContent>
             </Card>
           </div>
