@@ -102,6 +102,9 @@ const InquilinosPage = () => {
                 let changedCount = 0;
                 for (const item of apiData.statuses) {
                     console.log(`Verificando item do sync: ID=${item.id}, Status API=${item.status}`);
+                    if (item.error_detail) {
+                        console.error(`DETALHE DO ERRO no ID ${item.id}:`, item.error_detail);
+                    }
                     if (item.debug_signatures) {
                         console.log(`Documento ${item.id} - Assinaturas no Autentique:`, item.debug_signatures);
                     }

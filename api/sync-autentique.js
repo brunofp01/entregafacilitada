@@ -53,12 +53,11 @@ export default async function handler(req, res) {
 
                     if (json.errors) {
                         console.error(`Autentique GraphQL Error for ${id}:`, JSON.stringify(json.errors));
-                        return { id, status: 'error' };
+                        return { id, status: 'error', error_detail: json.errors[0]?.message || 'GraphQL Error' };
                     }
 
                     if (!json.data || !json.data.document) {
-                        console.warn(`Document ${id} not found in Autentique`);
-                        return { id, status: 'error' };
+                        return { id, status: 'error', error_detail: 'Documento não encontrado (Pode ter sido criado com outro Token)' };
                     }
 
                     const signatures = json.data.document.signatures || [];
