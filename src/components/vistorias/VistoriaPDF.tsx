@@ -171,72 +171,68 @@ const styles = StyleSheet.create({
   },
   promoBanner: {
     marginTop: 40,
-    padding: 32,
+    padding: 24,
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     position: 'relative',
     overflow: 'hidden'
   },
-  timelineLine: {
-    position: 'absolute',
-    left: 55,
-    top: 100,
-    bottom: 50,
-    width: 2,
-    backgroundColor: '#E2E8F0',
-    zIndex: 1,
-  },
   promoTitleContainer: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   promoTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#0F172A',
     textAlign: 'left',
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 32,
+    marginBottom: 20,
     alignItems: 'flex-start',
     zIndex: 2,
   },
-  iconBlock: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+  iconBlockPrimary: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#1E293B',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  iconBlockSecondary: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
     backgroundColor: '#F5A524',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 20,
-    shadowColor: '#F5A524',
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 }
+    marginRight: 16,
   },
   stepContent: {
     flex: 1,
     flexDirection: 'column',
-    paddingTop: 2,
+    paddingTop: 0,
   },
   stepPreHeader: {
-    fontSize: 9,
+    fontSize: 7,
     fontWeight: 'bold',
     color: '#64748B',
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   stepTitle: {
-    fontSize: 16,
+    fontSize: 11,
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 6,
+    marginBottom: 2,
   },
   stepDescription: {
-    fontSize: 13,
+    fontSize: 9,
     color: '#64748B',
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
   footer: {
     position: 'absolute',
@@ -439,22 +435,38 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
         {/* Selo de Fechamento (Timeline Estilo Landing Page) */}
         <View style={styles.promoBanner} wrap={false}>
-          <View style={styles.timelineLine} />
-
           <View style={styles.promoTitleContainer}>
             <Text style={styles.promoTitle}>
               Veja como funciona com a <Text style={{ color: '#3b82f6' }}>Entrega Facilitada</Text>:
             </Text>
           </View>
 
-          <View style={[styles.timelineItem, { marginBottom: 24, alignItems: 'center' }]}>
-            <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#F5A524', borderWidth: 2, borderColor: '#F8FAFC', zIndex: 10, position: 'absolute', left: 49 }} />
-            <Text style={[styles.stepPreHeader, { color: '#F5A524', marginLeft: 84, marginTop: 4, letterSpacing: 1.5 }]}>DAQUI EM DIANTE É COM A ENTREGA FACILITADA ↓</Text>
+          {/* Etapa 3 */}
+          <View style={styles.timelineItem}>
+            <View style={styles.iconBlockPrimary}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M8 2v4" />
+                <Path d="M16 2v4" />
+                <Path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" />
+                <Path d="M3 10h18" />
+                <Path d="m16 20 2 2 4-4" />
+              </Svg>
+            </View>
+            <View style={styles.stepContent}>
+              <Text style={styles.stepPreHeader}>Etapa 3</Text>
+              <Text style={styles.stepTitle}>Solicite a desocupação</Text>
+              <Text style={styles.stepDescription}>Ao final do contrato, acione o app e agende a vistoria de saída de forma 100% digital.</Text>
+            </View>
+          </View>
+
+          {/* Separador */}
+          <View style={[styles.timelineItem, { marginBottom: 16, marginTop: -4 }]}>
+            <Text style={[styles.stepPreHeader, { color: '#F5A524', marginLeft: 52, letterSpacing: 1.5 }]}>DAQUI EM DIANTE É COM A ENTREGA FACILITADA ↓</Text>
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={styles.iconBlock}>
-              <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <View style={styles.iconBlockSecondary}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                 <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" />
                 <Path d="m9 14 2 2 4-4" />
@@ -468,8 +480,8 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={styles.iconBlock}>
-              <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <View style={styles.iconBlockSecondary}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
                 <Path d="M9 8c-2 3-4 3.5-7 4l8 8c.5-3 1-5 4-7" />
               </Svg>
@@ -482,8 +494,8 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </View>
 
           <View style={[styles.timelineItem, { marginBottom: 0 }]}>
-            <View style={styles.iconBlock}>
-              <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <View style={styles.iconBlockSecondary}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
                 <Path d="m21 2-9.6 9.6" />
                 <Circle cx="7.5" cy="15.5" r="5.5" />
