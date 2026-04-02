@@ -31,6 +31,11 @@ const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
             .single();
 
           const userRole = profile?.role as string;
+
+          if (userRole) {
+            localStorage.setItem('userRole', userRole);
+          }
+
           const allowed = Array.isArray(allowedRole)
             ? allowedRole.includes(userRole as any)
             : userRole === allowedRole;

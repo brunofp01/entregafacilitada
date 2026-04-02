@@ -28,7 +28,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole') || null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -49,6 +49,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       if (profile) {
         setUserName(profile.full_name || user.email?.split("@")[0] || "Usuário");
         setUserRole(profile.role);
+        localStorage.setItem('userRole', profile.role);
       } else {
         setUserName(user.email?.split("@")[0] || "Usuário");
       }
@@ -57,6 +58,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   }, [navigate]);
 
   const handleLogout = async () => {
+    localStorage.removeItem('userRole');
     await supabase.auth.signOut();
     navigate("/");
   };

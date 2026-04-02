@@ -57,6 +57,10 @@ const Auth = () => {
 
         toast.success("Login realizado com sucesso!");
 
+        if (profile?.role) {
+          localStorage.setItem('userRole', profile.role);
+        }
+
         if (profile?.role === "admin") {
           navigate("/admin");
         } else if (profile?.role === "imobiliaria" || profile?.role === "integrante_imobiliaria") {
