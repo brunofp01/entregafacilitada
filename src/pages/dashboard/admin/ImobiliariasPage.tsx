@@ -15,7 +15,8 @@ import {
     ExternalLink,
     ShieldCheck,
     Loader2,
-    RefreshCw
+    RefreshCw,
+    Trash2
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
@@ -43,6 +44,20 @@ const ImobiliariasPage = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
+    const handleDeletar = async (id: string, name: string) => {
+        if (!confirm(`Tem certeza que deseja excluir permanentemente a imobiliária "${name}"? Esta ação removerá o acesso ao Authentication e todos os dados vinculados.`)) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase.rpc('delete_user_by_id', { user_id: id });
+            if (error) throw error;
+            toast.success("Imobiliária removida com sucesso!");
+            fetchImobiliarias();
+        } catch (error: any) {
+            toast.error("Erro ao remover imobiliária.");
+        }
+    };
     const fetchImobiliarias = async () => {
         try {
             setLoading(true);
@@ -146,8 +161,11 @@ const ImobiliariasPage = () => {
                                                     <Mail className="w-4 h-4" /> Enviar Mensagem
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-destructive gap-2">
-                                                    Bloquear Acesso
+                                                <DropdownMenuItem
+                                                    className="text-destructive gap-2 focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
+                                                    onClick={() => handleDeletar(imob.id, imob.full_name || "")}
+                                                >
+                                                    <Trash2 className="w-4 h-4" /> Excluir Imobiliária
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

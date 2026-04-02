@@ -154,7 +154,7 @@ const InquilinosPage = () => {
 
     const handleDeletar = async (id: string) => {
         try {
-            const { error } = await supabase.from('inquilinos').delete().eq('id', id);
+            const { error } = await supabase.rpc('delete_user_by_id', { user_id: id });
             if (error) throw error;
             toast.success("Inquilino removido com sucesso.");
             setIsSheetOpen(false);

@@ -17,7 +17,8 @@ import {
     Loader2,
     RefreshCw,
     CheckCircle2,
-    AlertCircle
+    AlertCircle,
+    Trash2
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
@@ -51,6 +52,26 @@ const UsuariosPage = () => {
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
 
+    const handleDeletar = async (id: string, name: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (id === user?.id) {
+            toast.error("Você não pode excluir seu próprio usuário admin!");
+            return;
+        }
+
+        if (!confirm(`Tem certeza que deseja excluir permanentemente o usuário "${name}"? Esta ação é irreversível e removerá o acesso ao sistema (Auth + Banco).`)) {
+            return;
+        }
+
+        try {
+            const { error } = await supabase.rpc('delete_user_by_id', { user_id: id });
+            if (error) throw error;
+            toast.success("Usuário removido com sucesso!");
+            fetchUsuarios();
+        } catch (error: any) {
+            toast.error("Erro ao remover usuário.");
+        }
+    };
     const fetchUsuarios = async () => {
         try {
             setLoading(true);
@@ -202,8 +223,11 @@ const UsuariosPage = () => {
                                                                 <Key className="w-4 h-4" /> Resetar Senha
                                                             </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
-                                                            <DropdownMenuItem className="text-destructive gap-2 focus:bg-destructive/10 focus:text-destructive cursor-pointer">
-                                                                <Ban className="w-4 h-4" /> Bloquear Login
+                                                            <DropdownMenuItem
+                                                                className="text-destructive gap-2 focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
+                                                                onClick={() => handleDeletar(user.id, user.full_name || "")}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" /> Excluir Usuário Permanentemente
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
