@@ -82,7 +82,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
       { icon: Users, label: "Gestão de Inquilinos", href: "/imobiliaria/inquilinos" },
-      { icon: User, label: "Novo Inquilino", href: "/imobiliaria/inquilinos/novo" },
+      { icon: User, label: "Contratar Entrega Facilitada", href: "/imobiliaria/contratar" },
     ],
     inquilino: [
       { icon: LayoutDashboard, label: "Meu Plano", href: "/inquilino" },

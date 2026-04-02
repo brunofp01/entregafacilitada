@@ -11,6 +11,7 @@ import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
 import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
 import NewVistoria from "./pages/dashboard/imobiliaria/NewVistoria.tsx";
 import PerfilPage from "./pages/dashboard/imobiliaria/PerfilPage.tsx";
+import ContratacaoPage from "./pages/dashboard/imobiliaria/ContratacaoPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -56,6 +57,11 @@ const App = () => (
           <Route path="/imobiliaria/vistorias/nova" element={
             <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
               <NewVistoria />
+            </ProtectedRoute>
+          } />
+          <Route path="/imobiliaria/contratar" element={
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+              <ContratacaoPage />
             </ProtectedRoute>
           } />
 

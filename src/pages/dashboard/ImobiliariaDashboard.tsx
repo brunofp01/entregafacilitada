@@ -76,7 +76,7 @@ const ImobiliariaDashboard = () => {
             <p className="text-muted-foreground">Bem-vindo ao seu centro de gestão e vistorias.</p>
           </div>
           <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20 font-bold">
-            <Link to="/imobiliaria/inquilinos/novo">Novo Inquilino</Link>
+            <Link to="/imobiliaria/contratar">Contratar Entrega Facilitada</Link>
           </Button>
         </div>
 
