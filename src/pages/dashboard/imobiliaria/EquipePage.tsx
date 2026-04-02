@@ -4,9 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Users, UserPlus, Mail, ShieldCheck, Loader2 } from "lucide-react";
+import { Users, UserPlus, Mail, ShieldCheck, Loader2, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -166,6 +177,34 @@ const EquipePage = () => {
     }
   };
 
+  const handleDeleteMember = async (memberId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("id, imobiliaria_id")
+        .eq("id", user.id)
+        .single();
+
+      const myOrgId = me?.imobiliaria_id || me?.id;
+
+      const { error } = await supabase.rpc('delete_team_member', {
+        target_id: memberId,
+        owner_id: myOrgId
+      });
+
+      if (error) throw error;
+
+      toast.success("Integrante removido com sucesso.");
+      fetchTeam();
+    } catch (error: any) {
+      console.error("Erro ao remover integrante:", error);
+      toast.error(error.message || "Erro ao remover integrante.");
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout role="imobiliaria">
@@ -272,9 +311,37 @@ const EquipePage = () => {
                           </div>
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 py-1 bg-muted rounded-md italic">
-                        {member.role}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 py-1 bg-muted rounded-md italic">
+                          {member.role}
+                        </span>
+
+                        {/* Only show delete button for entries that aren't the current user/owner */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação não pode ser desfeita. O acesso do colaborador {member.full_name || member.email} será revogado imediatamente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteMember(member.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
                   ))
                 ) : (
