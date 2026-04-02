@@ -96,13 +96,18 @@ const InquilinosPage = () => {
             });
 
             const apiData = await apiRes.json();
-            console.log("Resposta da API de Sincronização:", apiData);
+            console.log("DADOS RECEBIDOS DA API (apiData):", apiData);
 
             if (apiData.success && apiData.statuses) {
                 let changedCount = 0;
                 for (const item of apiData.statuses) {
+                    console.log(`Verificando item do sync: ID=${item.id}, Status API=${item.status}`);
+                    if (item.debug_signatures) {
+                        console.log(`Documento ${item.id} - Assinaturas no Autentique:`, item.debug_signatures);
+                    }
+
                     if (item.status === 'assinado' || item.status === 'rejeitado') {
-                        console.log(`Atualizando status do documento ${item.id} para ${item.status}...`);
+                        console.log(`Tentando atualizar no Supabase o inquilino com documento ${item.id} para ${item.status}...`);
                         const { data, error } = await supabase
                             .from('inquilinos')
                             .update({ status_assinatura: item.status })
@@ -110,11 +115,12 @@ const InquilinosPage = () => {
                             .select();
 
                         if (error) {
-                            console.error(`Erro ao atualizar status no banco para ${item.id}:`, error);
+                            console.error(`ERRO SUPABASE ao atualizar ${item.id}:`, error);
                         } else if (data && data.length > 0) {
+                            console.log(`SUCESSO! Inquilino ${data[0].nome} atualizado no banco.`);
                             changedCount++;
                         } else {
-                            console.warn(`Nenhuma linha atualizada para o ID ${item.id}. Verifique permissões RLS.`);
+                            console.warn(`AVISO: Nenhuma linha alterada para o ID ${item.id}. Verifique se a coluna 'autentique_document_id' no Supabase contém exatamente esse valor e se as permissões RLS de UPDATE foram rodadas.`);
                         }
                     }
                 }
