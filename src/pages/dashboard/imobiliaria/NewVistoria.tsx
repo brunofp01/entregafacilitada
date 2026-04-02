@@ -9,19 +9,19 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Camera, Trash2, CheckCircle2, ChevronRight, LayoutGrid, Droplets, Zap, Flame, Loader2, Save } from "lucide-react";
+import { Plus, Camera, Trash2, CheckCircle2, ChevronRight, LayoutGrid, Droplets, Zap, Flame, Loader2, Save, ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import { useVistoriaImage } from "@/hooks/useVistoriaImage";
 import { pdf } from '@react-pdf/renderer';
@@ -49,7 +49,7 @@ const NewVistoria = () => {
   const [searchParams] = useSearchParams();
   const vistoriaId = searchParams.get("id");
   const { processImage } = useVistoriaImage();
-  
+
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(!!vistoriaId);
   const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
@@ -65,7 +65,7 @@ const NewVistoria = () => {
   const isViewOnly = status === "concluida" || isViewMode;
 
   // Form State
-  const [imovel, setImovel] = useState({ 
+  const [imovel, setImovel] = useState({
     cep: "",
     rua: "",
     numero: "",
@@ -74,7 +74,7 @@ const NewVistoria = () => {
     estado: "",
     complemento: ""
   });
-  
+
   const [medidores, setMedidores] = useState({
     agua: { leitura: "", foto: "" },
     luz: { leitura: "", foto: "" },
@@ -95,7 +95,7 @@ const NewVistoria = () => {
     if (user) {
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       setCurrentUserProfile(data);
-      
+
       // Carregar perfil da imobiliária para o PDF
       const imobiliariaId = data?.imobiliaria_id || data?.id;
       const { data: perfil } = await supabase.from('imobiliaria_perfil').select('*').eq('imobiliaria_id', imobiliariaId).maybeSingle();
@@ -138,7 +138,7 @@ const NewVistoria = () => {
       });
       setMedidores(data.medidores || medidores);
       setStatus(data.status);
-      
+
       const loadedAmbientes = data.vistoria_ambientes.map((a: any) => ({
         id: a.id,
         nome: a.nome,
@@ -164,12 +164,12 @@ const NewVistoria = () => {
   const handleCepSearch = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, '');
     setImovel(prev => ({ ...prev, cep: cleanCep }));
-    
+
     if (cleanCep.length === 8) {
       try {
         const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
         const data = await response.json();
-        
+
         if (data.erro) {
           toast.error("CEP não encontrado.");
           return;
@@ -192,13 +192,13 @@ const NewVistoria = () => {
   const syncVistoriaData = async (currentVistoriaId: string) => {
     // Sync Ambientes and Itens
     await supabase.from('vistoria_ambientes').delete().eq('vistoria_id', currentVistoriaId);
-    
+
     for (const amb of ambientes) {
       const { data: newAmb, error: ambError } = await supabase
         .from('vistoria_ambientes')
         .insert({ vistoria_id: currentVistoriaId, nome: amb.nome })
         .select().single();
-      
+
       if (ambError) throw ambError;
 
       if (amb.itens.length > 0) {
@@ -220,7 +220,7 @@ const NewVistoria = () => {
     setLoading(true);
     try {
       const imobiliariaId = currentUserProfile?.imobiliaria_id || currentUserProfile?.id;
-      
+
       const payload = {
         imobiliaria_id: imobiliariaId,
         cep: imovel.cep,
@@ -267,7 +267,7 @@ const NewVistoria = () => {
     if (ambienteNome.includes("Cozinha")) {
       common.push("Bancada / Pia", "Gabinete");
     }
-    
+
     return common.map(nome => ({
       id: crypto.randomUUID(),
       nome,
@@ -296,16 +296,18 @@ const NewVistoria = () => {
     if (isViewOnly) return;
     const nome = nomeOverride || newItemName;
     if (nome.trim()) {
-      setAmbientes(ambientes.map(a => 
-        a.id === ambienteId 
-          ? { ...a, itens: [{ 
-              id: crypto.randomUUID(), 
-              nome: nome.trim(), 
-              estado: "Bom", 
-              observacao: "", 
+      setAmbientes(ambientes.map(a =>
+        a.id === ambienteId
+          ? {
+            ...a, itens: [{
+              id: crypto.randomUUID(),
+              nome: nome.trim(),
+              estado: "Bom",
+              observacao: "",
               fotos: [],
               isExpanded: true
-            }, ...a.itens] } 
+            }, ...a.itens]
+          }
           : a
       ));
       setNewItemName("");
@@ -317,7 +319,7 @@ const NewVistoria = () => {
 
   const removeItem = (ambienteId: string, itemId: string) => {
     if (isViewOnly) return;
-    setAmbientes(ambientes.map(a => 
+    setAmbientes(ambientes.map(a =>
       a.id === ambienteId ? { ...a, itens: a.itens.filter(i => i.id !== itemId) } : a
     ));
     toast.success("Item removido");
@@ -332,9 +334,9 @@ const NewVistoria = () => {
   };
 
   const toggleItemExpansion = (ambienteId: string, itemId: string, force?: boolean) => {
-    setAmbientes(ambientes.map(a => 
-      a.id === ambienteId 
-        ? { ...a, itens: a.itens.map(i => i.id === itemId ? { ...i, isExpanded: force !== undefined ? force : !i.isExpanded } : i) } 
+    setAmbientes(ambientes.map(a =>
+      a.id === ambienteId
+        ? { ...a, itens: a.itens.map(i => i.id === itemId ? { ...i, isExpanded: force !== undefined ? force : !i.isExpanded } : i) }
         : a
     ));
   };
@@ -346,7 +348,7 @@ const NewVistoria = () => {
 
     const fileList = Array.from(files);
     setLoading(true);
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -354,10 +356,10 @@ const NewVistoria = () => {
       for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
         toast.info(`Processando foto ${i + 1} de ${fileList.length}...`);
-        
+
         const optimizedFile = await processImage(file);
         const fileName = `vistorias/${crypto.randomUUID()}.jpg`; // Mantendo pasta vistorias
-        
+
         const { error: uploadError } = await supabase.storage
           .from('vistorias')
           .upload(fileName, optimizedFile);
@@ -369,11 +371,13 @@ const NewVistoria = () => {
 
         const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(fileName);
 
-        setAmbientes(prev => prev.map(a => 
-          a.id === ambienteId 
-            ? { ...a, itens: a.itens.map(item => 
+        setAmbientes(prev => prev.map(a =>
+          a.id === ambienteId
+            ? {
+              ...a, itens: a.itens.map(item =>
                 item.id === itemId ? { ...item, fotos: [...item.fotos, publicUrl] } : item
-              ) } 
+              )
+            }
             : a
         ));
       }
@@ -392,11 +396,11 @@ const NewVistoria = () => {
     if (!file) return;
 
     toast.info("Processando e otimizando imagem do medidor...");
-    
+
     try {
       const optimizedFile = await processImage(file);
       const fileName = `medidores/${crypto.randomUUID()}.jpg`;
-      
+
       const { error } = await supabase.storage
         .from('vistorias')
         .upload(fileName, optimizedFile);
@@ -442,7 +446,7 @@ const NewVistoria = () => {
           navigate(`/imobiliaria/vistorias/nova?id=${data.id}`, { replace: true });
         }
       }
-      
+
       if (targetStep) setStep(targetStep);
       toast.success("Progresso salvo!");
     } catch (error) {
@@ -455,7 +459,7 @@ const NewVistoria = () => {
 
   const handleFinish = async () => {
     if (isViewOnly) return;
-    const hasIncomplete = ambientes.some(a => 
+    const hasIncomplete = ambientes.some(a =>
       a.itens.some(i => (i.estado === 'Regular' || i.estado === 'Ruim') && (!i.observacao || i.fotos.length === 0))
     );
 
@@ -472,17 +476,17 @@ const NewVistoria = () => {
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       const imobiliariaId = profile?.imobiliaria_id || profile?.id;
 
-      const blob = await pdf(<VistoriaPDF data={{ 
+      const blob = await pdf(<VistoriaPDF data={{
         ...imovel,
-        medidores, 
+        medidores,
         ambientes,
         perfil: imobiliariaPerfil
       }} />).toBlob();
-      
+
       const pdfPath = `laudos/${crypto.randomUUID()}.pdf`;
       const { error: uploadError } = await supabase.storage.from('vistorias').upload(pdfPath, blob);
       if (uploadError) throw uploadError;
-      
+
       const { data: { publicUrl } } = supabase.storage.from('vistorias').getPublicUrl(pdfPath);
 
       const payload = {
@@ -527,9 +531,14 @@ const NewVistoria = () => {
     <DashboardLayout role="imobiliaria">
       <div className="max-w-4xl mx-auto pb-20">
         <header className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-heading font-extrabold">{vistoriaId ? (isViewOnly && !isViewMode ? 'Vistoria Finalizada' : (isViewMode ? 'Visualização' : 'Editar Vistoria')) : 'Nova Vistoria Professional'}</h1>
-            <p className="text-muted-foreground">{isViewOnly ? (isViewMode ? 'Modo de conferência de dados.' : 'Esta vistoria foi finalizada e não pode ser editada.') : 'Preencha os dados em campo conforme solicitado.'}</p>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" className="shrink-0 rounded-full h-10 w-10 border-border/50 bg-card hover:bg-muted" onClick={() => navigate("/imobiliaria/vistorias")}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-heading font-extrabold leading-tight">{vistoriaId ? (isViewOnly && !isViewMode ? 'Vistoria Finalizada' : (isViewMode ? 'Visualização' : 'Editar Vistoria')) : 'Nova Vistoria Professional'}</h1>
+              <p className="text-sm md:text-base text-muted-foreground">{isViewOnly ? (isViewMode ? 'Modo de conferência de dados.' : 'Esta vistoria foi finalizada e não pode ser editada.') : 'Preencha os dados em campo.'}</p>
+            </div>
           </div>
           <Badge className={isViewOnly ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-secondary/10 text-secondary border-secondary/20"}>
             {isViewMode ? 'Modo Visualização' : (isViewOnly ? 'Finalizada' : 'Modo Edição')}
@@ -554,36 +563,36 @@ const NewVistoria = () => {
                   </div>
                   <div className="md:col-span-3 space-y-2">
                     <label className="text-sm font-bold">Rua / Logradouro</label>
-                    <Input disabled={isViewOnly} placeholder="Rua..." value={imovel.rua} onChange={e => setImovel({...imovel, rua: e.target.value})} />
+                    <Input disabled={isViewOnly} placeholder="Rua..." value={imovel.rua} onChange={e => setImovel({ ...imovel, rua: e.target.value })} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Número</label>
-                    <Input disabled={isViewOnly} placeholder="123" value={imovel.numero} onChange={e => setImovel({...imovel, numero: e.target.value})} />
+                    <Input disabled={isViewOnly} placeholder="123" value={imovel.numero} onChange={e => setImovel({ ...imovel, numero: e.target.value })} />
                   </div>
                   <div className="md:col-span-3 space-y-2">
                     <label className="text-sm font-bold">Complemento (opcional)</label>
-                    <Input disabled={isViewOnly} placeholder="Apto 12..." value={imovel.complemento} onChange={e => setImovel({...imovel, complemento: e.target.value})} />
+                    <Input disabled={isViewOnly} placeholder="Apto 12..." value={imovel.complemento} onChange={e => setImovel({ ...imovel, complemento: e.target.value })} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Bairro</label>
-                    <Input disabled={isViewOnly} placeholder="Bairro..." value={imovel.bairro} onChange={e => setImovel({...imovel, bairro: e.target.value})} />
+                    <Input disabled={isViewOnly} placeholder="Bairro..." value={imovel.bairro} onChange={e => setImovel({ ...imovel, bairro: e.target.value })} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Cidade</label>
-                    <Input disabled={isViewOnly} placeholder="Cidade..." value={imovel.cidade} onChange={e => setImovel({...imovel, cidade: e.target.value})} />
+                    <Input disabled={isViewOnly} placeholder="Cidade..." value={imovel.cidade} onChange={e => setImovel({ ...imovel, cidade: e.target.value })} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Estado (UF)</label>
-                    <Input disabled={isViewOnly} placeholder="SP" value={imovel.estado} onChange={e => setImovel({...imovel, estado: e.target.value})} maxLength={2} />
+                    <Input disabled={isViewOnly} placeholder="SP" value={imovel.estado} onChange={e => setImovel({ ...imovel, estado: e.target.value })} maxLength={2} />
                   </div>
                 </div>
-                
+
                 <Button disabled={loading} className="w-full bg-secondary font-bold mt-4" onClick={() => saveProgressAndNavigate(2)}>
                   {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
                   Próximo Passo <ChevronRight className="w-4 h-4 ml-2" />
@@ -605,14 +614,14 @@ const NewVistoria = () => {
                     <CardTitle className="text-lg">{m.label}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <Input disabled={isViewOnly} placeholder="Leitura (números)" value={(medidores as any)[m.key].leitura} 
-                      onChange={e => setMedidores({...medidores, [m.key]: {...(medidores as any)[m.key], leitura: e.target.value}})} />
-                    
+                    <Input disabled={isViewOnly} placeholder="Leitura (números)" value={(medidores as any)[m.key].leitura}
+                      onChange={e => setMedidores({ ...medidores, [m.key]: { ...(medidores as any)[m.key], leitura: e.target.value } })} />
+
                     {!isViewOnly ? (
                       <div className="space-y-2">
                         <label className="block cursor-pointer">
                           <div className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}>
-                            { (medidores as any)[m.key].foto ? (
+                            {(medidores as any)[m.key].foto ? (
                               <div className="relative w-full h-full flex items-center justify-center">
                                 <img src={(medidores as any)[m.key].foto} className="h-full object-contain rounded" />
                                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
@@ -668,9 +677,9 @@ const NewVistoria = () => {
                     { nome: "Área de Serviço", emoji: "🧹" },
                     { nome: "Varanda", emoji: "🌿" }
                   ].map((quick) => (
-                    <Button 
-                      key={quick.nome} 
-                      variant="outline" 
+                    <Button
+                      key={quick.nome}
+                      variant="outline"
                       className="h-24 flex-col gap-2 border-2 hover:border-secondary/50 hover:bg-secondary/5 transition-all active:scale-95"
                       onClick={() => addAmbiente(quick.nome)}
                       disabled={ambientes.some(a => a.nome === quick.nome)}
@@ -715,121 +724,121 @@ const NewVistoria = () => {
               return (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold">Painel de Progresso</h2>
-                    <p className="text-sm text-muted-foreground">Toque no card para avaliar.</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setInspectionPhase('setup')} className="gap-2 font-bold text-secondary">
-                    <Plus className="w-4 h-4" /> Ambientes
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {ambientes.map(a => {
-                    const total = a.itens.length;
-                    const evaluated = a.itens.filter(i => {
-                      // Regra Universal Estrita: Status + Obs + Foto
-                      return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
-                    }).length;
-                    
-                    const progress = total > 0 ? (evaluated / total) * 100 : 0;
-                    const isComplete = progress === 100;
-
-                    return (
-                      <div key={a.id} className="relative group">
-                        {!isViewOnly && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setRoomToDelete(a.id);
-                            }}
-                            className="absolute -top-2 -right-2 z-10 bg-destructive text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity active:scale-95"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        <Card 
-                          className={`group cursor-pointer hover:border-secondary/50 transition-all border-2 active:bg-muted/10 ${isComplete ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-border/50'}`}
-                          onClick={() => {
-                            setActiveAmbienteId(a.id);
-                            setInspectionPhase('detail');
-                          }}
-                        >
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="space-y-1">
-                              <h3 className="font-bold text-lg group-hover:text-secondary transition-colors">{a.nome}</h3>
-                              <p className="text-xs text-muted-foreground">{evaluated} de {total} avaliados</p>
-                            </div>
-                            {isComplete ? (
-                              <div className="p-2 rounded-full bg-emerald-500/10"><CheckCircle2 className="text-emerald-500 w-6 h-6" /></div>
-                            ) : (
-                              <div className="p-2 rounded-full bg-muted text-muted-foreground group-hover:bg-secondary/10 group-hover:text-secondary transition-colors">
-                                <ChevronRight className="w-5 h-5" />
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full transition-all duration-700 ${isComplete ? 'bg-emerald-500' : 'bg-secondary'}`}
-                                style={{ width: `${progress}%` }}
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                    <div>
+                      <h2 className="text-xl font-bold">Painel de Progresso</h2>
+                      <p className="text-sm text-muted-foreground">Toque no card para avaliar.</p>
                     </div>
-                    );
-                  })}
-                </div>
-
-                {!isViewOnly && (
-                  <div className="mt-8">
-                    <Button 
-                      className="w-full py-10 h-auto text-xl font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 shadow-2xl shadow-emerald-500/20 rounded-2xl" 
-                      onClick={handleFinish} 
-                      disabled={loading || totalProgress < 100}
-                    >
-                      {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Gerar Laudo PDF Final"}
+                    <Button variant="outline" size="sm" onClick={() => setInspectionPhase('setup')} className="gap-2 font-bold text-secondary">
+                      <Plus className="w-4 h-4" /> Ambientes
                     </Button>
                   </div>
-                )}
 
-                {/* AlertDialog para Confirmação de Exclusão de Ambiente */}
-                <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && setRoomToDelete(null)}>
-                  <AlertDialogContent className="rounded-3xl w-[95%] max-w-md mx-auto">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-xl font-black">Excluir Ambiente?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta ação removerá permanentemente este ambiente e todos os seus itens avaliados da vistoria.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex flex-row gap-3 mt-4">
-                      <AlertDialogCancel className="flex-1 rounded-2xl h-14 font-bold border-2">Não, Manter</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={() => roomToDelete && removeAmbiente(roomToDelete)}
-                        className="flex-1 bg-destructive hover:bg-destructive/90 rounded-2xl h-14 font-bold"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {ambientes.map(a => {
+                      const total = a.itens.length;
+                      const evaluated = a.itens.filter(i => {
+                        // Regra Universal Estrita: Status + Obs + Foto
+                        return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
+                      }).length;
+
+                      const progress = total > 0 ? (evaluated / total) * 100 : 0;
+                      const isComplete = progress === 100;
+
+                      return (
+                        <div key={a.id} className="relative group">
+                          {!isViewOnly && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRoomToDelete(a.id);
+                              }}
+                              className="absolute -top-2 -right-2 z-10 bg-destructive text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity active:scale-95"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <Card
+                            className={`group cursor-pointer hover:border-secondary/50 transition-all border-2 active:bg-muted/10 ${isComplete ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-border/50'}`}
+                            onClick={() => {
+                              setActiveAmbienteId(a.id);
+                              setInspectionPhase('detail');
+                            }}
+                          >
+                            <CardContent className="p-6">
+                              <div className="flex justify-between items-start mb-4">
+                                <div className="space-y-1">
+                                  <h3 className="font-bold text-lg group-hover:text-secondary transition-colors">{a.nome}</h3>
+                                  <p className="text-xs text-muted-foreground">{evaluated} de {total} avaliados</p>
+                                </div>
+                                {isComplete ? (
+                                  <div className="p-2 rounded-full bg-emerald-500/10"><CheckCircle2 className="text-emerald-500 w-6 h-6" /></div>
+                                ) : (
+                                  <div className="p-2 rounded-full bg-muted text-muted-foreground group-hover:bg-secondary/10 group-hover:text-secondary transition-colors">
+                                    <ChevronRight className="w-5 h-5" />
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="space-y-2">
+                                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full transition-all duration-700 ${isComplete ? 'bg-emerald-500' : 'bg-secondary'}`}
+                                    style={{ width: `${progress}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {!isViewOnly && (
+                    <div className="mt-8">
+                      <Button
+                        className="w-full py-10 h-auto text-xl font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 shadow-2xl shadow-emerald-500/20 rounded-2xl"
+                        onClick={handleFinish}
+                        disabled={loading || totalProgress < 100}
                       >
-                        Sim, Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            );
-          })()}
+                        {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Gerar Laudo PDF Final"}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* AlertDialog para Confirmação de Exclusão de Ambiente */}
+                  <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && setRoomToDelete(null)}>
+                    <AlertDialogContent className="rounded-3xl w-[95%] max-w-md mx-auto">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-black">Excluir Ambiente?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação removerá permanentemente este ambiente e todos os seus itens avaliados da vistoria.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="flex flex-row gap-3 mt-4">
+                        <AlertDialogCancel className="flex-1 rounded-2xl h-14 font-bold border-2">Não, Manter</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => roomToDelete && removeAmbiente(roomToDelete)}
+                          className="flex-1 bg-destructive hover:bg-destructive/90 rounded-2xl h-14 font-bold"
+                        >
+                          Sim, Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              );
+            })()}
 
             {inspectionPhase === 'detail' && activeAmbienteId && (
               <div className="space-y-6 animate-in slide-in-from-right-8 duration-500 pb-20">
                 <div className="sticky top-0 bg-background/95 backdrop-blur-md z-30 py-4 border-b border-border/50">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="rounded-full hover:bg-secondary/10 hover:text-secondary h-8 w-8" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-secondary/10 hover:text-secondary h-8 w-8"
                         onClick={() => setInspectionPhase('master')}
                       >
                         <ChevronRight className="w-5 h-5 rotate-180" />
@@ -840,7 +849,7 @@ const NewVistoria = () => {
                       {ambientes.find(a => a.id === activeAmbienteId)?.itens.length} ITENS
                     </Badge>
                   </div>
-                  
+
                   {/* Barra de Progresso Real-Time Direbaixo do Header */}
                   {(() => {
                     const room = ambientes.find(a => a.id === activeAmbienteId);
@@ -850,11 +859,11 @@ const NewVistoria = () => {
                       return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
                     }).length || 0;
                     const progress = total > 0 ? (evaluated / total) * 100 : 0;
-                    
+
                     return (
                       <div className="px-1 pt-1">
                         <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className={`h-full transition-all duration-500 ease-out ${progress === 100 ? 'bg-emerald-500' : 'bg-secondary'}`}
                             style={{ width: `${progress}%` }}
                           />
@@ -874,15 +883,15 @@ const NewVistoria = () => {
                     <div className="p-4 bg-muted/20 border border-secondary/20 rounded-2xl flex flex-col gap-3 shadow-sm">
                       <Label className="text-xs font-black uppercase text-secondary tracking-widest px-1">Novo Item Personalizado</Label>
                       <div className="flex gap-2">
-                        <Input 
+                        <Input
                           value={newItemName}
                           onChange={e => setNewItemName(e.target.value)}
                           placeholder="Ex: Filtro da Piscina, Piso, Porta..."
                           className="bg-background/80 flex-1 h-12"
                           onKeyDown={e => e.key === 'Enter' && addItem(activeAmbienteId)}
                         />
-                        <Button 
-                          onClick={() => addItem(activeAmbienteId)} 
+                        <Button
+                          onClick={() => addItem(activeAmbienteId)}
                           className="bg-secondary px-6 font-bold h-12 active:scale-95 transition-all"
                         >
                           <Plus className="w-5 h-5 mr-1" /> ADICIONAR
@@ -894,7 +903,7 @@ const NewVistoria = () => {
                   {ambientes.find(a => a.id === activeAmbienteId)?.itens.length === 0 && (
                     <div className="py-20 text-center opacity-30 border-2 border-dashed border-border rounded-3xl">
                       <Plus className="w-12 h-12 mx-auto mb-4" />
-                      <p className="font-bold">Nenhum item cadastrado.<br/>Adicione o primeiro acima.</p>
+                      <p className="font-bold">Nenhum item cadastrado.<br />Adicione o primeiro acima.</p>
                     </div>
                   )}
 
@@ -908,7 +917,7 @@ const NewVistoria = () => {
                       <div key={item.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                         {/* Summary View (Collapsed) */}
                         {!isExpanded ? (
-                          <div 
+                          <div
                             className="flex items-center justify-between p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl cursor-pointer active:scale-95 transition-transform"
                             onClick={() => toggleItemExpansion(activeAmbienteId, item.id)}
                           >
@@ -941,7 +950,7 @@ const NewVistoria = () => {
                                   </div>
                                 )}
                               </div>
-                              
+
                               {/* Segmented Control para Status com Toque Otimizado */}
                               <div className="flex p-1 bg-muted/60 rounded-2xl gap-1 border border-border/20">
                                 {["Novo", "Bom", "Regular", "Ruim"].map((statusOption) => (
@@ -949,15 +958,14 @@ const NewVistoria = () => {
                                     key={statusOption}
                                     onClick={() => {
                                       if (isViewOnly) return;
-                                      setAmbientes(ambientes.map(a => 
+                                      setAmbientes(ambientes.map(a =>
                                         a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, estado: statusOption as any } : i) } : a
                                       ));
                                     }}
-                                    className={`flex-1 py-4 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 active:scale-95 ${
-                                      item.estado === statusOption 
-                                        ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10') 
+                                    className={`flex-1 py-4 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 active:scale-95 ${item.estado === statusOption
+                                        ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10')
                                         : 'text-muted-foreground hover:bg-background/40'
-                                    }`}
+                                      }`}
                                   >
                                     {statusOption}
                                   </button>
@@ -968,7 +976,7 @@ const NewVistoria = () => {
                             {/* Expansão Condicional Universal (Sempre visível se tiver conteúdo ou para novo preenchimento) */}
                             <AnimatePresence initial={false}>
                               {(true) && (
-                                <motion.div 
+                                <motion.div
                                   initial={{ height: 0, opacity: 0 }}
                                   animate={{ height: "auto", opacity: 1 }}
                                   exit={{ height: 0, opacity: 0 }}
@@ -976,71 +984,71 @@ const NewVistoria = () => {
                                   className="overflow-hidden"
                                 >
                                   <div className="pl-4 border-l-4 border-secondary/20 space-y-6 pt-2 pb-4">
-                                     <div className="space-y-3">
-                                        <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
-                                          <span>📝 Observações Técnicas</span>
-                                          <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
-                                        </Label>
-                                        <Textarea 
-                                          disabled={isViewOnly}
-                                          placeholder="Ex: Condição do item, avarias, detalhes..."
-                                          value={item.observacao}
-                                          className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${!item.observacao.trim() ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
-                                          onChange={e => {
-                                            setAmbientes(ambientes.map(a => 
-                                              a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
-                                            ));
-                                          }}
-                                        />
-                                     </div>
+                                    <div className="space-y-3">
+                                      <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                        <span>📝 Observações Técnicas</span>
+                                        <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
+                                      </Label>
+                                      <Textarea
+                                        disabled={isViewOnly}
+                                        placeholder="Ex: Condição do item, avarias, detalhes..."
+                                        value={item.observacao}
+                                        className={`bg-muted/10 border-border/50 focus-visible:ring-secondary/50 placeholder:italic transition-shadow min-h-[100px] ${!item.observacao.trim() ? 'ring-2 ring-destructive/30 bg-destructive/5' : ''}`}
+                                        onChange={e => {
+                                          setAmbientes(ambientes.map(a =>
+                                            a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, observacao: e.target.value } : i) } : a
+                                          ));
+                                        }}
+                                      />
+                                    </div>
 
-                                     <div className="space-y-3">
-                                       <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
-                                         <span>📸 Registro Fotográfico</span>
-                                         <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
-                                       </Label>
-                                       <div className="flex gap-3 flex-wrap py-2 px-1">
-                                         {!isViewOnly && (
-                                           <label className="shrink-0 w-24 h-24 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
-                                              <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
-                                              <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                              <input type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
-                                           </label>
-                                         )}
-                                         
-                                         {item.fotos.map((foto, fIdx) => (
-                                           <div key={fIdx} className="relative shrink-0 w-24 h-24 group shadow-md transition-shadow">
-                                              <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
-                                              {!isViewOnly && (
-                                                <button 
-                                                  type="button"
-                                                   className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-95 transition-transform z-10"
-                                                  onClick={() => {
-                                                    setAmbientes(ambientes.map(a => 
-                                                      a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
-                                                    ));
-                                                  }}
-                                                >
-                                                  <Trash2 className="w-3.5 h-3.5" />
-                                                </button>
-                                              )}
-                                           </div>
-                                         ))}
-                                       </div>
-                                     </div>
+                                    <div className="space-y-3">
+                                      <Label className="text-xs font-black uppercase tracking-widest flex justify-between items-center text-muted-foreground">
+                                        <span>📸 Registro Fotográfico</span>
+                                        <span className="text-destructive animate-pulse text-[9px] bg-destructive/10 px-2 py-0.5 rounded-full">Obrigatório</span>
+                                      </Label>
+                                      <div className="flex gap-3 flex-wrap py-2 px-1">
+                                        {!isViewOnly && (
+                                          <label className="shrink-0 w-24 h-24 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
+                                            <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                            <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
+                                            <input type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
+                                          </label>
+                                        )}
 
-                                     {/* Botão Salvar e Recolher */}
-                                     {!isViewOnly && (
-                                       <div className="pt-4">
-                                         <Button 
-                                           className={`w-full py-6 h-auto font-black uppercase tracking-widest transition-all ${isDone ? 'bg-secondary hover:bg-secondary/90 shadow-lg shadow-secondary/20' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-40'}`} 
-                                           disabled={!isDone}
-                                           onClick={() => toggleItemExpansion(activeAmbienteId, item.id, false)}
-                                         >
-                                           Salvar e Recolher
-                                         </Button>
-                                       </div>
-                                     )}
+                                        {item.fotos.map((foto, fIdx) => (
+                                          <div key={fIdx} className="relative shrink-0 w-24 h-24 group shadow-md transition-shadow">
+                                            <img src={foto} className="w-full h-full object-cover rounded-2xl border border-white/10" />
+                                            {!isViewOnly && (
+                                              <button
+                                                type="button"
+                                                className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-2 shadow-xl hover:scale-110 active:scale-95 transition-transform z-10"
+                                                onClick={() => {
+                                                  setAmbientes(ambientes.map(a =>
+                                                    a.id === activeAmbienteId ? { ...a, itens: a.itens.map(i => i.id === item.id ? { ...i, fotos: i.fotos.filter((_, idx) => idx !== fIdx) } : i) } : a
+                                                  ));
+                                                }}
+                                              >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                              </button>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* Botão Salvar e Recolher */}
+                                    {!isViewOnly && (
+                                      <div className="pt-4">
+                                        <Button
+                                          className={`w-full py-6 h-auto font-black uppercase tracking-widest transition-all ${isDone ? 'bg-secondary hover:bg-secondary/90 shadow-lg shadow-secondary/20' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-40'}`}
+                                          disabled={!isDone}
+                                          onClick={() => toggleItemExpansion(activeAmbienteId, item.id, false)}
+                                        >
+                                          Salvar e Recolher
+                                        </Button>
+                                      </div>
+                                    )}
                                   </div>
                                 </motion.div>
                               )}
@@ -1054,33 +1062,32 @@ const NewVistoria = () => {
                 </div>
 
                 {!isViewOnly && (
-                   <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-lg border-t border-border/50 z-30 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12">
-                     {(() => {
-                       const room = ambientes.find(a => a.id === activeAmbienteId);
-                       const total = room?.itens.length || 0;
-                       const evaluated = room?.itens.filter(i => {
-                         // Regra Universal Estrita: Status + Obs + Foto
-                         return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
-                       }).length || 0;
-                       const isComplete = total > 0 && evaluated === total;
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-lg border-t border-border/50 z-30 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12">
+                    {(() => {
+                      const room = ambientes.find(a => a.id === activeAmbienteId);
+                      const total = room?.itens.length || 0;
+                      const evaluated = room?.itens.filter(i => {
+                        // Regra Universal Estrita: Status + Obs + Foto
+                        return i.estado && i.observacao.trim() !== "" && i.fotos.length > 0;
+                      }).length || 0;
+                      const isComplete = total > 0 && evaluated === total;
 
-                       return (
-                         <Button 
-                           className={`w-full py-8 h-auto text-lg font-black uppercase tracking-wider shadow-xl transition-all ${
-                             isComplete ? 'bg-emerald-600 shadow-emerald-500/20 active:scale-95' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-                           }`} 
-                           disabled={!isComplete}
-                           onClick={() => setInspectionPhase('master')}
-                         >
-                           {isComplete ? (
-                             <span className="flex items-center gap-2 tracking-widest"><CheckCircle2 className="w-6 h-6" /> Finalizar Ambiente</span>
-                           ) : (
-                             <span>Avaliação Pendente ({evaluated}/{total})</span>
-                           )}
-                         </Button>
-                       );
-                     })()}
-                   </div>
+                      return (
+                        <Button
+                          className={`w-full py-8 h-auto text-lg font-black uppercase tracking-wider shadow-xl transition-all ${isComplete ? 'bg-emerald-600 shadow-emerald-500/20 active:scale-95' : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                            }`}
+                          disabled={!isComplete}
+                          onClick={() => setInspectionPhase('master')}
+                        >
+                          {isComplete ? (
+                            <span className="flex items-center gap-2 tracking-widest"><CheckCircle2 className="w-6 h-6" /> Finalizar Ambiente</span>
+                          ) : (
+                            <span>Avaliação Pendente ({evaluated}/{total})</span>
+                          )}
+                        </Button>
+                      );
+                    })()}
+                  </div>
                 )}
               </div>
             )}
