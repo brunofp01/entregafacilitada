@@ -71,6 +71,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
       { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },
+      { icon: User, label: "Meu Perfil", href: "/admin/perfil" },
       { icon: Settings, label: "Configurações", href: "/admin/configuracoes" },
     ],
     imobiliaria: [

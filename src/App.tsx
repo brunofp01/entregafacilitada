@@ -11,6 +11,7 @@ import ImobiliariasPage from "./pages/dashboard/admin/ImobiliariasPage.tsx";
 import UsuariosPage from "./pages/dashboard/admin/UsuariosPage.tsx";
 import RelatoriosPage from "./pages/dashboard/admin/RelatoriosPage.tsx";
 import ConfiguracoesPage from "./pages/dashboard/admin/ConfiguracoesPage.tsx";
+import AdminPerfilPage from "./pages/dashboard/admin/PerfilPage.tsx";
 import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
 import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
 import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
@@ -68,6 +69,11 @@ const App = () => (
           <Route path="/admin/configuracoes" element={
             <ProtectedRoute allowedRole="admin">
               <ConfiguracoesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/perfil" element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminPerfilPage />
             </ProtectedRoute>
           } />
 
