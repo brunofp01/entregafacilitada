@@ -31,24 +31,37 @@ const EquipePage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get current user's profile and imobiliaria_id
-      const { data: me } = await supabase
+      // Get current user's full profile
+      const { data: me, error: meError } = await supabase
         .from("profiles")
-        .select("id, imobiliaria_id")
+        .select("id, imobiliaria_id, role")
         .eq("id", user.id)
         .single();
 
-      const myOrgId = me?.imobiliaria_id || me?.id;
+      if (meError) {
+        console.error("[EquipePage] Error fetching own profile:", meError);
+        return;
+      }
 
-      const { data: team } = await supabase
+      console.log("[EquipePage] My profile:", me);
+
+      // For the owner (imobiliaria role), their own id IS the org id
+      // For an integrante, imobiliaria_id points to the owner
+      const myOrgId = me?.role === 'imobiliaria' ? me?.id : (me?.imobiliaria_id || me?.id);
+
+      console.log("[EquipePage] Searching for org members with imobiliaria_id =", myOrgId);
+
+      const { data: team, error: teamError } = await supabase
         .from("profiles")
         .select("id, full_name, email, role, whatsapp")
         .eq("imobiliaria_id", myOrgId)
         .in("role", ["imobiliaria", "integrante_imobiliaria"]);
 
+      console.log("[EquipePage] Team result:", team, "Error:", teamError);
+
       if (team) setMembers(team);
     } catch (error) {
-      console.error("Erro ao buscar equipe:", error);
+      console.error("[EquipePage] Unexpected error:", error);
     } finally {
       setLoading(false);
     }
