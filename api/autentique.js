@@ -6,8 +6,8 @@ export default async function handler(req, res) {
     // Expecting a JSON payload with pdf_url, signer_email, signer_name, document_name
     const { pdf_url, signer_email, signer_name, document_name } = req.body;
 
-    // Secure token injection logic
-    const authToken = process.env.AUTENTIQUE_TOKEN || 'e241ab943f3a01baf25c9b65b5c0ba4276c407e79614e543bd42eaded513bfc7';
+    // Secure token injection logic (Loaded entirely from Vercel Environment variables)
+    const authToken = process.env.AUTENTIQUE_TOKEN;
 
     if (!pdf_url || !signer_email || !signer_name) {
         return res.status(400).json({ error: 'Missing required fields' });
