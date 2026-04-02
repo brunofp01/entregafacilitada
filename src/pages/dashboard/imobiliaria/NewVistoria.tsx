@@ -532,8 +532,9 @@ const NewVistoria = () => {
       <div className="max-w-4xl mx-auto pb-20">
         <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" className="shrink-0 rounded-full h-10 w-10 border-border/50 bg-card hover:bg-muted" onClick={() => navigate("/imobiliaria/vistorias")}>
-              <ArrowLeft className="w-5 h-5" />
+            <Button variant="destructive" className="shrink-0 font-bold gap-2 hover:bg-destructive/90" onClick={() => navigate("/imobiliaria/vistorias")}>
+              <ArrowLeft className="w-4 h-4" />
+              Sair
             </Button>
             <div>
               <h1 className="text-2xl md:text-3xl font-heading font-extrabold leading-tight">{vistoriaId ? (isViewOnly && !isViewMode ? 'Vistoria Finalizada' : (isViewMode ? 'Visualização' : 'Editar Vistoria')) : 'Nova Vistoria Professional'}</h1>
@@ -963,8 +964,8 @@ const NewVistoria = () => {
                                       ));
                                     }}
                                     className={`flex-1 py-4 px-1 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 active:scale-95 ${item.estado === statusOption
-                                        ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10')
-                                        : 'text-muted-foreground hover:bg-background/40'
+                                      ? (statusOption === 'Novo' || statusOption === 'Bom' ? 'bg-background text-primary shadow-md border border-border/10' : 'bg-destructive text-white shadow-lg shadow-destructive/20 ring-2 ring-destructive/10')
+                                      : 'text-muted-foreground hover:bg-background/40'
                                       }`}
                                   >
                                     {statusOption}
