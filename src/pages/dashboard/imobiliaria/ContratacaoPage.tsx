@@ -112,7 +112,7 @@ const ContratacaoPage = () => {
         }
 
         setLoading(true);
-        toast.loading("Processando e gerando contrato de prestação de serviços...");
+        const toastId = toast.loading("Processando e gerando contrato de prestação de serviços...");
 
         try {
             // Identifier do inquilino e ambiente
@@ -133,7 +133,7 @@ const ContratacaoPage = () => {
             }
 
             // 2. Geração do Contrato Padrão em memória
-            toast.info("Confeccionando contrato padrão Entrega Facilitada...");
+            toast.loading("Confeccionando contrato padrão Entrega Facilitada...", { id: toastId });
             const contratoBlob = await pdf(<ContratoPDF inquilino={inquilino} imovel={imovel} imobiliariaPerfil={imobiliariaPerfil} />).toBlob();
 
             const servicoContractId = crypto.randomUUID();
@@ -141,7 +141,7 @@ const ContratacaoPage = () => {
             const contratoServicoUrl = supabase.storage.from("vistorias").getPublicUrl(`contratos_servico/${servicoContractId}.pdf`).data.publicUrl;
 
             // 3. Disparo Autentique (via nossa Vercel Edge Function Segura)
-            toast.info("Enviando solicitação de assinatura ao Autentique...");
+            toast.loading("Enviando solicitação de assinatura eletrônica...", { id: toastId });
             const apiRes = await fetch("/api/autentique", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -158,7 +158,7 @@ const ContratacaoPage = () => {
 
             if (!apiRes.ok || !autentiqueDocId) {
                 console.error("Autentique falhou:", apiResult);
-                toast.error("Erro na API do Autentique. Você pode continuar ou refazer a requisição amanhã.", { duration: 6000 });
+                toast.error("Erro na API do Autentique. Você pode continuar ou refazer a requisição amanhã.", { duration: 6000, id: toastId });
                 // We'll proceed so the tenant is still saved even if Autentique fails in dev without token
             }
 
@@ -186,12 +186,12 @@ const ContratacaoPage = () => {
 
             if (dbError) throw dbError;
 
-            toast.success("Operação fantástica! O Contrato Padrão foi gerado e disparado para o Locatário com sucesso!");
+            toast.success("O Contrato foi gerado e disparado para o Locatário com sucesso!", { id: toastId });
             setTimeout(() => navigate('/imobiliaria/inquilinos'), 1500);
 
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || "Ocorreu um erro na contratação.");
+            toast.error(error.message || "Ocorreu um erro na contratação.", { id: toastId });
         } finally {
             setLoading(false);
         }
