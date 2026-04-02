@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   User,
-  Bell
+  Bell,
+  Calculator
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const menuItems = {
     admin: [
       { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
+      { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
       { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
       { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },

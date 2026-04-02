@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import AdminDashboard from "./pages/dashboard/AdminDashboard.tsx";
+import PricingParametersPage from "./pages/dashboard/admin/PricingParametersPage.tsx";
 import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
 import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
 import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
@@ -38,6 +39,11 @@ const App = () => (
           <Route path="/admin/*" element={
             <ProtectedRoute allowedRole="admin">
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/parametros" element={
+            <ProtectedRoute allowedRole="admin">
+              <PricingParametersPage />
             </ProtectedRoute>
           } />
 

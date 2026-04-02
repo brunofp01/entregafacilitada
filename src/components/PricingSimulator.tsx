@@ -1,29 +1,43 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calculator } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const PricingSimulator = () => {
   const [area, setArea] = useState(60);
   const [standard, setStandard] = useState<"basico" | "medio" | "alto">("medio");
+  const [params, setParams] = useState<Record<string, number>>({
+    months: 12,
+    multiplier_ms: 0.15,
+    coefficient_co: 0.08,
+    sqm_cost_basico: 35,
+    sqm_cost_medio: 55,
+    sqm_cost_alto: 90,
+  });
 
-  const months = 12;
-  const Ms = 0.15;
-  const Co = 0.08;
-
-  const costPerSqm: Record<string, number> = {
-    basico: 35,
-    medio: 55,
-    alto: 90,
-  };
+  useEffect(() => {
+    const loadParams = async () => {
+      const { data } = await supabase.from("pricing_parameters").select("key, value");
+      if (data) {
+        const p: Record<string, number> = {};
+        data.forEach(item => p[item.key] = item.value);
+        setParams(prev => ({ ...prev, ...p }));
+      }
+    };
+    loadParams();
+  }, []);
 
   const result = useMemo(() => {
-    const Pp = area * costPerSqm[standard];
-    const Pc = (Pp * (1 + Ms)) / (1 - Co);
-    const monthly = Pc / months;
+    const costKey = `sqm_cost_${standard}`;
+    const costPerSqm = params[costKey] || 55;
+
+    const Pp = area * costPerSqm;
+    const Pc = (Pp * (1 + params.multiplier_ms)) / (1 - params.coefficient_co);
+    const monthly = Pc / params.months;
     return { monthly };
-  }, [area, standard]);
+  }, [area, standard, params]);
 
   return (
     <section className="py-24 bg-background" id="simulador">
