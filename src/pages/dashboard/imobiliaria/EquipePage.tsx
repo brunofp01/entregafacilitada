@@ -110,7 +110,7 @@ const EquipePage = () => {
           data: {
             full_name: newMemberName,
             whatsapp: newMemberWhatsapp,
-            role: 'imobiliaria',
+            role: 'integrante_imobiliaria',
             imobiliaria_id: imobiliariaId
           }
         }
@@ -144,7 +144,7 @@ const EquipePage = () => {
         const { error: profileUpdateError } = await updateClient.from('profiles').update({
           full_name: newMemberName,
           whatsapp: newMemberWhatsapp,
-          role: 'imobiliaria',
+          role: 'integrante_imobiliaria',
           imobiliaria_id: imobiliariaId
         }).eq('id', signUpData.user.id);
 
@@ -154,7 +154,7 @@ const EquipePage = () => {
           await supabase.from('profiles').update({
             full_name: newMemberName,
             whatsapp: newMemberWhatsapp,
-            role: 'imobiliaria',
+            role: 'integrante_imobiliaria',
             imobiliaria_id: imobiliariaId
           }).eq('id', signUpData.user.id);
         }
