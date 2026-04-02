@@ -28,6 +28,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
+  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,11 +42,16 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, role")
         .eq("id", user.id)
         .single();
 
-      setUserName(profile?.full_name || user.email?.split("@")[0] || "Usuário");
+      if (profile) {
+        setUserName(profile.full_name || user.email?.split("@")[0] || "Usuário");
+        setUserRole(profile.role);
+      } else {
+        setUserName(user.email?.split("@")[0] || "Usuário");
+      }
     };
     getProfile();
   }, [navigate]);
@@ -83,7 +89,11 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
   };
 
-  const items = menuItems[role] || [];
+  // Precedence: 
+  // 1. Fetched role from Database (userRole) - most accurate
+  // 2. Initial role from Prop (role) - fallback while loading or if fetch fails
+  const activeRole = (userRole || role) as keyof typeof menuItems;
+  const items = menuItems[activeRole] || [];
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">
@@ -167,7 +177,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
             <div className="flex items-center gap-3 pl-4 border-l border-border text-sm">
               <div className="text-right hidden sm:block">
                 <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{role}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{activeRole}</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner">
                 {userName.charAt(0).toUpperCase()}
@@ -198,7 +208,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
         {/* Mobile Navigation Components */}
         <MobileBottomNav
-          role={role}
+          role={activeRole}
           onMenuOpen={() => setIsMobileMenuOpen(true)}
         />
 
@@ -206,7 +216,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           open={isMobileMenuOpen}
           onOpenChange={setIsMobileMenuOpen}
           userName={userName}
-          role={role}
+          role={activeRole}
         />
       </main>
     </div>
