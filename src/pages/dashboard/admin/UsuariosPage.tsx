@@ -177,37 +177,37 @@ const UsuariosPage = () => {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30 border-b border-border/50">
+                                    <thead className="text-[10px] md:text-xs text-muted-foreground uppercase bg-muted/30 border-b border-border/50">
                                         <tr>
-                                            <th className="px-6 py-4 font-bold">Identidade</th>
-                                            <th className="px-6 py-4 font-bold">Nível de Acesso</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold">Identidade</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold">Acesso</th>
                                             <th className="px-6 py-4 font-bold hidden md:table-cell italic">Última Atividade</th>
-                                            <th className="px-6 py-4 font-bold text-right">Controle</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-right">Controle</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/50">
                                         {filtered.map((user) => (
                                             <tr key={user.id} className="hover:bg-muted/10 transition-colors group">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner shrink-0 transition-transform group-hover:scale-110">
+                                                <td className="px-3 md:px-6 py-4">
+                                                    <div className="flex items-center gap-2 md:gap-3">
+                                                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner shrink-0 transition-transform group-hover:scale-110">
                                                             {user.full_name?.charAt(0).toUpperCase() || "U"}
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <div className="font-bold text-foreground truncate">{user.full_name || "Sem nome"}</div>
-                                                            <div className="text-muted-foreground text-xs truncate flex items-center gap-1">
-                                                                <Mail className="w-3 h-3" /> {user.email}
+                                                            <div className="font-bold text-foreground truncate text-xs md:text-sm">{user.full_name || "Sem nome"}</div>
+                                                            <div className="text-muted-foreground text-[10px] md:text-xs truncate flex items-center gap-1">
+                                                                <Mail className="w-2.5 h-2.5 md:w-3 md:h-3" /> {user.email}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-3 md:px-6 py-4">
                                                     {getRoleBadge(user.role)}
                                                 </td>
                                                 <td className="px-6 py-4 hidden md:table-cell text-muted-foreground text-xs italic">
                                                     {new Date(user.updated_at).toLocaleString()}
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="px-3 md:px-6 py-4 text-right">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
                                                             <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-secondary/10 hover:text-secondary rounded-full transition-colors">

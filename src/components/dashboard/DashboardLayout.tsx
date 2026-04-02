@@ -222,6 +222,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           onOpenChange={setIsMobileMenuOpen}
           userName={userName}
           role={activeRole}
+          items={items}
         />
       </main>
     </div>

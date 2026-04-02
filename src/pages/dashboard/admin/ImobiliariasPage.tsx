@@ -148,8 +148,8 @@ const ImobiliariasPage = () => {
                                         </div>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                                                    <MoreHorizontal className="w-4 h-4" />
+                                                <Button variant="ghost" size="icon" className="h-10 w-10 md:h-8 md:w-8 rounded-full bg-muted/20 md:bg-transparent">
+                                                    <MoreHorizontal className="w-5 h-5 md:w-4 md:h-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">

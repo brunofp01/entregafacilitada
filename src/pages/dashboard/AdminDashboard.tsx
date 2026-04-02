@@ -291,22 +291,22 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="relative overflow-x-auto rounded-lg border border-border/50">
                 <table className="w-full text-sm text-left text-foreground">
-                  <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
+                  <thead className="text-[10px] md:text-xs text-muted-foreground uppercase bg-muted/30">
                     <tr>
-                      <th className="px-4 py-3">Nome</th>
-                      <th className="px-4 py-3">E-mail</th>
-                      <th className="px-4 py-3 text-right">Ação</th>
+                      <th className="px-3 md:px-4 py-3">Nome</th>
+                      <th className="px-3 md:px-4 py-3">E-mail</th>
+                      <th className="px-3 md:px-4 py-3 text-right">Ação</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
                     {imobiliariasList.length > 0 ? (
                       imobiliariasList.map((imob) => (
                         <tr key={imob.id} className="hover:bg-muted/20 transition-colors">
-                          <td className="px-4 py-3 font-semibold">{imob.full_name || "Sem nome"}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{imob.email}</td>
-                          <td className="px-4 py-3 text-right">
-                            <Button variant="ghost" size="sm" className="text-secondary hover:text-secondary hover:bg-secondary/10">
-                              Ver Detalhes
+                          <td className="px-3 md:px-4 py-3 font-semibold text-xs md:text-sm">{imob.full_name || "Sem nome"}</td>
+                          <td className="px-3 md:px-4 py-3 text-muted-foreground text-[10px] md:text-xs truncate max-w-[120px] md:max-w-none">{imob.email}</td>
+                          <td className="px-3 md:px-4 py-3 text-right">
+                            <Button variant="ghost" size="sm" className="text-secondary hover:text-secondary hover:bg-secondary/10 h-8 px-2 text-[10px] md:text-xs">
+                              Ver
                             </Button>
                           </td>
                         </tr>

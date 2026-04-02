@@ -255,33 +255,33 @@ const InquilinosPage = () => {
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
+                                    <thead className="text-[10px] md:text-xs text-muted-foreground uppercase bg-muted/30">
                                         <tr>
-                                            <th className="px-6 py-4 font-bold">Locatário</th>
-                                            <th className="px-6 py-4 font-bold">Imóvel Associado</th>
-                                            <th className="px-6 py-4 font-bold">Status Assinatura</th>
-                                            <th className="px-6 py-4 font-bold">Mensalidades</th>
-                                            <th className="px-6 py-4 font-bold text-right">Ação</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70">Locatário</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70 hidden sm:table-cell">Imóvel</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70">Assinatura</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70 hidden md:table-cell">Mensalidades</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-right text-secondary-foreground/70">Ação</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/50">
                                         {inquilinos.map((inquilino) => (
-                                            <tr key={inquilino.id} className="hover:bg-muted/10 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="font-bold text-foreground">{inquilino.nome}</div>
-                                                    <div className="text-muted-foreground text-xs">{inquilino.telefone}</div>
+                                            <tr key={inquilino.id} className="hover:bg-muted/5 transition-colors">
+                                                <td className="px-3 md:px-6 py-4">
+                                                    <div className="font-bold text-foreground text-xs md:text-sm">{inquilino.nome}</div>
+                                                    <div className="text-muted-foreground text-[10px] md:text-xs">{inquilino.telefone}</div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium">{inquilino.endereco_rua}, {inquilino.endereco_numero}</div>
-                                                    <div className="text-muted-foreground text-xs">{inquilino.endereco_cidade} - {inquilino.endereco_estado}</div>
+                                                <td className="px-3 md:px-6 py-4 hidden sm:table-cell">
+                                                    <div className="font-medium text-xs md:text-sm">{inquilino.endereco_rua}, {inquilino.endereco_numero}</div>
+                                                    <div className="text-muted-foreground text-[10px] md:text-xs">{inquilino.endereco_cidade} - {inquilino.endereco_estado}</div>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-3 md:px-6 py-4 scale-[0.85] origin-left md:scale-100">
                                                     {getSignatureBadge(inquilino.status_assinatura)}
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-3 md:px-6 py-4 hidden md:table-cell">
                                                     {getBillingBadge(inquilino.status_assinatura)}
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="px-3 md:px-6 py-4 text-right">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
