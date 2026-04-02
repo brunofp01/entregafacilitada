@@ -39,6 +39,7 @@ const InquilinosPage = () => {
     const [loading, setLoading] = useState(true);
     const [selectedInquilino, setSelectedInquilino] = useState<InquilinoRow | null>(null);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         fetchInquilinos();
@@ -49,7 +50,13 @@ const InquilinosPage = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data: profile } = await supabase.from('profiles').select('imobiliaria_id').eq('id', user.id).single();
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('imobiliaria_id, role')
+                .eq('id', user.id)
+                .single();
+
+            setUserRole(profile?.role || null);
             const imobiliariaId = profile?.imobiliaria_id || user.id;
 
             const { data, error } = await supabase
@@ -429,29 +436,31 @@ const InquilinosPage = () => {
 
                                     <Separator />
 
-                                    <div className="pt-4">
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 hover:text-destructive gap-2 text-xs font-bold uppercase tracking-widest h-11">
-                                                    <Trash2 className="w-4 h-4" /> Remover do Sistema
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Isso excluirá permanentemente o registro deste inquilino e desvinculará todos os documentos anexados. Esta ação não pode ser desfeita.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeletar(selectedInquilino.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                                        Sim, Remover Inquilino
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
+                                    {userRole === 'admin' && (
+                                        <div className="pt-4">
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 hover:text-destructive gap-2 text-xs font-bold uppercase tracking-widest h-11">
+                                                        <Trash2 className="w-4 h-4" /> Remover do Sistema
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Isso excluirá permanentemente o registro deste inquilino e desvinculará todos os documentos anexados. Esta ação não pode ser desfeita.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeletar(selectedInquilino.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                                            Sim, Remover Inquilino
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
