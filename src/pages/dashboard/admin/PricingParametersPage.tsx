@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import {
     Save, Info, Calculator, Settings2,
-    Zap, Star, Crown, Globe,
+    Zap, Star, Globe,
     Percent, DollarSign, TrendingUp, Shield,
-    Plus, Trash2, PlayCircle, Ruler,
+    Plus, Trash2, PlayCircle, Ruler, CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,26 +37,16 @@ const ppBasico: FormulaParam[] = [
     { id: "pb2", label: "Custo de Mão de Obra por m²", value: "18", unit: "currency", active: true },
     { id: "pb3", label: "Custo Fixo de Limpeza", value: "150", unit: "currency", active: true },
     { id: "pb4", label: "Custo de Vistoria de Regulação", value: "80", unit: "currency", active: true },
-    { id: "pb5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number", active: true },
-    { id: "pb6", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
+    { id: "pb5", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
 ];
 
-const ppMedio: FormulaParam[] = [
+const ppCompleto: FormulaParam[] = [
     { id: "pm1", label: "Custo de Material por m²", value: "20", unit: "currency", active: true },
     { id: "pm2", label: "Custo de Mão de Obra por m²", value: "28", unit: "currency", active: true },
     { id: "pm3", label: "Custo Fixo de Limpeza", value: "220", unit: "currency", active: true },
     { id: "pm4", label: "Custo de Vistoria de Regulação", value: "100", unit: "currency", active: true },
-    { id: "pm5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number", active: true },
+    { id: "pm5", label: "Módulo de Vistoria", value: "30", unit: "currency", active: true },
     { id: "pm6", label: "Projeção INCC Acumulado", value: "10", unit: "percent", active: true },
-];
-
-const ppAlto: FormulaParam[] = [
-    { id: "pa1", label: "Custo de Material por m²", value: "35", unit: "currency", active: true },
-    { id: "pa2", label: "Custo de Mão de Obra por m²", value: "45", unit: "currency", active: true },
-    { id: "pa3", label: "Custo Fixo de Limpeza", value: "350", unit: "currency", active: true },
-    { id: "pa4", label: "Custo de Vistoria de Regulação", value: "150", unit: "currency", active: true },
-    { id: "pa5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number", active: true },
-    { id: "pa6", label: "Projeção INCC Acumulado", value: "12", unit: "percent", active: true },
 ];
 
 const initialMs: FormulaParam[] = [
@@ -78,9 +68,16 @@ interface PlanConfig {
 }
 
 const initialPlans: PlanConfig[] = [
-    { id: "basico", label: "Plano Básico", color: "text-blue-500", bgColor: "bg-blue-500/10", borderColor: "border-blue-500/20", icon: Zap, badge: "Entrada", params: ppBasico },
-    { id: "medio", label: "Plano Médio", color: "text-secondary", bgColor: "bg-secondary/10", borderColor: "border-secondary/20", icon: Star, badge: "Recomendado", params: ppMedio },
-    { id: "alto", label: "Plano Alto Padrão", color: "text-amber-500", bgColor: "bg-amber-500/10", borderColor: "border-amber-500/20", icon: Crown, badge: "Premium", params: ppAlto },
+    {
+        id: "basico", label: "Plano Básico", color: "text-blue-500",
+        bgColor: "bg-blue-500/10", borderColor: "border-blue-500/20",
+        icon: Zap, badge: "Entrada", params: ppBasico
+    },
+    {
+        id: "completo", label: "Plano Completo", color: "text-secondary",
+        bgColor: "bg-secondary/10", borderColor: "border-secondary/20",
+        icon: Star, badge: "Recomendado", params: ppCompleto
+    },
 ];
 
 // ─── Cálculo ──────────────────────────────────────────────────────────────────
@@ -112,10 +109,8 @@ const ToggleSwitch = ({ active, onToggle }: { active: boolean; onToggle: () => v
         className={`relative shrink-0 w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none ${active ? "bg-secondary" : "bg-muted-foreground/30"
             }`}
     >
-        <span
-            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${active ? "translate-x-4" : "translate-x-0"
-                }`}
-        />
+        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${active ? "translate-x-4" : "translate-x-0"
+            }`} />
     </button>
 );
 
@@ -130,10 +125,7 @@ const ParamRow = ({
 }) => (
     <div className={`group flex items-center gap-2 py-2.5 border-b border-border/30 last:border-0 transition-opacity ${param.active ? "opacity-100" : "opacity-40"
         }`}>
-        {/* Toggle */}
         <ToggleSwitch active={param.active} onToggle={() => onToggle(param.id)} />
-
-        {/* Label */}
         <div className="flex-1 min-w-0">
             <input
                 type="text"
@@ -144,8 +136,6 @@ const ParamRow = ({
                 placeholder="Nome da despesa"
             />
         </div>
-
-        {/* Value + unit */}
         <div className="flex items-center gap-1.5 shrink-0">
             <select
                 value={param.unit}
@@ -182,13 +172,14 @@ const PricingParametersPage = () => {
     const [msParams, setMsParams] = useState<FormulaParam[]>(initialMs);
     const [coParams, setCoParams] = useState<FormulaParam[]>(initialCo);
     const [plans, setPlans] = useState<PlanConfig[]>(initialPlans);
+    const [installments, setInstallments] = useState(12); // Número de parcelas compartilhado
     const [isDirty, setIsDirty] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
 
     const touch = () => setIsDirty(true);
 
-    // ── Shared helpers ───────────────────────────────────────────────────────
+    // ── Shared ──────────────────────────────────────────────────────────────
     const updateShared = (setter: any, id: string, field: any, v: string) => {
         setter((ps: FormulaParam[]) => ps.map((p: FormulaParam) => p.id === id ? { ...p, [field]: v } : p));
         touch();
@@ -206,7 +197,7 @@ const PricingParametersPage = () => {
         touch();
     };
 
-    // ── Plan helpers ─────────────────────────────────────────────────────────
+    // ── Plan ────────────────────────────────────────────────────────────────
     const updatePlan = (planId: string, id: string, field: any, v: string) => {
         setPlans(ps => ps.map(pl => pl.id === planId
             ? { ...pl, params: pl.params.map(p => p.id === id ? { ...p, [field]: v } : p) }
@@ -232,12 +223,14 @@ const PricingParametersPage = () => {
         touch();
     };
 
-    // ── Derived totals ───────────────────────────────────────────────────────
+    // ── Totals ───────────────────────────────────────────────────────────────
     const totalMs = sumActive(msParams);
     const totalCo = sumActive(coParams);
     const planPcs = plans.map(pl => {
         const pp = calcPp(pl.params, simArea);
-        return { ...pl, pp, pc: calcPc(pp, totalMs, totalCo) };
+        const pc = calcPc(pp, totalMs, totalCo);
+        const monthly = installments > 0 ? pc / installments : 0;
+        return { ...pl, pp, pc, monthly };
     });
     const simData = planPcs.find(p => p.id === simPlan);
 
@@ -274,7 +267,7 @@ const PricingParametersPage = () => {
                     <CardContent className="pt-6">
 
                         {/* Slider m² */}
-                        <div className="mb-6 p-4 bg-background/50 rounded-xl border border-border/40">
+                        <div className="mb-4 p-4 bg-background/50 rounded-xl border border-border/40">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <Ruler className="w-4 h-4 text-secondary" />
@@ -355,16 +348,13 @@ const PricingParametersPage = () => {
                                 })}
                             </div>
                             <div className="flex flex-col sm:flex-row gap-3">
-                                {planPcs.map(plan => {
-                                    const monthly = plan.pc / 12;
-                                    return (
-                                        <div key={plan.id} className={`flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl border gap-1 ${plan.bgColor} ${plan.borderColor}`}>
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">12x de</span>
-                                            <span className={`font-mono font-extrabold text-lg ${plan.color}`}>R$ {monthly.toFixed(2)}</span>
-                                            <span className="text-[10px] text-muted-foreground">/mês</span>
-                                        </div>
-                                    );
-                                })}
+                                {planPcs.map(plan => (
+                                    <div key={plan.id} className={`flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl border gap-1 ${plan.bgColor} ${plan.borderColor}`}>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{installments}x de</span>
+                                        <span className={`font-mono font-extrabold text-lg ${plan.color}`}>R$ {plan.monthly.toFixed(2)}</span>
+                                        <span className="text-[10px] text-muted-foreground">/mês</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </CardContent>
@@ -376,8 +366,52 @@ const PricingParametersPage = () => {
                         <Globe className="w-5 h-5 text-muted-foreground" />
                         <h2 className="text-lg font-bold text-foreground">Parâmetros Comuns a Todos os Planos</h2>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-6">
 
+                    {/* Número de Parcelas */}
+                    <div className="mb-6">
+                        <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-md">
+                            <CardHeader className="pb-3 border-b border-border/30">
+                                <div className="flex items-center gap-2">
+                                    <CalendarDays className="w-5 h-5 text-violet-500" />
+                                    <CardTitle className="text-base">Número de Parcelas</CardTitle>
+                                </div>
+                                <CardDescription className="text-xs">
+                                    Divide o Pc final por este número para calcular a mensalidade. Aplica-se a todos os planos.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center gap-6">
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <label className="text-sm font-semibold text-foreground">Parcelas</label>
+                                            <span className="font-mono font-bold text-violet-500 text-lg">{installments}x</span>
+                                        </div>
+                                        <Slider
+                                            value={[installments]}
+                                            onValueChange={v => { setInstallments(v[0]); touch(); }}
+                                            min={1} max={60} step={1}
+                                            className="[&_[role=slider]]:bg-violet-500 [&_[role=slider]]:border-violet-500 [&_.relative>div]:bg-violet-500"
+                                        />
+                                        <div className="flex justify-between mt-1">
+                                            <span className="text-xs text-muted-foreground">1x</span>
+                                            <span className="text-xs text-muted-foreground">60x</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <Input
+                                            type="number" min={1} max={60}
+                                            value={installments}
+                                            onChange={e => { const v = Math.max(1, Math.min(60, parseInt(e.target.value) || 1)); setInstallments(v); touch(); }}
+                                            className="w-20 font-mono text-center text-sm bg-background/60 border-border/50"
+                                        />
+                                        <span className="text-sm text-muted-foreground font-medium">meses</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
                         {/* Ms */}
                         <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-md">
                             <CardHeader className="pb-2 border-b border-border/30">
@@ -442,11 +476,12 @@ const PricingParametersPage = () => {
                         <Settings2 className="w-5 h-5 text-muted-foreground" />
                         <h2 className="text-lg font-bold text-foreground">Prêmio Puro por Plano — Pp</h2>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6">
                         {plans.map(plan => {
                             const PlanIcon = plan.icon;
                             const pp = calcPp(plan.params, simArea);
                             const pc = calcPc(pp, totalMs, totalCo);
+                            const monthly = installments > 0 ? pc / installments : 0;
                             return (
                                 <Card key={plan.id} className={`border ${plan.borderColor} bg-card/60 backdrop-blur-sm shadow-md`}>
                                     <CardHeader className={`pb-3 border-b border-border/30 ${plan.bgColor}`}>
@@ -457,9 +492,15 @@ const PricingParametersPage = () => {
                                             </div>
                                             <Badge className={`text-[10px] font-bold ${plan.bgColor} ${plan.color} ${plan.borderColor}`}>{plan.badge}</Badge>
                                         </div>
-                                        <div className="flex items-center justify-between pt-1">
-                                            <span className="text-[11px] text-muted-foreground">Pc estimado:</span>
-                                            <span className={`font-mono font-extrabold text-xl ${plan.color}`}>R$ {pc.toFixed(2)}</span>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <span className="text-[11px] text-muted-foreground">Pc estimado</span>
+                                                <div className={`font-mono font-extrabold text-xl ${plan.color}`}>R$ {pc.toFixed(2)}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-[11px] text-muted-foreground">{installments}x de</span>
+                                                <div className={`font-mono font-extrabold text-xl ${plan.color}`}>R$ {monthly.toFixed(2)}</div>
+                                            </div>
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-2">
@@ -484,7 +525,7 @@ const PricingParametersPage = () => {
 
                 <Separator />
 
-                {/* ══ FÓRMULA (RODAPÉ) ══ */}
+                {/* ══ FÓRMULA ══ */}
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/30 pb-4">
                         <div className="flex items-center gap-2">
@@ -503,6 +544,9 @@ const PricingParametersPage = () => {
                                     <strong className="text-foreground">Pp</strong> = Prêmio puro (custo base por plano) &nbsp;|&nbsp;
                                     <strong className="text-foreground">Ms</strong> = Margens de segurança &nbsp;|&nbsp;
                                     <strong className="text-foreground">Co</strong> = Custos operacionais
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                    <strong className="text-violet-500">Mensalidade</strong> = Pc ÷ Número de Parcelas
                                 </p>
                             </div>
                             <div className="grid grid-cols-3 gap-4 w-full md:w-auto md:min-w-[240px] shrink-0">
@@ -525,9 +569,8 @@ const PricingParametersPage = () => {
 
                 <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl border border-border/40 text-sm text-muted-foreground">
                     <Info className="w-4 h-4 mt-0.5 shrink-0 text-secondary" />
-                    <p>Estimativas calculadas em tempo real. Itens desativados (toggle desligado) são excluídos do cálculo. A persistência dos dados no Supabase será ativada na próxima fase.</p>
+                    <p>Estimativas calculadas em tempo real. Itens desativados (toggle desligado) são excluídos do cálculo. A persistência no Supabase será ativada na próxima fase.</p>
                 </div>
-
             </div>
         </DashboardLayout>
     );
