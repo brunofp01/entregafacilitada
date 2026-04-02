@@ -9,6 +9,8 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard.tsx";
 import PricingParametersPage from "./pages/dashboard/admin/PricingParametersPage.tsx";
 import ImobiliariasPage from "./pages/dashboard/admin/ImobiliariasPage.tsx";
 import UsuariosPage from "./pages/dashboard/admin/UsuariosPage.tsx";
+import RelatoriosPage from "./pages/dashboard/admin/RelatoriosPage.tsx";
+import ConfiguracoesPage from "./pages/dashboard/admin/ConfiguracoesPage.tsx";
 import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
 import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
 import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
@@ -56,6 +58,16 @@ const App = () => (
           <Route path="/admin/usuarios" element={
             <ProtectedRoute allowedRole="admin">
               <UsuariosPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/relatorios" element={
+            <ProtectedRoute allowedRole="admin">
+              <RelatoriosPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/configuracoes" element={
+            <ProtectedRoute allowedRole="admin">
+              <ConfiguracoesPage />
             </ProtectedRoute>
           } />
 
