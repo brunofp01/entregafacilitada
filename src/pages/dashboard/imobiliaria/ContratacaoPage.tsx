@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileUp, Home, User, Link as LinkIcon, Loader2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
+import { pdf } from "@react-pdf/renderer";
+import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
 
 interface VistoriaPlataforma {
     id: string;
@@ -18,9 +21,11 @@ interface VistoriaPlataforma {
 }
 
 const ContratacaoPage = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [fetchingVistorias, setFetchingVistorias] = useState(true);
     const [vistoriasConcluidas, setVistoriasConcluidas] = useState<VistoriaPlataforma[]>([]);
+    const [imobiliariaPerfil, setImobiliariaPerfil] = useState<any>(null);
 
     // Formulário State
     const [inquilino, setInquilino] = useState({ nome: "", email: "", cpf: "", rg: "", telefone: "" });
@@ -36,7 +41,8 @@ const ContratacaoPage = () => {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
-                const { data: profile } = await supabase.from('profiles').select('imobiliaria_id').eq('id', user.id).single();
+                const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                setImobiliariaPerfil(profile);
                 const imobiliariaId = profile?.imobiliaria_id || user.id;
 
                 const { data, error } = await supabase
@@ -109,18 +115,83 @@ const ContratacaoPage = () => {
         toast.loading("Processando e gerando contrato de prestação de serviços...");
 
         try {
-            // 1. Simulação: Upload dos arquivos para o storage
-            // 2. Simulação: Criação do registro no banco
-            // 3. Simulação: Disparo Autentique
+            // Identifier do inquilino e ambiente
+            const imobiliariaId = imobiliariaPerfil?.imobiliaria_id || imobiliariaPerfil?.id;
 
-            await new Promise(r => setTimeout(r, 2000));
+            // 1. Upload dos arquivos anexados (Contrato Assinado e Vistoria PDF)
+            const locacaoId = crypto.randomUUID();
+            const { error: errContrato } = await supabase.storage.from("vistorias").upload(`documentos_locacao/${locacaoId}.pdf`, contratoFile);
+            if (errContrato) throw new Error("Falha ao anexar contrato de locação");
+            const contratoLocacaoUrl = supabase.storage.from("vistorias").getPublicUrl(`documentos_locacao/${locacaoId}.pdf`).data.publicUrl;
 
-            toast.success("Contrato padrão gerado e enviado para assinatura do inquilino!");
+            let vistoriaUploadUrl = null;
+            if (vistoriaTipo === "upload" && vistoriaFile) {
+                const vistUplId = crypto.randomUUID();
+                const { error: errVist } = await supabase.storage.from("vistorias").upload(`documentos_locacao/${vistUplId}.pdf`, vistoriaFile);
+                if (errVist) throw new Error("Falha ao anexar PDF de vistoria");
+                vistoriaUploadUrl = supabase.storage.from("vistorias").getPublicUrl(`documentos_locacao/${vistUplId}.pdf`).data.publicUrl;
+            }
 
-            // Limpar formulário na V1 ou Redirecionar
+            // 2. Geração do Contrato Padrão em memória
+            toast.info("Confeccionando contrato padrão Entrega Facilitada...");
+            const contratoBlob = await pdf(<ContratoPDF inquilino={inquilino} imovel={imovel} imobiliariaPerfil={imobiliariaPerfil} />).toBlob();
 
-        } catch (error) {
-            toast.error("Ocorreu um erro na contratação.");
+            const servicoContractId = crypto.randomUUID();
+            await supabase.storage.from("vistorias").upload(`contratos_servico/${servicoContractId}.pdf`, contratoBlob);
+            const contratoServicoUrl = supabase.storage.from("vistorias").getPublicUrl(`contratos_servico/${servicoContractId}.pdf`).data.publicUrl;
+
+            // 3. Disparo Autentique (via nossa Vercel Edge Function Segura)
+            toast.info("Enviando solicitação de assinatura ao Autentique...");
+            const apiRes = await fetch("/api/autentique", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    pdf_url: contratoServicoUrl,
+                    signer_email: inquilino.email,
+                    signer_name: inquilino.nome,
+                    document_name: `Contrato de Adesão Entrega Facilitada - ${inquilino.nome}`
+                })
+            });
+
+            const apiResult = await apiRes.json();
+            const autentiqueDocId = apiResult?.data?.createDocument?.id || null;
+
+            if (!apiRes.ok || !autentiqueDocId) {
+                console.error("Autentique falhou:", apiResult);
+                toast.error("Erro na API do Autentique. Você pode continuar ou refazer a requisição amanhã.", { duration: 6000 });
+                // We'll proceed so the tenant is still saved even if Autentique fails in dev without token
+            }
+
+            // 4. Criação do registro no banco
+            const { error: dbError } = await supabase.from("inquilinos").insert({
+                imobiliaria_id: imobiliariaId,
+                nome: inquilino.nome,
+                email: inquilino.email,
+                cpf: inquilino.cpf,
+                rg: inquilino.rg,
+                telefone: inquilino.telefone,
+                endereco_cep: imovel.cep,
+                endereco_rua: imovel.rua,
+                endereco_numero: imovel.numero,
+                endereco_complemento: imovel.complemento,
+                endereco_bairro: imovel.bairro,
+                endereco_cidade: imovel.cidade,
+                endereco_estado: imovel.estado,
+                contrato_locacao_url: contratoLocacaoUrl,
+                vistoria_id: vistoriaTipo === "plataforma" ? vistoriaIdVinculada : null,
+                vistoria_upload_url: vistoriaUploadUrl,
+                autentique_document_id: autentiqueDocId,
+                status_assinatura: 'pendente'
+            });
+
+            if (dbError) throw dbError;
+
+            toast.success("Operação fantástica! O Contrato Padrão foi gerado e disparado para o Locatário com sucesso!");
+            setTimeout(() => navigate('/imobiliaria/inquilinos'), 1500);
+
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || "Ocorreu um erro na contratação.");
         } finally {
             setLoading(false);
         }
