@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Image, Link, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image, Link, Font, Svg, Path, Circle } from '@react-pdf/renderer';
 
 // Configuração de Estilos Profissionais
 const styles = StyleSheet.create({
@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   iconEmoji: {
+    // keeping for any other usage, though SVG is used now
     fontSize: 20,
   },
   stepContent: {
@@ -437,7 +438,12 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={styles.iconBlock}><Text style={styles.iconEmoji}>📋</Text></View>
+            <View style={styles.iconBlock}>
+              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" />
+              </Svg>
+            </View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>Vistoria e diagnóstico</Text>
               <Text style={styles.stepDescription}>Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.</Text>
@@ -445,7 +451,12 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={styles.iconBlock}><Text style={styles.iconEmoji}>🖌️</Text></View>
+            <View style={styles.iconBlock}>
+              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
+                <Path d="M9 8c-2 3-4 3.5-7 4l8 8c.5-3 1-5 4-7" />
+              </Svg>
+            </View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>Execução dos reparos</Text>
               <Text style={styles.stepDescription}>Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.</Text>
@@ -453,7 +464,13 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </View>
 
           <View style={[styles.timelineItem, { marginBottom: 0 }]}>
-            <View style={styles.iconBlock}><Text style={styles.iconEmoji}>🔑</Text></View>
+            <View style={styles.iconBlock}>
+              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
+                <Path d="m21 2-9.6 9.6" />
+                <Circle cx="7.5" cy="15.5" r="5.5" />
+              </Svg>
+            </View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>Chaves entregues, Nada Consta emitido</Text>
               <Text style={styles.stepDescription}>Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.</Text>
