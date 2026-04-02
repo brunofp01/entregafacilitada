@@ -8,10 +8,13 @@ import { Users, UserPlus, Mail, ShieldCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
+import { createClient } from '@supabase/supabase-js';
+
 interface TeamMember {
   id: string;
   full_name: string | null;
   email: string | null;
+  whatsapp?: string | null;
   role: string;
 }
 
@@ -20,6 +23,8 @@ const EquipePage = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberWhatsapp, setNewMemberWhatsapp] = useState("");
+  const [isInviting, setIsInviting] = useState(false);
 
   const fetchTeam = async () => {
     try {
@@ -37,9 +42,9 @@ const EquipePage = () => {
 
       const { data: team } = await supabase
         .from("profiles")
-        .select("id, full_name, email, role")
+        .select("id, full_name, email, role, whatsapp")
         .eq("imobiliaria_id", myOrgId)
-        .eq("role", "imobiliaria"); // Only staff
+        .eq("role", "imobiliaria");
 
       if (team) setMembers(team);
     } catch (error) {
@@ -55,8 +60,71 @@ const EquipePage = () => {
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.info("Em breve: Integração com convites por e-mail.");
-    // In a real app, we'd call a Supabase function or invite API
+    if (!newMemberName || !newMemberEmail || !newMemberWhatsapp) {
+      toast.error("Preencha todos os campos do formulário.");
+      return;
+    }
+
+    setIsInviting(true);
+    toast.loading("Criando acesso ao colaborador...");
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { data: profile } = await supabase.from('profiles').select('imobiliaria_id').eq('id', user.id).single();
+      const imobiliariaId = profile?.imobiliaria_id || user.id;
+
+      // Secondary client to avoid hijacking current session
+      const supabaseAdmin = createClient(
+        import.meta.env.VITE_SUPABASE_URL || '',
+        import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      );
+
+      const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.signUp({
+        email: newMemberEmail,
+        password: '123456',
+        options: {
+          data: {
+            full_name: newMemberName,
+            whatsapp: newMemberWhatsapp,
+            role: 'imobiliaria',
+            imobiliaria_id: imobiliariaId
+          }
+        }
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes('already registered')) throw new Error('E-mail já está em uso.');
+        throw signUpError;
+      }
+
+      // Explicitly insert to profile to guarantee persistence in case trigger misses it
+      if (signUpData.user) {
+        await supabaseAdmin.from('profiles').update({
+          full_name: newMemberName,
+          whatsapp: newMemberWhatsapp,
+          role: 'imobiliaria',
+          imobiliaria_id: imobiliariaId
+        }).eq('id', signUpData.user.id);
+      }
+
+      toast.dismiss();
+      toast.success("Funcionário adicionado com sucesso! Senha padrão: 123456");
+
+      setNewMemberEmail("");
+      setNewMemberName("");
+      setNewMemberWhatsapp("");
+      fetchTeam();
+
+    } catch (error: any) {
+      console.error(error);
+      toast.dismiss();
+      toast.error(error.message || "Erro ao adicionar funcionário. Tente novamente.");
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   if (loading) {
@@ -94,9 +162,9 @@ const EquipePage = () => {
               <form onSubmit={handleAddMember} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome Completo</Label>
-                  <Input 
-                    id="name" 
-                    placeholder="Nome do integrante" 
+                  <Input
+                    id="name"
+                    placeholder="Nome do integrante"
                     value={newMemberName}
                     onChange={(e) => setNewMemberName(e.target.value)}
                     className="bg-background/50 border-border/50"
@@ -104,18 +172,28 @@ const EquipePage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">E-mail Corporativo</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="email@imobiliaria.com" 
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@imobiliaria.com"
                     value={newMemberEmail}
                     onChange={(e) => setNewMemberEmail(e.target.value)}
                     className="bg-background/50 border-border/50"
                   />
                 </div>
-                <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  Enviar Convite
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp">WhatsApp</Label>
+                  <Input
+                    id="whatsapp"
+                    placeholder="(00) 00000-0000"
+                    value={newMemberWhatsapp}
+                    onChange={(e) => setNewMemberWhatsapp(e.target.value)}
+                    className="bg-background/50 border-border/50"
+                  />
+                </div>
+                <Button disabled={isInviting} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold gap-2">
+                  {isInviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                  Cadastrar Colaborador
                 </Button>
               </form>
             </CardContent>
@@ -141,9 +219,17 @@ const EquipePage = () => {
                         </div>
                         <div>
                           <p className="font-bold">{member.full_name || member.email}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                            <Mail className="w-3 h-3" />
-                            {member.email}
+                          <div className="flex items-center gap-4 mt-0.5">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Mail className="w-3 h-3" />
+                              {member.email}
+                            </div>
+                            {member.whatsapp && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <span className="font-bold">📱</span>
+                                {member.whatsapp}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

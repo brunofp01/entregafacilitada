@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Building2, 
-  FileText, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  FileText,
+  Settings,
+  LogOut,
+  Menu,
   X,
   User,
   Bell
@@ -38,13 +38,13 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         navigate("/auth");
         return;
       }
-      
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .single();
-      
+
       setUserName(profile?.full_name || user.email?.split("@")[0] || "Usuário");
     };
     getProfile();
@@ -66,6 +66,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: Users, label: "Inquilinos", href: "/imobiliaria/inquilinos" },
+      { icon: Users, label: "Minha Equipe", href: "/imobiliaria/equipe" },
       { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
       { icon: Settings, label: "Configurações", href: "/imobiliaria/configuracoes" },
     ],
@@ -80,9 +81,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">
-      
+
       {/* Sidebar - Desktop Only */}
-      <aside 
+      <aside
         className={cn(
           "bg-card border-r border-border transition-all duration-300 z-30 hidden md:flex flex-col",
           isSidebarOpen ? "w-64" : "w-20"
@@ -105,13 +106,13 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           {items.map((item) => {
             const isActive = location.pathname === item.href;
             return (
-              <Link 
-                key={item.href} 
+              <Link
+                key={item.href}
                 to={item.href}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
-                  isActive 
-                    ? "bg-secondary text-secondary-foreground" 
+                  isActive
+                    ? "bg-secondary text-secondary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
@@ -123,8 +124,8 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         </nav>
 
         <div className="p-3 border-t border-border">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             onClick={handleLogout}
           >
@@ -139,7 +140,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         {/* Header */}
         <header className="h-16 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden md:block"
             >
@@ -156,7 +157,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background" />
             </Button>
-            
+
             <div className="flex items-center gap-3 pl-4 border-l border-border text-sm">
               <div className="text-right hidden sm:block">
                 <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
@@ -167,9 +168,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               </div>
             </div>
 
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-2 hidden sm:flex"
               onClick={handleLogout}
               title="Sair da plataforma"
@@ -190,13 +191,13 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         </div>
 
         {/* Mobile Navigation Components */}
-        <MobileBottomNav 
-          role={role} 
-          onMenuOpen={() => setIsMobileMenuOpen(true)} 
+        <MobileBottomNav
+          role={role}
+          onMenuOpen={() => setIsMobileMenuOpen(true)}
         />
-        
-        <MobileMenuDrawer 
-          open={isMobileMenuOpen} 
+
+        <MobileMenuDrawer
+          open={isMobileMenuOpen}
           onOpenChange={setIsMobileMenuOpen}
           userName={userName}
           role={role}
