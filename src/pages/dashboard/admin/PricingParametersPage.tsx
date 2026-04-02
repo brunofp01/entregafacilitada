@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
 import {
     Save, Info, Calculator, Settings2,
     Zap, Star, Crown, Globe,
     Percent, DollarSign, TrendingUp, Shield,
-    Plus, Trash2, PlayCircle,
+    Plus, Trash2, PlayCircle, Ruler,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,11 +84,14 @@ const initialPlans: PlanConfig[] = [
 ];
 
 // ─── Cálculo ─────────────────────────────────────────────────────────────────
-const calcPp = (params: FormulaParam[]) => {
+// Items cujo label contém "m²" são multiplicados pela metragem; demais são fixos
+const isPerSqm = (label: string) => label.toLowerCase().includes("m²");
+
+const calcPp = (params: FormulaParam[], area: number) => {
     let base = 0; let pct = 0;
     params.forEach(p => {
         const v = parseFloat(p.value) || 0;
-        if (p.unit === "currency") base += v;
+        if (p.unit === "currency") base += isPerSqm(p.label) ? v * area : v;
         else if (p.unit === "percent") pct += v;
     });
     return base * (1 + pct / 100);
@@ -152,6 +156,8 @@ const PricingParametersPage = () => {
     const [plans, setPlans] = useState<PlanConfig[]>(initialPlans);
     const [isDirty, setIsDirty] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
+    const [simArea, setSimArea] = useState(60);
+
 
     const touch = () => setIsDirty(true);
 
@@ -186,7 +192,10 @@ const PricingParametersPage = () => {
     // Totals
     const totalMs = msParams.reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
     const totalCo = coParams.reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
-    const planPcs = plans.map(pl => ({ ...pl, pp: calcPp(pl.params), pc: calcPc(calcPp(pl.params), totalMs, totalCo) }));
+    const planPcs = plans.map(pl => {
+        const pp = calcPp(pl.params, simArea);
+        return { ...pl, pp, pc: calcPc(pp, totalMs, totalCo) };
+    });
     const simData = planPcs.find(p => p.id === simPlan);
 
     return (
@@ -218,7 +227,29 @@ const PricingParametersPage = () => {
                         <CardDescription>Selecione um plano para ver o Pc calculado com os parâmetros atuais.</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <div className="flex flex-wrap gap-3 mb-8">
+                        {/* Slider m² */}
+                        <div className="mb-6 p-4 bg-background/50 rounded-xl border border-border/40">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <Ruler className="w-4 h-4 text-secondary" />
+                                    <label className="text-sm font-semibold text-foreground">Área do imóvel</label>
+                                </div>
+                                <span className="font-mono font-bold text-secondary text-lg">{simArea} m²</span>
+                            </div>
+                            <Slider
+                                value={[simArea]}
+                                onValueChange={v => setSimArea(v[0])}
+                                min={20} max={300} step={5}
+                                className="[&_[role=slider]]:bg-secondary [&_[role=slider]]:border-secondary [&_.relative>div]:bg-secondary"
+                            />
+                            <div className="flex justify-between mt-1">
+                                <span className="text-xs text-muted-foreground">20 m²</span>
+                                <span className="text-xs text-muted-foreground">300 m²</span>
+                            </div>
+                        </div>
+
+                        {/* Seletor de plano */}
+                        <div className="flex flex-wrap gap-3 mb-6">
                             {plans.map(plan => {
                                 const PIcon = plan.icon;
                                 return (
