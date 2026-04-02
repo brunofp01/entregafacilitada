@@ -61,7 +61,10 @@ const AdminPerfilPage = () => {
             // 2. Atualizar Email se mudou
             const currentUser = await supabase.auth.getUser();
             if (email !== currentUser.data.user?.email) {
-                const { error: emailError } = await supabase.auth.updateUser({ email });
+                const { error: emailError } = await supabase.auth.updateUser(
+                    { email },
+                    { emailRedirectTo: window.location.origin + '/admin/perfil' }
+                );
                 if (emailError) throw emailError;
                 toast.success("E-mail atualizado! Verifique sua nova caixa de entrada para confirmar.");
             }
