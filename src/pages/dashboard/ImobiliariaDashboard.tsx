@@ -9,14 +9,34 @@ import { supabase } from "@/lib/supabaseClient";
 const ImobiliariaDashboard = () => {
   const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || "imobiliaria");
 
+  const [stats, setStats] = useState({ total: 0, pending: 0, signed: 0 });
+  const [loadingStats, setLoadingStats] = useState(true);
+
   useEffect(() => {
-    const fetchRole = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+      const { data: profile } = await supabase.from('profiles').select('role, imobiliaria_id').eq('id', user.id).single();
       if (profile?.role) setUserRole(profile.role);
+
+      const imobiliariaId = profile?.imobiliaria_id || user.id;
+
+      const { data: inqs } = await supabase
+        .from('inquilinos')
+        .select('status_assinatura')
+        .eq('imobiliaria_id', imobiliariaId);
+
+      if (inqs) {
+        setStats({
+          total: inqs.length,
+          pending: inqs.filter(i => i.status_assinatura === 'pendente').length,
+          signed: inqs.filter(i => i.status_assinatura === 'assinado').length,
+        });
+      }
+      setLoadingStats(false);
     };
-    fetchRole();
+    fetchData();
   }, []);
 
   const isIntegrante = userRole === "integrante_imobiliaria";
@@ -78,6 +98,34 @@ const ImobiliariaDashboard = () => {
           <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20 font-bold">
             <Link to="/imobiliaria/contratar">Contratar Entrega Facilitada</Link>
           </Button>
+        </div>
+
+        {/* Stats Banner */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+            <CardHeader className="p-4 pb-2">
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Total de Inquilinos</CardDescription>
+              <CardTitle className="text-2xl font-black">{loadingStats ? "..." : stats.total}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+            <CardHeader className="p-4 pb-2">
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-orange-500">Pendentes</CardDescription>
+              <CardTitle className="text-2xl font-black text-orange-500">{loadingStats ? "..." : stats.pending}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+            <CardHeader className="p-4 pb-2">
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">Assinados</CardDescription>
+              <CardTitle className="text-2xl font-black text-emerald-500">{loadingStats ? "..." : stats.signed}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="border-border/50 bg-emerald-500/10 backdrop-blur-sm border-emerald-500/20">
+            <CardHeader className="p-4 pb-2">
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Vistorias Grátis</CardDescription>
+              <CardTitle className="text-2xl font-black text-emerald-600">Ilimitadas</CardTitle>
+            </CardHeader>
+          </Card>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

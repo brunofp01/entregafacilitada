@@ -3,28 +3,42 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, FileSignature, Wallet, ArrowRight, Eye, CheckCircle2, Clock, RefreshCw } from "lucide-react";
+import { Loader2, Users, FileSignature, Wallet, ArrowRight, Eye, CheckCircle2, Clock, RefreshCw, Phone, Mail, MapPin, FileText, Download, ExternalLink, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface InquilinoRow {
     id: string;
     nome: string;
     email: string;
     telefone: string;
+    cpf: string;
+    rg: string;
+    endereco_cep: string;
     endereco_rua: string;
     endereco_numero: string;
+    endereco_complemento?: string;
+    endereco_bairro: string;
     endereco_cidade: string;
     endereco_estado: string;
     status_assinatura: string;
     autentique_document_id?: string;
+    contrato_locacao_url?: string;
+    contratos_servico_url?: string;
+    vistoria_id?: string;
+    vistoria_upload_url?: string;
     created_at: string;
 }
 
 const InquilinosPage = () => {
     const [inquilinos, setInquilinos] = useState<InquilinoRow[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedInquilino, setSelectedInquilino] = useState<InquilinoRow | null>(null);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     useEffect(() => {
         fetchInquilinos();
@@ -101,6 +115,18 @@ const InquilinosPage = () => {
             console.error(err);
         } finally {
             setSyncing(false);
+        }
+    };
+
+    const handleDeletar = async (id: string) => {
+        try {
+            const { error } = await supabase.from('inquilinos').delete().eq('id', id);
+            if (error) throw error;
+            toast.success("Inquilino removido com sucesso.");
+            setIsSheetOpen(false);
+            fetchInquilinos();
+        } catch (error) {
+            toast.error("Erro ao remover inquilino.");
         }
     };
 
@@ -222,7 +248,16 @@ const InquilinosPage = () => {
                                                     {getBillingBadge(inquilino.status_assinatura)}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <Button variant="ghost" size="icon" className="hover:bg-secondary/10 hover:text-secondary rounded-full" title="Ver Detalhes">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="hover:bg-secondary/10 hover:text-secondary rounded-full"
+                                                        title="Ver Detalhes"
+                                                        onClick={() => {
+                                                            setSelectedInquilino(inquilino);
+                                                            setIsSheetOpen(true);
+                                                        }}
+                                                    >
                                                         <Eye className="w-4 h-4" />
                                                     </Button>
                                                 </td>
@@ -234,6 +269,167 @@ const InquilinosPage = () => {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Detalhes do Inquilino Drawer */}
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetContent className="sm:max-w-md overflow-y-auto">
+                        {selectedInquilino && (
+                            <div className="space-y-6 pt-4">
+                                <SheetHeader>
+                                    <SheetTitle className="text-2xl font-bold flex items-center gap-2">
+                                        <Users className="w-5 h-5 text-secondary" /> Perfil do Locatário
+                                    </SheetTitle>
+                                    <SheetDescription>
+                                        Dados detalhados e documentos vinculados.
+                                    </SheetDescription>
+                                </SheetHeader>
+
+                                <div className="space-y-4">
+                                    <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                                                <Users className="w-4 h-4 text-secondary" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Dados Pessoais</p>
+                                                <p className="text-lg font-bold">{selectedInquilino.nome}</p>
+                                                <p className="text-sm text-muted-foreground">CPF: {selectedInquilino.cpf} | RG: {selectedInquilino.rg}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm ml-11">
+                                            <Mail className="w-3.5 h-3.5 text-muted-foreground" /> {selectedInquilino.email}
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm ml-11">
+                                            <Phone className="w-3.5 h-3.5 text-muted-foreground" /> {selectedInquilino.telefone}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                                                <MapPin className="w-4 h-4 text-secondary" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Onde ele mora (Imóvel Alugado)</p>
+                                                <p className="text-sm font-bold">{selectedInquilino.endereco_rua}, {selectedInquilino.endereco_numero}</p>
+                                                {selectedInquilino.endereco_complemento && <p className="text-xs text-muted-foreground">{selectedInquilino.endereco_complemento}</p>}
+                                                <p className="text-xs text-muted-foreground">{selectedInquilino.endereco_bairro}, {selectedInquilino.endereco_cidade} - {selectedInquilino.endereco_estado}</p>
+                                                <p className="text-xs text-muted-foreground">CEP: {selectedInquilino.endereco_cep}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status da Garantia</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="p-3 border rounded-lg bg-background flex flex-col gap-1">
+                                                <span className="text-[10px] text-muted-foreground font-bold">ASSINATURA</span>
+                                                {getSignatureBadge(selectedInquilino.status_assinatura)}
+                                            </div>
+                                            <div className="p-3 border rounded-lg bg-background flex flex-col gap-1">
+                                                <span className="text-[10px] text-muted-foreground font-bold">PAGAMENTO</span>
+                                                {getBillingBadge(selectedInquilino.status_assinatura)}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <Separator />
+
+                                    <div className="space-y-3">
+                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Documentos do Processo</p>
+
+                                        {/* Contrato Locacao */}
+                                        <div className="flex items-center justify-between p-3 border rounded-lg bg-card hover:border-secondary/50 transition-colors group">
+                                            <div className="flex items-center gap-3">
+                                                <FileText className="w-5 h-5 text-secondary" />
+                                                <div>
+                                                    <p className="text-sm font-bold leading-none">Contrato de Locação</p>
+                                                    <p className="text-[10px] text-muted-foreground mt-1 tracking-tight">PDF Enviado no Onboarding</p>
+                                                </div>
+                                            </div>
+                                            {selectedInquilino.contrato_locacao_url ? (
+                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-full" onClick={() => window.open(selectedInquilino.contrato_locacao_url, '_blank')}>
+                                                    <Download className="w-4 h-4" />
+                                                </Button>
+                                            ) : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
+                                        </div>
+
+                                        {/* Vistoria */}
+                                        <div className="flex items-center justify-between p-3 border rounded-lg bg-card hover:border-secondary/50 transition-colors group">
+                                            <div className="flex items-center gap-3">
+                                                <FileText className="w-5 h-5 text-secondary" />
+                                                <div>
+                                                    <p className="text-sm font-bold leading-none">Laudo de Vistoria</p>
+                                                    <p className="text-[10px] text-muted-foreground mt-1 tracking-tight">
+                                                        {selectedInquilino.vistoria_id ? 'Vinculada da Plataforma' : 'PDF Enviado no Onboarding'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {selectedInquilino.vistoria_upload_url || selectedInquilino.vistoria_id ? (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 p-0 rounded-full"
+                                                    onClick={() => {
+                                                        if (selectedInquilino.vistoria_id) {
+                                                            window.open(`/imobiliaria/vistorias/nova?id=${selectedInquilino.vistoria_id}`, '_blank');
+                                                        } else {
+                                                            window.open(selectedInquilino.vistoria_upload_url, '_blank');
+                                                        }
+                                                    }}
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </Button>
+                                            ) : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
+                                        </div>
+
+                                        {/* Contrato Servico (Autentique/PDF Padrão) */}
+                                        {selectedInquilino.status_assinatura === 'assinado' && (
+                                            <div className="flex items-center justify-between p-3 border rounded-lg bg-emerald-500/5 border-emerald-500/20 group">
+                                                <div className="flex items-center gap-3">
+                                                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                                    <div>
+                                                        <p className="text-sm font-bold leading-none text-emerald-700">Contrato Entrega Facilitada</p>
+                                                        <p className="text-[10px] text-emerald-600/70 mt-1 tracking-tight">Assinatura Eletrônica Concluída</p>
+                                                    </div>
+                                                </div>
+                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-full text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10" onClick={() => window.open(`https://app.autentique.com.br/documento/${selectedInquilino.autentique_document_id}`, '_blank')}>
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <Separator />
+
+                                    <div className="pt-4">
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 hover:text-destructive gap-2 text-xs font-bold uppercase tracking-widest h-11">
+                                                    <Trash2 className="w-4 h-4" /> Remover do Sistema
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Isso excluirá permanentemente o registro deste inquilino e desvinculará todos os documentos anexados. Esta ação não pode ser desfeita.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeletar(selectedInquilino.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                                        Sim, Remover Inquilino
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </SheetContent>
+                </Sheet>
             </div>
         </DashboardLayout>
     );
