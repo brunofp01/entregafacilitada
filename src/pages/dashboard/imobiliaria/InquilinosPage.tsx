@@ -3,8 +3,9 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, FileSignature, Wallet, ArrowRight, Eye, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, Users, FileSignature, Wallet, ArrowRight, Eye, CheckCircle2, Clock, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 
 interface InquilinoRow {
@@ -17,6 +18,7 @@ interface InquilinoRow {
     endereco_cidade: string;
     endereco_estado: string;
     status_assinatura: string;
+    autentique_document_id?: string;
     created_at: string;
 }
 
@@ -51,6 +53,57 @@ const InquilinosPage = () => {
         }
     };
 
+    const [syncing, setSyncing] = useState(false);
+
+    const handleSyncAssinaturas = async () => {
+        try {
+            setSyncing(true);
+            const pendentes = inquilinos.filter(i => i.status_assinatura === 'pendente' && i.autentique_document_id);
+
+            if (pendentes.length === 0) {
+                toast.info("Não há contratos pendentes listados hoje para sincronizar.");
+                return;
+            }
+
+            const idsToCheck = pendentes.map(i => i.autentique_document_id);
+
+            const apiRes = await fetch("/api/sync-autentique", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ documentIds: idsToCheck })
+            });
+
+            const apiData = await apiRes.json();
+
+            if (apiData.success && apiData.statuses) {
+                let changedCount = 0;
+                for (const item of apiData.statuses) {
+                    if (item.status === 'assinado' || item.status === 'rejeitado') {
+                        await supabase
+                            .from('inquilinos')
+                            .update({ status_assinatura: item.status })
+                            .eq('autentique_document_id', item.id);
+                        changedCount++;
+                    }
+                }
+
+                if (changedCount > 0) {
+                    toast.success(`${changedCount} contrato(s) atualizados magicamente!`);
+                    fetchInquilinos();
+                } else {
+                    toast.info("Nenhuma nova assinatura concluída detectada no momento.");
+                }
+            } else {
+                toast.error("Falha ao comunicar com os servidores do Autentique.");
+            }
+        } catch (err) {
+            toast.error("Erro inesperado na sincronização");
+            console.error(err);
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     const getSignatureBadge = (status: string) => {
         if (status === 'assinado') {
             return <Badge className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20"><CheckCircle2 className="w-3 h-3 mr-1" /> Assinado</Badge>;
@@ -74,11 +127,17 @@ const InquilinosPage = () => {
                         <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Gestão de Inquilinos</h1>
                         <p className="text-muted-foreground">Acompanhe os contratos, assinaturas e mensalidades do Entrega Facilitada.</p>
                     </div>
-                    <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold shadow-lg shadow-secondary/20">
-                        <Link to="/imobiliaria/contratar">
-                            Novo Contrato <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" onClick={handleSyncAssinaturas} disabled={syncing || loading} className="border-border/50 bg-background/50 backdrop-blur-sm shadow-sm transition-all hover:bg-secondary/5">
+                            <RefreshCw className={`w-4 h-4 mr-2 text-secondary ${syncing ? 'animate-spin' : ''}`} />
+                            {syncing ? 'Sincronizando...' : 'Atualizar Assinaturas'}
+                        </Button>
+                        <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold shadow-lg shadow-secondary/20">
+                            <Link to="/imobiliaria/contratar">
+                                Novo Contrato <ArrowRight className="w-4 h-4 ml-2" />
+                            </Link>
+                        </Button>
+                    </div>
                 </header>
 
                 {/* Resumo Opcional */}
