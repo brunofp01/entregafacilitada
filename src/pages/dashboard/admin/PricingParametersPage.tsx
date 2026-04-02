@@ -285,17 +285,36 @@ const PricingParametersPage = () => {
                         )}
 
                         <div className="mt-6 pt-5 border-t border-border/30">
-                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-3">Comparativo</p>
-                            <div className="flex flex-col sm:flex-row gap-3">
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-3">Comparativo de Planos</p>
+                            <div className="flex flex-col sm:flex-row gap-3 mb-3">
                                 {planPcs.map(plan => {
                                     const PIcon = plan.icon;
                                     return (
-                                        <div key={plan.id} className="flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl bg-background/50 border border-border/40 gap-2">
+                                        <div key={plan.id} className="flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl bg-background/50 border border-border/40 gap-1">
                                             <div className={`flex items-center gap-1.5 ${plan.color}`}>
                                                 <PIcon className="w-3.5 h-3.5" />
                                                 <span className="text-xs font-bold">{plan.label}</span>
                                             </div>
-                                            <span className="font-mono font-extrabold text-base">R$ {plan.pc.toFixed(2)}</span>
+                                            <div className="text-center">
+                                                <div className="font-mono font-extrabold text-base text-foreground">R$ {plan.pc.toFixed(2)}</div>
+                                                <div className="text-[10px] text-muted-foreground">valor total</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Mensalidades */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                {planPcs.map(plan => {
+                                    const monthly = plan.pc / 12;
+                                    return (
+                                        <div key={plan.id} className={`flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl border gap-1 ${plan.bgColor} ${plan.borderColor}`}>
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">12x de</span>
+                                            <span className={`font-mono font-extrabold text-lg ${plan.color}`}>
+                                                R$ {monthly.toFixed(2)}
+                                            </span>
+                                            <span className="text-[10px] text-muted-foreground">/mês</span>
                                         </div>
                                     );
                                 })}
@@ -373,7 +392,7 @@ const PricingParametersPage = () => {
                     <div className="grid md:grid-cols-3 gap-6">
                         {plans.map(plan => {
                             const PlanIcon = plan.icon;
-                            const pp = calcPp(plan.params);
+                            const pp = calcPp(plan.params, simArea);
                             const pc = calcPc(pp, totalMs, totalCo);
                             return (
                                 <Card key={plan.id} className={`border ${plan.borderColor} bg-card/60 backdrop-blur-sm shadow-md`}>
