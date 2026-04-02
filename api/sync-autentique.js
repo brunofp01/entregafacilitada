@@ -25,6 +25,9 @@ export default async function handler(req, res) {
         document(id: $id) {
           id
           signatures {
+            public_id
+            action { name }
+            viewed { created_at }
             signed { created_at }
             rejected { created_at }
           }
@@ -36,6 +39,7 @@ export default async function handler(req, res) {
         const results = await Promise.all(
             documentIds.map(async (id) => {
                 try {
+                    console.log(`Checking status for document: ${id}`);
                     const response = await fetch('https://api.autentique.com.br/v2/graphql', {
                         method: 'POST',
                         headers: authHeaders,
@@ -46,23 +50,32 @@ export default async function handler(req, res) {
                     });
 
                     const json = await response.json();
-                    if (json.errors || !json.data || !json.data.document) {
+
+                    if (json.errors) {
+                        console.error(`Autentique GraphQL Error for ${id}:`, JSON.stringify(json.errors));
+                        return { id, status: 'error' };
+                    }
+
+                    if (!json.data || !json.data.document) {
+                        console.warn(`Document ${id} not found in Autentique`);
                         return { id, status: 'error' };
                     }
 
                     const signatures = json.data.document.signatures || [];
 
-                    // Check if at least one signature object has valid "signed" event payload
-                    // (Because typically there's only one signer for these generated templates)
                     const isSigned = signatures.some(sig => sig.signed && sig.signed.created_at);
                     const isRejected = signatures.some(sig => sig.rejected && sig.rejected.created_at);
 
-                    if (isSigned) return { id, status: 'assinado' };
-                    if (isRejected) return { id, status: 'rejeitado' };
+                    console.log(`Document ${id} status - Signed: ${isSigned}, Rejected: ${isRejected}`);
 
-                    return { id, status: 'pendente' };
+                    return {
+                        id,
+                        status: isSigned ? 'assinado' : (isRejected ? 'rejeitado' : 'pendente'),
+                        debug_signatures: signatures
+                    };
 
                 } catch (err) {
+                    console.error(`Fetch error for ${id}:`, err);
                     return { id, status: 'error' };
                 }
             })
