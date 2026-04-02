@@ -100,14 +100,43 @@ const EquipePage = () => {
         throw signUpError;
       }
 
-      // Explicitly insert to profile to guarantee persistence in case trigger misses it
+      // Explicitly update profile utilizing the ephemeral session if available to bypass RLS restrictions
       if (signUpData.user) {
-        await supabaseAdmin.from('profiles').update({
+        let updateClient = supabaseAdmin;
+
+        // If email confirmation is disabled, signUpData will have a session.
+        // We use this session to authenticate the update request as the new user!
+        if (signUpData.session) {
+          updateClient = createClient(
+            import.meta.env.VITE_SUPABASE_URL || '',
+            import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+            {
+              global: {
+                headers: {
+                  Authorization: `Bearer ${signUpData.session.access_token}`
+                }
+              }
+            }
+          );
+        }
+
+        const { error: profileUpdateError } = await updateClient.from('profiles').update({
           full_name: newMemberName,
           whatsapp: newMemberWhatsapp,
           role: 'imobiliaria',
           imobiliaria_id: imobiliariaId
         }).eq('id', signUpData.user.id);
+
+        if (profileUpdateError) {
+          console.warn("Failed to update profile directly via new session:", profileUpdateError);
+          // Fallback: Try with the agency owner's session just in case RLS allows it
+          await supabase.from('profiles').update({
+            full_name: newMemberName,
+            whatsapp: newMemberWhatsapp,
+            role: 'imobiliaria',
+            imobiliaria_id: imobiliariaId
+          }).eq('id', signUpData.user.id);
+        }
       }
 
       toast.dismiss();
