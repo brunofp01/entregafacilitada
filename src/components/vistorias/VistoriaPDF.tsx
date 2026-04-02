@@ -175,14 +175,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     position: 'relative',
+    overflow: 'hidden'
   },
   timelineLine: {
     position: 'absolute',
     left: 55,
-    top: 80,
+    top: 100,
     bottom: 50,
     width: 2,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E2E8F0',
     zIndex: 1,
   },
   promoTitleContainer: {
@@ -196,37 +197,46 @@ const styles = StyleSheet.create({
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 24,
+    marginBottom: 32,
     alignItems: 'flex-start',
     zIndex: 2,
   },
   iconBlock: {
     width: 48,
     height: 48,
-    borderRadius: 8,
-    backgroundColor: '#FEF3C7',
+    borderRadius: 16,
+    backgroundColor: '#F5A524',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-  },
-  iconEmoji: {
-    // keeping for any other usage, though SVG is used now
-    fontSize: 20,
+    marginRight: 20,
+    shadowColor: '#F5A524',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 }
   },
   stepContent: {
     flex: 1,
     flexDirection: 'column',
+    paddingTop: 2,
+  },
+  stepPreHeader: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   stepTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 4,
+    color: '#0F172A',
+    marginBottom: 6,
   },
   stepDescription: {
-    fontSize: 14,
-    color: '#4B5563',
-    lineHeight: 1.4,
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 1.5,
   },
   footer: {
     position: 'absolute',
@@ -437,14 +447,21 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
             </Text>
           </View>
 
+          <View style={[styles.timelineItem, { marginBottom: 24, alignItems: 'center' }]}>
+            <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#F5A524', borderWidth: 2, borderColor: '#F8FAFC', zIndex: 10, position: 'absolute', left: 49 }} />
+            <Text style={[styles.stepPreHeader, { color: '#F5A524', marginLeft: 84, marginTop: 4, letterSpacing: 1.5 }]}>DAQUI EM DIANTE É COM A ENTREGA FACILITADA ↓</Text>
+          </View>
+
           <View style={styles.timelineItem}>
             <View style={styles.iconBlock}>
-              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                 <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" />
+                <Path d="m9 14 2 2 4-4" />
               </Svg>
             </View>
             <View style={styles.stepContent}>
+              <Text style={styles.stepPreHeader}>Etapa 4</Text>
               <Text style={styles.stepTitle}>Vistoria e diagnóstico</Text>
               <Text style={styles.stepDescription}>Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.</Text>
             </View>
@@ -452,12 +469,13 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
           <View style={styles.timelineItem}>
             <View style={styles.iconBlock}>
-              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <Path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
                 <Path d="M9 8c-2 3-4 3.5-7 4l8 8c.5-3 1-5 4-7" />
               </Svg>
             </View>
             <View style={styles.stepContent}>
+              <Text style={styles.stepPreHeader}>Etapa 5</Text>
               <Text style={styles.stepTitle}>Execução dos reparos</Text>
               <Text style={styles.stepDescription}>Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.</Text>
             </View>
@@ -465,13 +483,14 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
           <View style={[styles.timelineItem, { marginBottom: 0 }]}>
             <View style={styles.iconBlock}>
-              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <Path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
                 <Path d="m21 2-9.6 9.6" />
                 <Circle cx="7.5" cy="15.5" r="5.5" />
               </Svg>
             </View>
             <View style={styles.stepContent}>
+              <Text style={styles.stepPreHeader}>Etapa 6</Text>
               <Text style={styles.stepTitle}>Chaves entregues, Nada Consta emitido</Text>
               <Text style={styles.stepDescription}>Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.</Text>
             </View>
