@@ -171,47 +171,60 @@ const styles = StyleSheet.create({
   },
   promoBanner: {
     marginTop: 40,
-    padding: '30 40',
-    backgroundColor: '#f8fafc',
+    padding: 32,
+    backgroundColor: '#F8FAFC',
     borderRadius: 12,
-    border: '1pt solid #e2e8f0',
+    position: 'relative',
   },
-  promoHeader: {
-    marginBottom: 25,
+  timelineLine: {
+    position: 'absolute',
+    left: 55,
+    top: 80,
+    bottom: 50,
+    width: 2,
+    backgroundColor: '#E5E7EB',
+    zIndex: 1,
+  },
+  promoTitleContainer: {
+    marginBottom: 32,
   },
   promoTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#0f172a',
-    textAlign: 'center',
+    color: '#0F172A',
+    textAlign: 'left',
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 20,
-    alignItems: 'center',
+    marginBottom: 24,
+    alignItems: 'flex-start',
+    zIndex: 2,
   },
-  iconBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#fef3c7',
-    border: '1pt solid #f59e0b',
+  iconBlock: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#FEF3C7',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: 16,
+  },
+  iconEmoji: {
+    fontSize: 20,
   },
   stepContent: {
     flex: 1,
+    flexDirection: 'column',
   },
   stepTitle: {
-    fontSize: 11,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 2,
+    color: '#111827',
+    marginBottom: 4,
   },
   stepDescription: {
-    fontSize: 9,
-    color: '#475569',
+    fontSize: 14,
+    color: '#4B5563',
     lineHeight: 1.4,
   },
   footer: {
@@ -306,7 +319,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
             <Image src={data.perfil.logo_url} style={styles.headerLogo} />
           ) : (
             <View style={[styles.headerLogo, { backgroundColor: '#f3f4f6', justifyContent: 'center', alignItems: 'center' }]}>
-               <Text style={{ fontSize: 8, color: '#9ca3af' }}>Logo Imobiliária</Text>
+              <Text style={{ fontSize: 8, color: '#9ca3af' }}>Logo Imobiliária</Text>
             </View>
           )}
           <View style={styles.headerInfo}>
@@ -349,7 +362,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           return (
             <View key={aIdx} style={{ marginBottom: 20 }}>
               <Text style={styles.roomHeader}>{ambiente.nome.toUpperCase()}</Text>
-              
+
               {/* Subseção A: Relatório Textual */}
               <View style={{ marginBottom: 10 }}>
                 {ambiente.itens.map((item, iIdx) => {
@@ -363,7 +376,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                   }
 
                   const getStatusColor = (status: string) => {
-                    switch(status) {
+                    switch (status) {
                       case 'Novo': return { bg: 'rgba(209, 250, 229, 0.4)', text: '#065f46' }; // Green
                       case 'Bom': return { bg: 'rgba(219, 234, 254, 0.4)', text: '#1e40af' }; // Blue
                       case 'Regular': return { bg: 'rgba(254, 249, 195, 0.4)', text: '#854d0e' }; // Yellow
@@ -395,7 +408,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                 <View style={styles.photoGrid}>
                   {(() => {
                     let gridCounter = 0;
-                    return ambiente.itens.flatMap(item => 
+                    return ambiente.itens.flatMap(item =>
                       item.fotos.map((foto, fIdx) => {
                         gridCounter++;
                         return (
@@ -415,14 +428,16 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
         {/* Selo de Fechamento (Timeline Estilo Landing Page) */}
         <View style={styles.promoBanner} wrap={false}>
-          <View style={styles.promoHeader}>
+          <View style={styles.timelineLine} />
+
+          <View style={styles.promoTitleContainer}>
             <Text style={styles.promoTitle}>
               Veja como funciona com a <Text style={{ color: '#3b82f6' }}>Entrega Facilitada</Text>:
             </Text>
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={styles.iconBadge}><Text style={{ fontSize: 12 }}>📋</Text></View>
+            <View style={styles.iconBlock}><Text style={styles.iconEmoji}>📋</Text></View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>Vistoria e diagnóstico</Text>
               <Text style={styles.stepDescription}>Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.</Text>
@@ -430,15 +445,15 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           </View>
 
           <View style={styles.timelineItem}>
-            <View style={styles.iconBadge}><Text style={{ fontSize: 12 }}>🖌️</Text></View>
+            <View style={styles.iconBlock}><Text style={styles.iconEmoji}>🖌️</Text></View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>Execução dos reparos</Text>
               <Text style={styles.stepDescription}>Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.</Text>
             </View>
           </View>
 
-          <View style={styles.timelineItem}>
-            <View style={styles.iconBadge}><Text style={{ fontSize: 12 }}>🔑</Text></View>
+          <View style={[styles.timelineItem, { marginBottom: 0 }]}>
+            <View style={styles.iconBlock}><Text style={styles.iconEmoji}>🔑</Text></View>
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>Chaves entregues, Nada Consta emitido</Text>
               <Text style={styles.stepDescription}>Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.</Text>
