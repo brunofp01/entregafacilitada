@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 
 const ImobiliariaDashboard = () => {
-  const [userRole, setUserRole] = useState<string>("imobiliaria");
+  const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || "imobiliaria");
 
   useEffect(() => {
     const fetchRole = async () => {
