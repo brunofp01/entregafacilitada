@@ -54,8 +54,7 @@ const EquipePage = () => {
       const { data: team, error: teamError } = await supabase
         .from("profiles")
         .select("id, full_name, email, role, whatsapp")
-        .eq("imobiliaria_id", myOrgId)
-        .in("role", ["imobiliaria", "integrante_imobiliaria"]);
+        .eq("imobiliaria_id", myOrgId);
 
       console.log("[EquipePage] Team result:", team, "Error:", teamError);
 
