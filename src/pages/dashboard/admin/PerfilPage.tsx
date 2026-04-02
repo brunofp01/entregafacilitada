@@ -58,27 +58,38 @@ const AdminPerfilPage = () => {
 
             if (profileError) throw profileError;
 
-            // 2. Atualizar Email se mudou
+            // 2. Atualizar Autenticação (Email e/ou Senha) em chamada única
             const currentUser = await supabase.auth.getUser();
+            const updates: any = {};
+
             if (email !== currentUser.data.user?.email) {
-                const { error: emailError } = await supabase.auth.updateUser(
-                    { email },
-                    { emailRedirectTo: window.location.origin + '/admin/perfil' }
-                );
-                if (emailError) throw emailError;
-                toast.success("E-mail atualizado! Verifique sua nova caixa de entrada para confirmar.");
+                updates.email = email;
             }
 
-            // 3. Atualizar Senha se preenchida
             if (newPassword) {
                 if (newPassword.length < 6) {
                     toast.error("A senha deve ter pelo menos 6 caracteres.");
+                    setLoading(false);
                     return;
                 }
-                const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
-                if (passwordError) throw passwordError;
-                toast.success("Senha atualizada com sucesso!");
-                setNewPassword("");
+                updates.password = newPassword;
+            }
+
+            if (Object.keys(updates).length > 0) {
+                const { error: authError } = await supabase.auth.updateUser(
+                    updates,
+                    { emailRedirectTo: window.location.origin + '/admin/perfil' }
+                );
+
+                if (authError) throw authError;
+
+                if (updates.email) {
+                    toast.success("Link de confirmação enviado para o novo e-mail!");
+                }
+                if (updates.password) {
+                    toast.success("Senha atualizada!");
+                    setNewPassword("");
+                }
             }
 
             toast.success("Perfil atualizado com sucesso!");
