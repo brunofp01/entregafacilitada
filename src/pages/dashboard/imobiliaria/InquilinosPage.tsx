@@ -68,26 +68,26 @@ const InquilinosPage = () => {
     };
 
     const [syncing, setSyncing] = useState(false);
+    const [hasAutoSynced, setHasAutoSynced] = useState(false);
+
+    useEffect(() => {
+        if (!loading && inquilinos.length > 0 && !hasAutoSynced && !syncing) {
+            const pendentes = inquilinos.filter(i => i.status_assinatura !== 'assinado' && i.autentique_document_id);
+            if (pendentes.length > 0) {
+                handleSyncAssinaturas();
+                setHasAutoSynced(true);
+            }
+        }
+    }, [loading, inquilinos, hasAutoSynced, syncing]);
 
     const handleSyncAssinaturas = async () => {
-        console.log("Botão de Sincronização clicado!");
-        console.log("Estado atual dos inquilinos:", inquilinos);
         try {
             setSyncing(true);
-            // Considerar qualquer um que não esteja assinado mas tenha ID do Autentique
-            const pendentes = inquilinos.filter(i =>
-                i.status_assinatura !== 'assinado' &&
-                i.autentique_document_id
-            );
+            const pendentes = inquilinos.filter(i => i.status_assinatura !== 'assinado' && i.autentique_document_id);
 
-            if (pendentes.length === 0) {
-                console.log("Nenhum contrato elegível para sincronização encontrado.");
-                toast.info("Não há contratos pendentes listados hoje para sincronizar.");
-                return;
-            }
+            if (pendentes.length === 0) return;
 
             const idsToCheck = pendentes.map(i => i.autentique_document_id);
-            console.log("Iniciando sincronização com Autentique para os documentos:", idsToCheck);
 
             const apiRes = await fetch("/api/sync-autentique", {
                 method: "POST",
