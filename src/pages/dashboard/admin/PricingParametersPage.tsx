@@ -20,56 +20,56 @@ interface FormulaParam {
     label: string;
     value: string;
     unit: "percent" | "currency" | "number";
+    active: boolean;
     removable?: boolean;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 8);
 
 const makeNew = (unit: FormulaParam["unit"] = "percent"): FormulaParam => ({
-    id: uid(), label: "Nova despesa", value: "0", unit, removable: true,
+    id: uid(), label: "Nova despesa", value: "0", unit, active: true, removable: true,
 });
 
 // ─── Dados Iniciais ──────────────────────────────────────────────────────────
 
-// Pp (compartilhado — mesmos campos em cada plano, valores distintos)
 const ppBasico: FormulaParam[] = [
-    { id: "pb1", label: "Custo de Material por m²", value: "12", unit: "currency" },
-    { id: "pb2", label: "Custo de Mão de Obra por m²", value: "18", unit: "currency" },
-    { id: "pb3", label: "Custo Fixo de Limpeza", value: "150", unit: "currency" },
-    { id: "pb4", label: "Custo de Vistoria de Regulação", value: "80", unit: "currency" },
-    { id: "pb5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number" },
-    { id: "pb6", label: "Projeção INCC Acumulado", value: "8", unit: "percent" },
+    { id: "pb1", label: "Custo de Material por m²", value: "12", unit: "currency", active: true },
+    { id: "pb2", label: "Custo de Mão de Obra por m²", value: "18", unit: "currency", active: true },
+    { id: "pb3", label: "Custo Fixo de Limpeza", value: "150", unit: "currency", active: true },
+    { id: "pb4", label: "Custo de Vistoria de Regulação", value: "80", unit: "currency", active: true },
+    { id: "pb5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number", active: true },
+    { id: "pb6", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
 ];
 
 const ppMedio: FormulaParam[] = [
-    { id: "pm1", label: "Custo de Material por m²", value: "20", unit: "currency" },
-    { id: "pm2", label: "Custo de Mão de Obra por m²", value: "28", unit: "currency" },
-    { id: "pm3", label: "Custo Fixo de Limpeza", value: "220", unit: "currency" },
-    { id: "pm4", label: "Custo de Vistoria de Regulação", value: "100", unit: "currency" },
-    { id: "pm5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number" },
-    { id: "pm6", label: "Projeção INCC Acumulado", value: "10", unit: "percent" },
+    { id: "pm1", label: "Custo de Material por m²", value: "20", unit: "currency", active: true },
+    { id: "pm2", label: "Custo de Mão de Obra por m²", value: "28", unit: "currency", active: true },
+    { id: "pm3", label: "Custo Fixo de Limpeza", value: "220", unit: "currency", active: true },
+    { id: "pm4", label: "Custo de Vistoria de Regulação", value: "100", unit: "currency", active: true },
+    { id: "pm5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number", active: true },
+    { id: "pm6", label: "Projeção INCC Acumulado", value: "10", unit: "percent", active: true },
 ];
 
 const ppAlto: FormulaParam[] = [
-    { id: "pa1", label: "Custo de Material por m²", value: "35", unit: "currency" },
-    { id: "pa2", label: "Custo de Mão de Obra por m²", value: "45", unit: "currency" },
-    { id: "pa3", label: "Custo Fixo de Limpeza", value: "350", unit: "currency" },
-    { id: "pa4", label: "Custo de Vistoria de Regulação", value: "150", unit: "currency" },
-    { id: "pa5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number" },
-    { id: "pa6", label: "Projeção INCC Acumulado", value: "12", unit: "percent" },
+    { id: "pa1", label: "Custo de Material por m²", value: "35", unit: "currency", active: true },
+    { id: "pa2", label: "Custo de Mão de Obra por m²", value: "45", unit: "currency", active: true },
+    { id: "pa3", label: "Custo Fixo de Limpeza", value: "350", unit: "currency", active: true },
+    { id: "pa4", label: "Custo de Vistoria de Regulação", value: "150", unit: "currency", active: true },
+    { id: "pa5", label: "Tempo Médio de Contrato (Meses)", value: "30", unit: "number", active: true },
+    { id: "pa6", label: "Projeção INCC Acumulado", value: "12", unit: "percent", active: true },
 ];
 
 const initialMs: FormulaParam[] = [
-    { id: "ms1", label: "Margem de Lucro Esperado", value: "15", unit: "percent" },
-    { id: "ms2", label: "Fator de Risco Moral", value: "5", unit: "percent" },
-    { id: "ms3", label: "Taxa de Inadimplência Estimada", value: "3", unit: "percent" },
+    { id: "ms1", label: "Margem de Lucro Esperado", value: "15", unit: "percent", active: true },
+    { id: "ms2", label: "Fator de Risco Moral", value: "5", unit: "percent", active: true },
+    { id: "ms3", label: "Taxa de Inadimplência Estimada", value: "3", unit: "percent", active: true },
 ];
 
 const initialCo: FormulaParam[] = [
-    { id: "co1", label: "Impostos", value: "12", unit: "percent" },
-    { id: "co2", label: "Taxa do Gateway de Pagamento", value: "3.5", unit: "percent" },
-    { id: "co3", label: "Comissão da Imobiliária", value: "5", unit: "percent" },
-    { id: "co4", label: "Custo de Plataforma / Adm", value: "3", unit: "percent" },
+    { id: "co1", label: "Impostos", value: "12", unit: "percent", active: true },
+    { id: "co2", label: "Taxa do Gateway de Pagamento", value: "3.5", unit: "percent", active: true },
+    { id: "co3", label: "Comissão da Imobiliária", value: "5", unit: "percent", active: true },
+    { id: "co4", label: "Custo de Plataforma / Adm", value: "3", unit: "percent", active: true },
 ];
 
 interface PlanConfig {
@@ -83,13 +83,12 @@ const initialPlans: PlanConfig[] = [
     { id: "alto", label: "Plano Alto Padrão", color: "text-amber-500", bgColor: "bg-amber-500/10", borderColor: "border-amber-500/20", icon: Crown, badge: "Premium", params: ppAlto },
 ];
 
-// ─── Cálculo ─────────────────────────────────────────────────────────────────
-// Items cujo label contém "m²" são multiplicados pela metragem; demais são fixos
+// ─── Cálculo ──────────────────────────────────────────────────────────────────
 const isPerSqm = (label: string) => label.toLowerCase().includes("m²");
 
 const calcPp = (params: FormulaParam[], area: number) => {
     let base = 0; let pct = 0;
-    params.forEach(p => {
+    params.filter(p => p.active).forEach(p => {
         const v = parseFloat(p.value) || 0;
         if (p.unit === "currency") base += isPerSqm(p.label) ? v * area : v;
         else if (p.unit === "percent") pct += v;
@@ -102,29 +101,57 @@ const calcPc = (pp: number, msTotal: number, coTotal: number) => {
     return d > 0 ? (pp * (1 + msTotal / 100)) / d : 0;
 };
 
-// ─── ParamRow (simplificado: apenas nome + valor) ────────────────────────────
+const sumActive = (params: FormulaParam[]) =>
+    params.filter(p => p.active).reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
+
+// ─── Toggle Switch ─────────────────────────────────────────────────────────────
+const ToggleSwitch = ({ active, onToggle }: { active: boolean; onToggle: () => void }) => (
+    <button
+        onClick={onToggle}
+        title={active ? "Desativar do cálculo" : "Ativar no cálculo"}
+        className={`relative shrink-0 w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none ${active ? "bg-secondary" : "bg-muted-foreground/30"
+            }`}
+    >
+        <span
+            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${active ? "translate-x-4" : "translate-x-0"
+                }`}
+        />
+    </button>
+);
+
+// ─── ParamRow ─────────────────────────────────────────────────────────────────
 const ParamRow = ({
-    param, onUpdate, onRemove,
+    param, onUpdate, onRemove, onToggle,
 }: {
     param: FormulaParam;
     onUpdate: (id: string, field: "label" | "value" | "unit", v: string) => void;
     onRemove?: (id: string) => void;
+    onToggle: (id: string) => void;
 }) => (
-    <div className="group flex items-center gap-3 py-2.5 border-b border-border/30 last:border-0">
+    <div className={`group flex items-center gap-2 py-2.5 border-b border-border/30 last:border-0 transition-opacity ${param.active ? "opacity-100" : "opacity-40"
+        }`}>
+        {/* Toggle */}
+        <ToggleSwitch active={param.active} onToggle={() => onToggle(param.id)} />
+
+        {/* Label */}
         <div className="flex-1 min-w-0">
             <input
                 type="text"
                 value={param.label}
                 onChange={e => onUpdate(param.id, "label", e.target.value)}
-                className="bg-transparent border-0 focus:outline-none text-sm font-medium text-foreground w-full placeholder:text-muted-foreground"
+                disabled={!param.active}
+                className="bg-transparent border-0 focus:outline-none text-sm font-medium text-foreground w-full placeholder:text-muted-foreground disabled:cursor-not-allowed"
                 placeholder="Nome da despesa"
             />
         </div>
+
+        {/* Value + unit */}
         <div className="flex items-center gap-1.5 shrink-0">
             <select
                 value={param.unit}
                 onChange={e => onUpdate(param.id, "unit", e.target.value)}
-                className="text-[10px] bg-muted/50 border border-border/40 rounded px-1 py-1 text-muted-foreground cursor-pointer"
+                disabled={!param.active}
+                className="text-[10px] bg-muted/50 border border-border/40 rounded px-1 py-1 text-muted-foreground cursor-pointer disabled:cursor-not-allowed"
             >
                 <option value="currency">R$</option>
                 <option value="percent">%</option>
@@ -135,8 +162,9 @@ const ParamRow = ({
                 {param.unit === "percent" && <Percent className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />}
                 <Input
                     type="number" step="0.01" value={param.value}
+                    disabled={!param.active}
                     onChange={e => onUpdate(param.id, "value", e.target.value)}
-                    className={`${param.unit !== "number" ? "pl-6" : ""} bg-background/60 border-border/50 font-mono text-sm h-8 focus:border-secondary/50`}
+                    className={`${param.unit !== "number" ? "pl-6" : ""} bg-background/60 border-border/50 font-mono text-sm h-8 focus:border-secondary/50 disabled:cursor-not-allowed`}
                 />
             </div>
             {param.removable && onRemove && (
@@ -158,12 +186,15 @@ const PricingParametersPage = () => {
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
 
-
     const touch = () => setIsDirty(true);
 
-    // Shared
+    // ── Shared helpers ───────────────────────────────────────────────────────
     const updateShared = (setter: any, id: string, field: any, v: string) => {
         setter((ps: FormulaParam[]) => ps.map((p: FormulaParam) => p.id === id ? { ...p, [field]: v } : p));
+        touch();
+    };
+    const toggleShared = (setter: any, id: string) => {
+        setter((ps: FormulaParam[]) => ps.map((p: FormulaParam) => p.id === id ? { ...p, active: !p.active } : p));
         touch();
     };
     const removeShared = (setter: any, id: string) => {
@@ -175,23 +206,35 @@ const PricingParametersPage = () => {
         touch();
     };
 
-    // Plan
+    // ── Plan helpers ─────────────────────────────────────────────────────────
     const updatePlan = (planId: string, id: string, field: any, v: string) => {
-        setPlans(ps => ps.map(pl => pl.id === planId ? { ...pl, params: pl.params.map(p => p.id === id ? { ...p, [field]: v } : p) } : pl));
+        setPlans(ps => ps.map(pl => pl.id === planId
+            ? { ...pl, params: pl.params.map(p => p.id === id ? { ...p, [field]: v } : p) }
+            : pl));
+        touch();
+    };
+    const togglePlan = (planId: string, id: string) => {
+        setPlans(ps => ps.map(pl => pl.id === planId
+            ? { ...pl, params: pl.params.map(p => p.id === id ? { ...p, active: !p.active } : p) }
+            : pl));
         touch();
     };
     const removePlanParam = (planId: string, id: string) => {
-        setPlans(ps => ps.map(pl => pl.id === planId ? { ...pl, params: pl.params.filter(p => p.id !== id) } : pl));
+        setPlans(ps => ps.map(pl => pl.id === planId
+            ? { ...pl, params: pl.params.filter(p => p.id !== id) }
+            : pl));
         touch();
     };
     const addPlanParam = (planId: string) => {
-        setPlans(ps => ps.map(pl => pl.id === planId ? { ...pl, params: [...pl.params, makeNew("currency")] } : pl));
+        setPlans(ps => ps.map(pl => pl.id === planId
+            ? { ...pl, params: [...pl.params, makeNew("currency")] }
+            : pl));
         touch();
     };
 
-    // Totals
-    const totalMs = msParams.reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
-    const totalCo = coParams.reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
+    // ── Derived totals ───────────────────────────────────────────────────────
+    const totalMs = sumActive(msParams);
+    const totalCo = sumActive(coParams);
     const planPcs = plans.map(pl => {
         const pp = calcPp(pl.params, simArea);
         return { ...pl, pp, pc: calcPc(pp, totalMs, totalCo) };
@@ -202,15 +245,17 @@ const PricingParametersPage = () => {
         <DashboardLayout role="admin">
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
 
-                {/* Header */}
+                {/* ── Header ── */}
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Parâmetros de Cálculo</h1>
                         <p className="text-muted-foreground">Ajuste os fatores da fórmula atuarial e simule o Pc de cada plano em tempo real.</p>
                     </div>
-                    <Button onClick={() => { toast.success("Parâmetros salvos! (Persistência no banco em breve)"); setIsDirty(false); }}
+                    <Button
+                        onClick={() => { toast.success("Parâmetros salvos! (Persistência no banco em breve)"); setIsDirty(false); }}
                         disabled={!isDirty}
-                        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 shadow-lg shadow-secondary/20 shrink-0">
+                        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 shadow-lg shadow-secondary/20 shrink-0"
+                    >
                         <Save className="w-4 h-4" />
                         {isDirty ? "Salvar Alterações" : "Nenhuma Alteração"}
                     </Button>
@@ -224,9 +269,10 @@ const PricingParametersPage = () => {
                             <CardTitle className="text-base">Simulador de Preços</CardTitle>
                             <Badge variant="outline" className="text-[10px] ml-1">Tempo Real</Badge>
                         </div>
-                        <CardDescription>Selecione um plano para ver o Pc calculado com os parâmetros atuais.</CardDescription>
+                        <CardDescription>Selecione um plano e a área para ver o Pc calculado com os parâmetros ativos.</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
+
                         {/* Slider m² */}
                         <div className="mb-6 p-4 bg-background/50 rounded-xl border border-border/40">
                             <div className="flex items-center justify-between mb-3">
@@ -255,14 +301,16 @@ const PricingParametersPage = () => {
                                 return (
                                     <button key={plan.id} onClick={() => setSimPlan(plan.id)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-sm transition-all ${simPlan === plan.id
-                                            ? `${plan.bgColor} ${plan.color} ${plan.borderColor} shadow-md scale-105`
-                                            : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/60"}`}>
+                                                ? `${plan.bgColor} ${plan.color} ${plan.borderColor} shadow-md scale-105`
+                                                : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/60"
+                                            }`}>
                                         <PIcon className="w-4 h-4" /> {plan.label}
                                     </button>
                                 );
                             })}
                         </div>
 
+                        {/* Cards de resultado */}
                         {simData && (
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center p-5 rounded-2xl bg-background/70 border border-border/50 gap-1">
@@ -279,11 +327,14 @@ const PricingParametersPage = () => {
                                 </div>
                                 <div className={`flex flex-col items-center justify-center p-5 rounded-2xl border gap-1 ${plans.find(p => p.id === simPlan)?.bgColor} ${plans.find(p => p.id === simPlan)?.borderColor}`}>
                                     <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Pc Final</span>
-                                    <span className={`font-mono font-extrabold text-2xl ${plans.find(p => p.id === simPlan)?.color}`}>R$ {simData.pc.toFixed(2)}</span>
+                                    <span className={`font-mono font-extrabold text-2xl ${plans.find(p => p.id === simPlan)?.color}`}>
+                                        R$ {simData.pc.toFixed(2)}
+                                    </span>
                                 </div>
                             </div>
                         )}
 
+                        {/* Comparativo */}
                         <div className="mt-6 pt-5 border-t border-border/30">
                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-3">Comparativo de Planos</p>
                             <div className="flex flex-col sm:flex-row gap-3 mb-3">
@@ -303,17 +354,13 @@ const PricingParametersPage = () => {
                                     );
                                 })}
                             </div>
-
-                            {/* Mensalidades */}
                             <div className="flex flex-col sm:flex-row gap-3">
                                 {planPcs.map(plan => {
                                     const monthly = plan.pc / 12;
                                     return (
                                         <div key={plan.id} className={`flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl border gap-1 ${plan.bgColor} ${plan.borderColor}`}>
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">12x de</span>
-                                            <span className={`font-mono font-extrabold text-lg ${plan.color}`}>
-                                                R$ {monthly.toFixed(2)}
-                                            </span>
+                                            <span className={`font-mono font-extrabold text-lg ${plan.color}`}>R$ {monthly.toFixed(2)}</span>
                                             <span className="text-[10px] text-muted-foreground">/mês</span>
                                         </div>
                                     );
@@ -346,9 +393,12 @@ const PricingParametersPage = () => {
                                 {msParams.map(p => (
                                     <ParamRow key={p.id} param={p}
                                         onUpdate={(id, field, v) => updateShared(setMsParams, id, field, v)}
-                                        onRemove={p.removable ? (id) => removeShared(setMsParams, id) : undefined} />
+                                        onToggle={(id) => toggleShared(setMsParams, id)}
+                                        onRemove={p.removable ? (id) => removeShared(setMsParams, id) : undefined}
+                                    />
                                 ))}
-                                <Button variant="ghost" size="sm" className="mt-3 w-full gap-2 border border-dashed border-border/50 text-muted-foreground hover:text-emerald-500 hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                                <Button variant="ghost" size="sm"
+                                    className="mt-3 w-full gap-2 border border-dashed border-border/50 text-muted-foreground hover:text-emerald-500 hover:border-emerald-500/40 hover:bg-emerald-500/5"
                                     onClick={() => addShared(setMsParams, "percent")}>
                                     <Plus className="w-4 h-4" /> Adicionar Item
                                 </Button>
@@ -370,9 +420,12 @@ const PricingParametersPage = () => {
                                 {coParams.map(p => (
                                     <ParamRow key={p.id} param={p}
                                         onUpdate={(id, field, v) => updateShared(setCoParams, id, field, v)}
-                                        onRemove={p.removable ? (id) => removeShared(setCoParams, id) : undefined} />
+                                        onToggle={(id) => toggleShared(setCoParams, id)}
+                                        onRemove={p.removable ? (id) => removeShared(setCoParams, id) : undefined}
+                                    />
                                 ))}
-                                <Button variant="ghost" size="sm" className="mt-3 w-full gap-2 border border-dashed border-border/50 text-muted-foreground hover:text-rose-500 hover:border-rose-500/40 hover:bg-rose-500/5"
+                                <Button variant="ghost" size="sm"
+                                    className="mt-3 w-full gap-2 border border-dashed border-border/50 text-muted-foreground hover:text-rose-500 hover:border-rose-500/40 hover:bg-rose-500/5"
                                     onClick={() => addShared(setCoParams, "percent")}>
                                     <Plus className="w-4 h-4" /> Adicionar Item
                                 </Button>
@@ -413,10 +466,12 @@ const PricingParametersPage = () => {
                                         {plan.params.map(p => (
                                             <ParamRow key={p.id} param={p}
                                                 onUpdate={(id, field, v) => updatePlan(plan.id, id, field, v)}
-                                                onRemove={p.removable ? (id) => removePlanParam(plan.id, id) : undefined} />
+                                                onToggle={(id) => togglePlan(plan.id, id)}
+                                                onRemove={p.removable ? (id) => removePlanParam(plan.id, id) : undefined}
+                                            />
                                         ))}
                                         <Button variant="ghost" size="sm"
-                                            className={`mt-3 w-full gap-2 border border-dashed border-border/50 text-muted-foreground hover:${plan.color}`}
+                                            className="mt-3 w-full gap-2 border border-dashed border-border/50 text-muted-foreground"
                                             onClick={() => addPlanParam(plan.id)}>
                                             <Plus className="w-4 h-4" /> Adicionar Item
                                         </Button>
@@ -470,7 +525,7 @@ const PricingParametersPage = () => {
 
                 <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl border border-border/40 text-sm text-muted-foreground">
                     <Info className="w-4 h-4 mt-0.5 shrink-0 text-secondary" />
-                    <p>Estimativas calculadas em tempo real. A persistência dos dados no Supabase será ativada na próxima fase.</p>
+                    <p>Estimativas calculadas em tempo real. Itens desativados (toggle desligado) são excluídos do cálculo. A persistência dos dados no Supabase será ativada na próxima fase.</p>
                 </div>
 
             </div>
