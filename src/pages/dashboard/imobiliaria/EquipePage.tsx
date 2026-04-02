@@ -52,11 +52,9 @@ const EquipePage = () => {
       console.log("[EquipePage] Searching for org members with imobiliaria_id =", myOrgId);
 
       const { data: team, error: teamError } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, role, whatsapp")
-        .eq("imobiliaria_id", myOrgId);
+        .rpc('get_team_members', { org_id: myOrgId });
 
-      console.log("[EquipePage] Team result:", team, "Error:", teamError);
+      console.log("[EquipePage] Team RPC result:", team, "Error:", teamError);
 
       if (team) setMembers(team);
     } catch (error) {
