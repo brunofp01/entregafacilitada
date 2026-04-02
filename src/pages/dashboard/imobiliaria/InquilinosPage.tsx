@@ -70,16 +70,24 @@ const InquilinosPage = () => {
     const [syncing, setSyncing] = useState(false);
 
     const handleSyncAssinaturas = async () => {
+        console.log("Botão de Sincronização clicado!");
+        console.log("Estado atual dos inquilinos:", inquilinos);
         try {
             setSyncing(true);
-            const pendentes = inquilinos.filter(i => i.status_assinatura === 'pendente' && i.autentique_document_id);
+            // Considerar qualquer um que não esteja assinado mas tenha ID do Autentique
+            const pendentes = inquilinos.filter(i =>
+                i.status_assinatura !== 'assinado' &&
+                i.autentique_document_id
+            );
 
             if (pendentes.length === 0) {
+                console.log("Nenhum contrato elegível para sincronização encontrado.");
                 toast.info("Não há contratos pendentes listados hoje para sincronizar.");
                 return;
             }
 
             const idsToCheck = pendentes.map(i => i.autentique_document_id);
+            console.log("Iniciando sincronização com Autentique para os documentos:", idsToCheck);
 
             const apiRes = await fetch("/api/sync-autentique", {
                 method: "POST",
@@ -88,16 +96,26 @@ const InquilinosPage = () => {
             });
 
             const apiData = await apiRes.json();
+            console.log("Resposta da API de Sincronização:", apiData);
 
             if (apiData.success && apiData.statuses) {
                 let changedCount = 0;
                 for (const item of apiData.statuses) {
                     if (item.status === 'assinado' || item.status === 'rejeitado') {
-                        await supabase
+                        console.log(`Atualizando status do documento ${item.id} para ${item.status}...`);
+                        const { data, error } = await supabase
                             .from('inquilinos')
                             .update({ status_assinatura: item.status })
-                            .eq('autentique_document_id', item.id);
-                        changedCount++;
+                            .eq('autentique_document_id', item.id)
+                            .select();
+
+                        if (error) {
+                            console.error(`Erro ao atualizar status no banco para ${item.id}:`, error);
+                        } else if (data && data.length > 0) {
+                            changedCount++;
+                        } else {
+                            console.warn(`Nenhuma linha atualizada para o ID ${item.id}. Verifique permissões RLS.`);
+                        }
                     }
                 }
 
