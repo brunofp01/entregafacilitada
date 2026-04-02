@@ -47,10 +47,13 @@ const AdminPerfilPage = () => {
     const handleUpdateProfile = async () => {
         setLoading(true);
         try {
-            // 1. Atualizar Nome no Banco
+            // 1. Atualizar Nome e Email no Banco (Tabela profiles)
             const { error: profileError } = await supabase
                 .from('profiles')
-                .update({ full_name: fullName })
+                .update({
+                    full_name: fullName,
+                    email: email
+                })
                 .eq('id', userId);
 
             if (profileError) throw profileError;
