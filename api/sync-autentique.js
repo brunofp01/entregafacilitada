@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         };
 
         const graphqlQuery = `
-      query GetDocumentStatus($id: ID!) {
+      query GetDocumentStatus($id: UUID!) {
         document(id: $id) {
           id
           signatures {
