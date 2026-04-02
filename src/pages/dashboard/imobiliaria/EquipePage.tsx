@@ -44,7 +44,7 @@ const EquipePage = () => {
         .from("profiles")
         .select("id, full_name, email, role, whatsapp")
         .eq("imobiliaria_id", myOrgId)
-        .eq("role", "imobiliaria");
+        .in("role", ["imobiliaria", "integrante_imobiliaria"]);
 
       if (team) setMembers(team);
     } catch (error) {

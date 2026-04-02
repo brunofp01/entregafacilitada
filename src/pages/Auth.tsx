@@ -30,7 +30,7 @@ const Auth = () => {
   const handleAuth = async (type: "login" | "signup") => {
     try {
       setLoading(true);
-      const { error } = type === "login" 
+      const { error } = type === "login"
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password });
 
@@ -56,10 +56,10 @@ const Auth = () => {
         }
 
         toast.success("Login realizado com sucesso!");
-        
+
         if (profile?.role === "admin") {
           navigate("/admin");
-        } else if (profile?.role === "imobiliaria") {
+        } else if (profile?.role === "imobiliaria" || profile?.role === "integrante_imobiliaria") {
           navigate("/imobiliaria");
         } else {
           navigate("/inquilino");
@@ -85,9 +85,9 @@ const Auth = () => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
       >
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="mb-8 text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => navigate("/")}
         >
@@ -113,12 +113,12 @@ const Auth = () => {
                   Cadastrar
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="login" className="mt-0">
                 <CardTitle className="text-2xl font-bold">Bem-vindo de volta</CardTitle>
                 <CardDescription>Insira suas credenciais para acessar a plataforma.</CardDescription>
               </TabsContent>
-              
+
               <TabsContent value="signup" className="mt-0">
                 <CardTitle className="text-2xl font-bold">Criar conta</CardTitle>
                 <CardDescription>Comece hoje mesmo a facilitar suas entregas.</CardDescription>
@@ -128,10 +128,10 @@ const Auth = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="seu@email.com" 
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-background/50"
@@ -144,9 +144,9 @@ const Auth = () => {
                     Esqueceu a senha?
                   </Button>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
+                <Input
+                  id="password"
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-background/50"
@@ -156,7 +156,7 @@ const Auth = () => {
 
             <CardFooter className="flex flex-col gap-4">
               <TabsContent value="login" className="mt-0 w-full">
-                <Button 
+                <Button
                   className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
                   onClick={() => handleAuth("login")}
                   disabled={loading}
@@ -165,9 +165,9 @@ const Auth = () => {
                   Entrar
                 </Button>
               </TabsContent>
-              
+
               <TabsContent value="signup" className="mt-0 w-full">
-                <Button 
+                <Button
                   className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
                   onClick={() => handleAuth("signup")}
                   disabled={loading}
@@ -176,27 +176,27 @@ const Auth = () => {
                   Cadastrar
                 </Button>
               </TabsContent>
-            
-            <div className="relative w-full py-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <Button variant="outline" className="border-border/50 hover:bg-secondary/5 transition-colors">
-                Google
-              </Button>
-              <Button variant="outline" className="border-border/50 hover:bg-secondary/5 transition-colors">
-                GitHub
-              </Button>
-            </div>
-          </CardFooter>
-        </Tabs>
-      </Card>
+              <div className="relative w-full py-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full">
+                <Button variant="outline" className="border-border/50 hover:bg-secondary/5 transition-colors">
+                  Google
+                </Button>
+                <Button variant="outline" className="border-border/50 hover:bg-secondary/5 transition-colors">
+                  GitHub
+                </Button>
+              </div>
+            </CardFooter>
+          </Tabs>
+        </Card>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
           Ao continuar, você concorda com nossos{" "}

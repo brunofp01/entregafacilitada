@@ -3,7 +3,7 @@ import { LayoutDashboard, Users, Plus, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MobileBottomNavProps {
-  role: "admin" | "imobiliaria" | "inquilino";
+  role: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria";
   onMenuOpen: () => void;
 }
 
@@ -17,6 +17,11 @@ export const MobileBottomNav = ({ role, onMenuOpen }: MobileBottomNavProps) => {
       { icon: Users, label: "Users", href: "/admin/usuarios" },
     ],
     imobiliaria: [
+      { icon: LayoutDashboard, label: "Home", href: "/imobiliaria" },
+      { icon: Users, label: "Inquilinos", href: "/imobiliaria/inquilinos" },
+      { icon: Plus, label: "Vistoria", href: "/imobiliaria/vistorias/nova" },
+    ],
+    integrante_imobiliaria: [
       { icon: LayoutDashboard, label: "Home", href: "/imobiliaria" },
       { icon: Users, label: "Inquilinos", href: "/imobiliaria/inquilinos" },
       { icon: Plus, label: "Vistoria", href: "/imobiliaria/vistorias/nova" },
@@ -47,7 +52,7 @@ export const MobileBottomNav = ({ role, onMenuOpen }: MobileBottomNavProps) => {
           </Link>
         );
       })}
-      
+
       <button
         onClick={onMenuOpen}
         className="flex flex-col items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"

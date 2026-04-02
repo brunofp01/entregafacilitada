@@ -30,16 +30,16 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          
+
           {/* Dashboard Routes with Protection */}
           <Route path="/admin/*" element={
             <ProtectedRoute allowedRole="admin">
               <AdminDashboard />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/imobiliaria/*" element={
-            <ProtectedRoute allowedRole="imobiliaria">
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
               <ImobiliariaDashboard />
             </ProtectedRoute>
           } />
@@ -49,22 +49,22 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/imobiliaria/vistorias" element={
-            <ProtectedRoute allowedRole="imobiliaria">
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
               <VistoriasPage />
             </ProtectedRoute>
           } />
           <Route path="/imobiliaria/vistorias/nova" element={
-            <ProtectedRoute allowedRole="imobiliaria">
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
               <NewVistoria />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/imobiliaria/perfil" element={
             <ProtectedRoute allowedRole="imobiliaria">
               <PerfilPage />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/inquilino/*" element={
             <ProtectedRoute allowedRole="inquilino">
               <InquilinoDashboard />

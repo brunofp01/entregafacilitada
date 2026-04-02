@@ -21,7 +21,7 @@ import { MobileMenuDrawer } from "./MobileMenuDrawer";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role: "admin" | "imobiliaria" | "inquilino";
+  role: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria";
 }
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
@@ -69,6 +69,12 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: Users, label: "Minha Equipe", href: "/imobiliaria/equipe" },
       { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
       { icon: Settings, label: "Configurações", href: "/imobiliaria/configuracoes" },
+    ],
+    integrante_imobiliaria: [
+      { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
+      { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
+      { icon: Users, label: "Gestão de Inquilinos", href: "/imobiliaria/inquilinos" },
+      { icon: User, label: "Novo Inquilino", href: "/imobiliaria/inquilinos/novo" },
     ],
     inquilino: [
       { icon: LayoutDashboard, label: "Meu Plano", href: "/inquilino" },

@@ -1,17 +1,34 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, FileText, ClipboardCheck, UserPlus, ArrowRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabaseClient";
 
 const ImobiliariaDashboard = () => {
-  const modules = [
+  const [userRole, setUserRole] = useState<string>("imobiliaria");
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+      if (profile?.role) setUserRole(profile.role);
+    };
+    fetchRole();
+  }, []);
+
+  const isIntegrante = userRole === "integrante_imobiliaria";
+
+  const allModules = [
     {
       title: "Gestão de Inquilinos com Entrega Facilitada",
       description: "Visualize e gerencie todos os inquilinos vinculados à sua imobiliária.",
       icon: Users,
       href: "/imobiliaria/inquilinos",
       color: "bg-blue-500/10 text-blue-500",
+      restrictedOnly: false,
     },
     {
       title: "Módulo de Vistoria",
@@ -19,7 +36,8 @@ const ImobiliariaDashboard = () => {
       icon: ClipboardCheck,
       href: "/imobiliaria/vistorias",
       color: "bg-emerald-500/10 text-emerald-500",
-      badge: "Grátis"
+      badge: "Grátis",
+      restrictedOnly: false,
     },
     {
       title: "Minha Equipe",
@@ -27,6 +45,7 @@ const ImobiliariaDashboard = () => {
       icon: UserPlus,
       href: "/imobiliaria/equipe",
       color: "bg-purple-500/10 text-purple-500",
+      ownerOnly: true,
     },
     {
       title: "Seguros e Garantias",
@@ -34,6 +53,7 @@ const ImobiliariaDashboard = () => {
       icon: Shield,
       href: "/imobiliaria/seguros",
       color: "bg-orange-500/10 text-orange-500",
+      restrictedOnly: false,
     },
     {
       title: "Perfil da Imobiliária",
@@ -41,11 +61,14 @@ const ImobiliariaDashboard = () => {
       icon: FileText,
       href: "/imobiliaria/perfil",
       color: "bg-pink-500/10 text-pink-500",
+      ownerOnly: true,
     },
   ];
 
+  const modules = allModules.filter(m => !m.ownerOnly || !isIntegrante);
+
   return (
-    <DashboardLayout role="imobiliaria">
+    <DashboardLayout role={userRole as "imobiliaria" | "integrante_imobiliaria"}>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

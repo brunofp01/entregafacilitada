@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRole?: "admin" | "imobiliaria" | "inquilino";
+  allowedRole?: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria" | Array<"admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria">;
 }
 
 const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
           navigate("/auth");
           return;
@@ -30,14 +30,19 @@ const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
             .eq("id", session.user.id)
             .single();
 
-          if (profile?.role !== allowedRole) {
-            // Redirect to their own dashboard if they share the wrong role
-            const dashboardMap = {
+          const userRole = profile?.role as string;
+          const allowed = Array.isArray(allowedRole)
+            ? allowedRole.includes(userRole as any)
+            : userRole === allowedRole;
+
+          if (!allowed) {
+            const dashboardMap: Record<string, string> = {
               admin: "/admin",
               imobiliaria: "/imobiliaria",
+              integrante_imobiliaria: "/imobiliaria",
               inquilino: "/inquilino",
             };
-            navigate(dashboardMap[profile?.role as keyof typeof dashboardMap] || "/");
+            navigate(dashboardMap[userRole] || "/");
             return;
           }
         }
