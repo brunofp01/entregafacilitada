@@ -189,8 +189,8 @@ const InquilinosPage = () => {
 
                 <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Gestão de Inquilinos</h1>
-                        <p className="text-muted-foreground">Acompanhe os contratos, assinaturas e mensalidades do Entrega Facilitada.</p>
+                        <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Gestão de Clientes EF</h1>
+                        <p className="text-muted-foreground">Acompanhe os contratos, assinaturas e o status de aprovação da Entrega Facilitada.</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button variant="outline" onClick={handleSyncAssinaturas} disabled={syncing || loading} className="border-border/50 bg-background/50 backdrop-blur-sm shadow-sm transition-all hover:bg-secondary/5">
@@ -206,30 +206,39 @@ const InquilinosPage = () => {
                 </header>
 
                 {/* Resumo Opcional */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="pb-2">
-                            <CardDescription className="font-bold uppercase tracking-wider text-xs">Total na Base</CardDescription>
-                            <CardTitle className="text-3xl flex items-center gap-2">
-                                <Users className="w-6 h-6 text-secondary" /> {inquilinos.length}
+                            <CardDescription className="font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Total de Clientes</CardDescription>
+                            <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
+                                <Users className="w-5 h-5 md:w-6 md:h-6 text-secondary" /> {inquilinos.length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <Card className="border-orange-500/10 bg-orange-500/5 hover:border-orange-500/30 transition-all">
                         <CardHeader className="pb-2">
-                            <CardDescription className="font-bold uppercase tracking-wider text-xs text-orange-500">Assinaturas Pendentes</CardDescription>
-                            <CardTitle className="text-3xl flex items-center gap-2">
-                                <FileSignature className="w-6 h-6 text-orange-500" />
-                                {inquilinos.filter(i => i.status_assinatura !== 'assinado').length}
+                            <CardDescription className="font-bold uppercase tracking-wider text-[10px] text-orange-600">Aguardando Assinatura</CardDescription>
+                            <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
+                                <FileSignature className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
+                                {inquilinos.filter(i => i.status_assinatura !== 'assinado' && i.status_assinatura !== 'rejeitado').length}
                             </CardTitle>
                         </CardHeader>
                     </Card>
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <Card className="border-violet-500/10 bg-violet-500/5 hover:border-violet-500/30 transition-all">
                         <CardHeader className="pb-2">
-                            <CardDescription className="font-bold uppercase tracking-wider text-xs text-emerald-500">Contratos Ativos</CardDescription>
-                            <CardTitle className="text-3xl flex items-center gap-2">
-                                <Wallet className="w-6 h-6 text-emerald-500" />
-                                {inquilinos.filter(i => i.status_assinatura === 'assinado').length}
+                            <CardDescription className="font-bold uppercase tracking-wider text-[10px] text-violet-600">Aguardando EF</CardDescription>
+                            <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
+                                <Clock className="w-5 h-5 md:w-6 md:h-6 text-violet-500" />
+                                {inquilinos.filter(i => i.status_assinatura === 'assinado' && (!i.aprovacao_ef || i.aprovacao_ef === 'pendente')).length}
+                            </CardTitle>
+                        </CardHeader>
+                    </Card>
+                    <Card className="border-emerald-500/10 bg-emerald-500/5 hover:border-emerald-500/30 transition-all">
+                        <CardHeader className="pb-2">
+                            <CardDescription className="font-bold uppercase tracking-wider text-[10px] text-emerald-600">Contratos Ativos</CardDescription>
+                            <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
+                                <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
+                                {inquilinos.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado').length}
                             </CardTitle>
                         </CardHeader>
                     </Card>

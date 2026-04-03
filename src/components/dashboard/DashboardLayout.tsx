@@ -80,7 +80,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
-      { icon: Users, label: "Inquilinos", href: "/imobiliaria/inquilinos" },
+      { icon: Users, label: "Clientes EF", href: "/imobiliaria/inquilinos" },
       { icon: Users, label: "Minha Equipe", href: "/imobiliaria/equipe" },
       { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
       { icon: Settings, label: "Configurações", href: "/imobiliaria/configuracoes" },
@@ -88,7 +88,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     integrante_imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
-      { icon: Users, label: "Gestão de Inquilinos", href: "/imobiliaria/inquilinos" },
+      { icon: Users, label: "Gestão de Clientes EF", href: "/imobiliaria/inquilinos" },
       { icon: User, label: "Contratar Entrega Facilitada", href: "/imobiliaria/contratar" },
     ],
     inquilino: [
