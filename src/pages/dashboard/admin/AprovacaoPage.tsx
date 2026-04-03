@@ -38,6 +38,7 @@ interface ContratoParaAprovacao {
     contrato_locacao_url?: string;
     vistoria_id?: string;
     vistoria_upload_url?: string;
+    vistorias?: { relatorio_url: string };
     created_at: string;
     imobiliaria_id: string;
     imobiliaria_nome?: string;
@@ -83,7 +84,12 @@ const AprovacaoPage = () => {
             // Only contracts that are signed (eligible for approval)
             const { data, error } = await supabase
                 .from("inquilinos")
-                .select("*")
+                .select(`
+                    *,
+                    vistorias:vistoria_id (
+                        relatorio_url
+                    )
+                `)
                 .eq("status_assinatura", "assinado")
                 .order("created_at", { ascending: false });
 
@@ -441,8 +447,9 @@ const AprovacaoPage = () => {
                                     </div>
                                     {(selected.vistoria_upload_url || selected.vistoria_id)
                                         ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => {
-                                            if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
-                                            else window.open(selected.vistoria_upload_url, "_blank");
+                                            const url = selected.vistorias?.relatorio_url || selected.vistoria_upload_url;
+                                            if (url) window.open(url, "_blank");
+                                            else if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
                                         }}><ExternalLink className="w-4 h-4" /></Button>
                                         : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
                                 </div>

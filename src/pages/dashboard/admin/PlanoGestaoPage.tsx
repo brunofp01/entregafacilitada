@@ -52,6 +52,7 @@ interface ClienteContrato {
     imobiliaria_nome?: string;
     motivo_recusa?: string;
     aprovacao_ef?: string;
+    vistorias?: { relatorio_url: string };
 }
 
 const statusBadge = (item: ClienteContrato) => {
@@ -128,7 +129,12 @@ const PlanoGestaoPage = () => {
             // Fetch all clients across all agencies
             const { data: clientesData, error } = await supabase
                 .from("inquilinos")
-                .select("*")
+                .select(`
+                    *,
+                    vistorias:vistoria_id (
+                        relatorio_url
+                    )
+                `)
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
@@ -630,8 +636,9 @@ const PlanoGestaoPage = () => {
                                     </div>
                                     {(selected.vistoria_upload_url || selected.vistoria_id)
                                         ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => {
-                                            if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
-                                            else window.open(selected.vistoria_upload_url, "_blank");
+                                            const url = selected.vistorias?.relatorio_url || selected.vistoria_upload_url;
+                                            if (url) window.open(url, "_blank");
+                                            else if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
                                         }}><ExternalLink className="w-4 h-4" /></Button>
                                         : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
                                 </div>
