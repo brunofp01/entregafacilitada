@@ -89,16 +89,6 @@ const App = () => (
             </ProtectedRoute>
           } />
 
-          <Route path="/imobiliaria/*" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <ImobiliariaDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/imobiliaria/equipe" element={
-            <ProtectedRoute allowedRole="imobiliaria">
-              <EquipePage />
-            </ProtectedRoute>
-          } />
           <Route path="/imobiliaria/vistorias" element={
             <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
               <VistoriasPage />
@@ -128,6 +118,12 @@ const App = () => (
           <Route path="/imobiliaria/perfil" element={
             <ProtectedRoute allowedRole="imobiliaria">
               <PerfilPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/imobiliaria/*" element={
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+              <ImobiliariaDashboard />
             </ProtectedRoute>
           } />
 
