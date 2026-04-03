@@ -18,7 +18,7 @@ export const PwaHandler = () => {
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      
+
       const allowedRoutes = ['/auth', '/imobiliaria', '/admin', '/inquilino'];
       const isAllowed = allowedRoutes.some(route => location.pathname.startsWith(route));
 
@@ -35,10 +35,10 @@ export const PwaHandler = () => {
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
-    
+
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
       setShowBanner(false);
@@ -56,7 +56,7 @@ export const PwaHandler = () => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 bg-card border border-border shadow-2xl rounded-2xl p-4 z-[100] flex flex-col gap-3"
+        className="fixed top-4 md:top-auto md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 bg-card border border-border shadow-2xl rounded-2xl p-4 z-[110] flex flex-col gap-3"
       >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -68,14 +68,14 @@ export const PwaHandler = () => {
               <p className="text-xs text-muted-foreground line-clamp-1">Acesse a plataforma mais rápido.</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setShowBanner(false)}
             className="p-1 hover:bg-muted rounded-full text-muted-foreground transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
-        
+
         <Button onClick={handleInstall} className="w-full bg-secondary text-secondary-foreground font-bold gap-2">
           <Download className="w-4 h-4" />
           Adicionar à Tela de Início
