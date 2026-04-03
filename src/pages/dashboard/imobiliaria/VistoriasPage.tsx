@@ -250,7 +250,7 @@ const VistoriasPage = () => {
               className={cn(
                 "rounded-full px-5 py-5 font-bold gap-2 transition-all",
                 statusFilter === filter.id
-                  ? `${filter.color} shadow-lg scale-105`
+                  ? `${filter.color} shadow-lg`
                   : "border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
