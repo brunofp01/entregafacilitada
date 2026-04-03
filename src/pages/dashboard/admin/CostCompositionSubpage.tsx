@@ -15,6 +15,8 @@ export interface CompositionItem {
     probabilidade: string;
     rendimento: string;
     valorReferencia: string;
+    temValorMinimo: boolean;
+    valorMinimo: string;
     inBasico: boolean;
     inCompleto: boolean;
 }
@@ -30,6 +32,8 @@ const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
     probabilidade: "",
     rendimento: "",
     valorReferencia: "",
+    temValorMinimo: false,
+    valorMinimo: "",
 };
 
 export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ area, onTotalsChange }) => {
@@ -53,6 +57,8 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                     probabilidade: d.probabilidade?.toString() || "",
                     rendimento: d.rendimento?.toString() || "",
                     valorReferencia: d.valor_referencia?.toString() || "",
+                    temValorMinimo: d.tem_valor_minimo || false,
+                    valorMinimo: d.valor_minimo?.toString() || "",
                     inBasico: d.in_basico,
                     inCompleto: d.in_completo
                 })));
@@ -73,8 +79,16 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         const execucaoPrevista = totalServico * (prob / 100);
 
         // Formules: (Execução Prevista / Rendimento) * Valor * [0.57 ou 0.43]
-        const mo = rend > 0 ? (execucaoPrevista / rend) * ref * 0.57 : 0;
-        const mat = rend > 0 ? (execucaoPrevista / rend) * ref * 0.43 : 0;
+        let mo = rend > 0 ? (execucaoPrevista / rend) * ref * 0.57 : 0;
+        let mat = rend > 0 ? (execucaoPrevista / rend) * ref * 0.43 : 0;
+
+        if (item.temValorMinimo) {
+            const minV = parseFloat(item.valorMinimo) || 0;
+            if ((mo + mat) < minV) {
+                mo = minV * 0.57;
+                mat = minV * 0.43;
+            }
+        }
 
         return { totalServico, execucaoPrevista, mo, mat };
     };
@@ -92,6 +106,8 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
             probabilidade: parseFloat(formItem.probabilidade) || 0,
             rendimento: parseFloat(formItem.rendimento) || 1,
             valor_referencia: parseFloat(formItem.valorReferencia) || 0,
+            tem_valor_minimo: formItem.temValorMinimo || false,
+            valor_minimo: parseFloat(formItem.valorMinimo) || 0,
         };
 
         if (editingId) {
@@ -135,6 +151,8 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
             probabilidade: item.probabilidade,
             rendimento: item.rendimento,
             valorReferencia: item.valorReferencia,
+            temValorMinimo: item.temValorMinimo,
+            valorMinimo: item.valorMinimo,
         });
         setEditingId(item.id);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -294,6 +312,38 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="pt-2">
+                                <label className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-background/50 cursor-pointer hover:bg-background/80 transition-colors">
+                                    <Checkbox
+                                        checked={formItem.temValorMinimo}
+                                        onCheckedChange={(c) => setFormItem(f => ({ ...f, temValorMinimo: !!c }))}
+                                        className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-bold text-foreground">Aplicar Valor Mínimo?</div>
+                                        <div className="text-xs text-muted-foreground leading-tight mt-0.5">O cálculo adotará este piso de cobrança caso a fórmula atuarial final resulte num valor inferior.</div>
+                                    </div>
+                                </label>
+
+                                {formItem.temValorMinimo && (
+                                    <div className="mt-3 p-3 pt-4 border rounded-xl bg-orange-500/5 border-orange-500/30 relative animate-in fade-in slide-in-from-top-1">
+                                        <label className="absolute -top-2 left-3 bg-card px-1 text-xs font-bold text-orange-600 dark:text-orange-400">
+                                            Valor Mínimo Fixo (R$)
+                                        </label>
+                                        <div className="relative mt-1">
+                                            <DollarSign className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-orange-500" />
+                                            <Input
+                                                type="number" step="0.01"
+                                                value={formItem.valorMinimo}
+                                                onChange={e => setFormItem(f => ({ ...f, valorMinimo: e.target.value }))}
+                                                placeholder="Ex: 500"
+                                                className="pl-9 border-orange-500/40 focus-visible:ring-orange-500 bg-background/80 font-mono font-bold shadow-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-4 border-t border-border/30 mt-4 grid grid-cols-2 gap-4">
