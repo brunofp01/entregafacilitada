@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ClipboardCheck, Calendar, FileText, Plus, Loader2, Eye, Search, SearchX, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Vistoria {
   id: string;
@@ -30,6 +31,7 @@ const VistoriasPage = () => {
   const [loading, setLoading] = useState(true);
   const [vistorias, setVistorias] = useState<Vistoria[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"todas" | "aprovadas" | "pendentes" | "reprovadas">("todas");
 
   const fetchVistorias = async () => {
     try {
@@ -71,7 +73,7 @@ const VistoriasPage = () => {
     if (url) {
       // 1. Abrir para visualização
       window.open(url, "_blank");
-      
+
       // 2. Trigger Download (Blob approach for best cross-browser support)
       try {
         const response = await fetch(url);
@@ -94,7 +96,7 @@ const VistoriasPage = () => {
 
   const handleDeleteVistoria = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta vistoria? Esta ação não pode ser desfeita.")) return;
-    
+
     try {
       const { error } = await supabase.from("vistorias").delete().eq("id", id);
       if (error) throw error;
@@ -111,7 +113,7 @@ const VistoriasPage = () => {
         .from("vistorias")
         .update({ status: "concluida" })
         .eq("id", id);
-      
+
       if (error) throw error;
       toast.success("Vistoria aprovada e finalizada!");
       fetchVistorias();
@@ -134,7 +136,7 @@ const VistoriasPage = () => {
 
   const formatEndereco = (vistoria: Vistoria) => {
     const parts = [];
-    
+
     // Rua, nº Número
     if (vistoria.rua) {
       let main = vistoria.rua;
@@ -162,25 +164,25 @@ const VistoriasPage = () => {
     // CEP (Conditional)
     const baseline = parts.join(", ");
     let final = baseline.replace(/, ([^,]+)$/, " - $1"); // Replace last comma with dash for Bairro or Cidade separation
-    
+
     // Ajuste fino para o formato solicitado: [Rua], nº [Número], [Complemento] - [Bairro], [Cidade]/[UF] - CEP: [CEP]
     // Vamos reconstruir de forma mais granular para o formato exato:
     const finalParts = [];
     const ruaNum = vistoria.rua ? `${vistoria.rua}${vistoria.numero ? `, nº ${vistoria.numero}` : ''}` : "";
     if (ruaNum) finalParts.push(ruaNum);
-    
+
     if (vistoria.complemento && vistoria.complemento.trim()) finalParts.push(vistoria.complemento.trim());
-    
+
     let result = finalParts.join(", ");
-    
+
     if (vistoria.bairro) {
       result += (result ? " - " : "") + vistoria.bairro;
     }
-    
+
     if (vistoria.cidade) {
       result += (result ? ", " : "") + vistoria.cidade + (vistoria.estado ? `/${vistoria.estado}` : "");
     }
-    
+
     if (vistoria.cep) {
       result += (result ? " - " : "") + `CEP: ${vistoria.cep}`;
     }
@@ -189,10 +191,19 @@ const VistoriasPage = () => {
   };
 
   const filteredVistorias = vistorias.filter(v => {
-    if (!searchTerm.trim()) return true;
-    const search = searchTerm.toLowerCase();
-    const fullSearchString = `${v.rua} ${v.bairro} ${v.cidade} ${v.complemento} ${v.numero} ${v.id}`.toLowerCase();
-    return fullSearchString.includes(search);
+    // 1. Search Filter
+    const searchMatch = !searchTerm.trim() ||
+      `${v.rua} ${v.bairro} ${v.cidade} ${v.complemento} ${v.numero} ${v.id}`.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!searchMatch) return false;
+
+    // 2. Status Filter
+    if (statusFilter === "todas") return true;
+    if (statusFilter === "aprovadas") return v.status === "concluida";
+    if (statusFilter === "reprovadas") return v.status === "cancelada";
+    if (statusFilter === "pendentes") return ["agendada", "pendente", "aguardando_aprovacao", "rascunho"].includes(v.status);
+
+    return true;
   });
 
   if (loading) {
@@ -224,18 +235,45 @@ const VistoriasPage = () => {
           </Button>
         </div>
 
+        {/* Filtros de Status */}
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: "todas", label: "Todas", count: vistorias.length },
+            { id: "aprovadas", label: "Aprovadas", count: vistorias.filter(v => v.status === "concluida").length },
+            { id: "pendentes", label: "Pendentes", count: vistorias.filter(v => ["agendada", "pendente", "aguardando_aprovacao", "rascunho"].includes(v.status)).length },
+            { id: "reprovadas", label: "Reprovadas", count: vistorias.filter(v => v.status === "cancelada").length },
+          ].map((filter) => (
+            <Button
+              key={filter.id}
+              variant={statusFilter === filter.id ? "secondary" : "outline"}
+              onClick={() => setStatusFilter(filter.id as any)}
+              className={cn(
+                "rounded-full px-5 py-5 font-bold gap-2 transition-all",
+                statusFilter === filter.id
+                  ? "bg-secondary text-secondary-foreground shadow-lg shadow-secondary/20"
+                  : "border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              {filter.label}
+              <Badge variant="secondary" className="ml-1 bg-background/50 text-[10px] px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full">
+                {filter.count}
+              </Badge>
+            </Button>
+          ))}
+        </div>
+
         {/* Barra de Busca Dinâmica */}
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm p-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar por rua, bairro, cidade ou complemento..." 
+            <Input
+              placeholder="Buscar por rua, bairro, cidade ou complemento..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-12 pr-10 h-14 bg-background/50 border-border/50 focus-visible:ring-secondary/50 text-base rounded-xl"
             />
             {searchTerm && (
-              <button 
+              <button
                 onClick={() => setSearchTerm("")}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
               >
@@ -254,7 +292,7 @@ const VistoriasPage = () => {
                     <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0 border border-secondary/20">
                       <ClipboardCheck className="w-8 h-8 text-secondary group-hover:scale-110 transition-transform" />
                     </div>
-                    
+
                     <div className="flex-1 space-y-1">
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <h3 className="font-bold text-base leading-tight md:text-lg max-w-md">
@@ -277,38 +315,38 @@ const VistoriasPage = () => {
                     </div>
 
                     <div className="flex gap-2">
-                       <Button variant="ghost" size="sm" className="text-blue-500 hover:bg-blue-500/10"
-                         onClick={() => navigate(`/imobiliaria/vistorias/nova?id=${vistoria.id}&view=true`)}>
-                         <Eye className="w-4 h-4" />
-                       </Button>
+                      <Button variant="ghost" size="sm" className="text-blue-500 hover:bg-blue-500/10"
+                        onClick={() => navigate(`/imobiliaria/vistorias/nova?id=${vistoria.id}&view=true`)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
 
-                       {vistoria.status === "aguardando_aprovacao" && (
-                         <Button onClick={() => handleApproveVistoria(vistoria.id)} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
-                           Aprovar
-                         </Button>
-                       )}
+                      {vistoria.status === "aguardando_aprovacao" && (
+                        <Button onClick={() => handleApproveVistoria(vistoria.id)} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white font-bold">
+                          Aprovar
+                        </Button>
+                      )}
 
-                       {vistoria.status !== "concluida" ? (
-                         <>
-                           <Button variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10"
-                             onClick={() => navigate(`/imobiliaria/vistorias/nova?id=${vistoria.id}`)}>
-                             Editar
-                           </Button>
-                           <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10"
-                             onClick={() => handleDeleteVistoria(vistoria.id)}>
-                             Excluir
-                           </Button>
-                         </>
-                       ) : (
-                         <>
-                           <Button variant="ghost" size="sm" className="text-muted-foreground font-bold" disabled>
-                             Finalizada
-                           </Button>
-                           <Button onClick={() => handleOpenPDF(vistoria.relatorio_url)} size="sm" className="bg-secondary text-secondary-foreground font-bold">
-                             PDF
-                           </Button>
-                         </>
-                       )}
+                      {vistoria.status !== "concluida" ? (
+                        <>
+                          <Button variant="ghost" size="sm" className="text-secondary hover:bg-secondary/10"
+                            onClick={() => navigate(`/imobiliaria/vistorias/nova?id=${vistoria.id}`)}>
+                            Editar
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteVistoria(vistoria.id)}>
+                            Excluir
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button variant="ghost" size="sm" className="text-muted-foreground font-bold" disabled>
+                            Finalizada
+                          </Button>
+                          <Button onClick={() => handleOpenPDF(vistoria.relatorio_url)} size="sm" className="bg-secondary text-secondary-foreground font-bold">
+                            PDF
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -345,35 +383,35 @@ const VistoriasPage = () => {
 
           <div className="space-y-6">
             <Card className="border-border/50 bg-secondary/5 overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="text-lg">Como funciona?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { step: "01", title: "Cadastro", desc: "Insira os dados do imóvel e locatário no portal." },
-                    { step: "02", title: "Vistoria", desc: "Use o checklist no celular para detalhar os ambientes." },
-                    { step: "03", title: "Fotos", desc: "Capture fotos otimizadas diretamente pelo sistema." },
-                    { step: "04", title: "Laudo", desc: "O PDF oficial é gerado instantaneamente após finalizar." },
-                  ].map((item, i) => (
-                    <div key={i} className="flex gap-4">
-                      <span className="text-xl font-bold text-secondary/30">{item.step}</span>
-                      <div>
-                        <p className="text-sm font-bold">{item.title}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
-                      </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Como funciona?</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { step: "01", title: "Cadastro", desc: "Insira os dados do imóvel e locatário no portal." },
+                  { step: "02", title: "Vistoria", desc: "Use o checklist no celular para detalhar os ambientes." },
+                  { step: "03", title: "Fotos", desc: "Capture fotos otimizadas diretamente pelo sistema." },
+                  { step: "04", title: "Laudo", desc: "O PDF oficial é gerado instantaneamente após finalizar." },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <span className="text-xl font-bold text-secondary/30">{item.step}</span>
+                    <div>
+                      <p className="text-sm font-bold">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
                     </div>
-                  ))}
-                </CardContent>
+                  </div>
+                ))}
+              </CardContent>
             </Card>
 
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                   <h4 className="font-bold mb-2 uppercase tracking-widest text-[10px] text-muted-foreground">Laudos Jurídicos</h4>
-                   <p className="text-sm text-foreground/80 mb-4 italic">
-                     "Nossa metodologia garante laudos aceitos juridicamente, evitando contestações e trazendo segurança para sua imobiliária."
-                   </p>
-                   <Button variant="link" className="p-0 h-auto text-secondary font-bold text-[10px] uppercase">Ver Modelo de Laudo</Button>
-                </CardContent>
+              <CardContent className="p-6">
+                <h4 className="font-bold mb-2 uppercase tracking-widest text-[10px] text-muted-foreground">Laudos Jurídicos</h4>
+                <p className="text-sm text-foreground/80 mb-4 italic">
+                  "Nossa metodologia garante laudos aceitos juridicamente, evitando contestações e trazendo segurança para sua imobiliária."
+                </p>
+                <Button variant="link" className="p-0 h-auto text-secondary font-bold text-[10px] uppercase">Ver Modelo de Laudo</Button>
+              </CardContent>
             </Card>
           </div>
         </div>
