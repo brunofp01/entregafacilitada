@@ -240,24 +240,12 @@ const ContratacaoPage = () => {
         }
     };
 
-    const normalizeAddress = (str: string) => {
-        if (!str) return "";
-        return str
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "") // Remove accents
-            .replace(/\b(rua|avenida|av|r|travessa|al|alameda|praca|estrada|rodovia)\.?\b/g, "") // Remove common prefixes
-            .trim();
-    };
-
     const matchingVistorias = vistoriasConcluidas.filter(v => {
-        const inputRua = normalizeAddress(imovel.rua);
-        const dbRua = normalizeAddress(v.rua);
-        return (
-            inputRua && imovel.numero &&
-            inputRua === dbRua &&
-            v.numero?.trim() === imovel.numero.trim()
-        );
+        const iRua = (imovel.rua || "").toLowerCase().trim();
+        const iNum = (imovel.numero || "").trim();
+        const vRua = (v.rua || "").toLowerCase().trim();
+        const vNum = (v.numero || "").trim();
+        return iRua && iNum && vRua === iRua && vNum === iNum;
     });
 
     const selectedVistoria = vistoriasConcluidas.find(v => v.id === vistoriaIdVinculada);
