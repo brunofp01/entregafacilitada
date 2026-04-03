@@ -13,7 +13,8 @@ import {
   X,
   User,
   Bell,
-  Calculator
+  Calculator,
+  Package
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -68,6 +69,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     admin: [
       { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
       { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
+      { icon: Package, label: "Gestão de Planos", href: "/admin/planos" },
       { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
       { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },
