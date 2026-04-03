@@ -54,14 +54,19 @@ const ContratacaoPage = () => {
 
                 const { data, error } = await supabase
                     .from("vistorias")
-                    .select("id, rua, numero, complemento, cidade, metragem, status")
+                    .select("id, rua, numero, complemento, cidade")
                     .eq("imobiliaria_id", imobiliariaId)
                     .in("status", ["concluida", "aguardando_aprovacao"])
                     .order("created_at", { ascending: false });
 
-                if (!error && data) {
-                    setVistoriasConcluidas(data);
+                if (error) {
+                    console.error("Erro ao buscar vistorias:", error);
                 }
+
+                if (!error && data) {
+                    setVistoriasConcluidas(data as VistoriaPlataforma[]);
+                }
+
                 const { data: configData } = await supabase.from('pricing_parameters_config').select('*').eq('id', 1).single();
                 if (configData) {
                     setParametrosGlobais(configData);
