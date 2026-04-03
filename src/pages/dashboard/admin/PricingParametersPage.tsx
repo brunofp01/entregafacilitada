@@ -15,18 +15,9 @@ import {
 import { toast } from "sonner";
 import { CostCompositionSubpage } from "./CostCompositionSubpage";
 import { supabase } from "@/lib/supabaseClient";
+import { FormulaParam, PlanConfig, calcPp, calcPc, sumActive, isPerSqm } from "@/lib/pricingCalc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface FormulaParam {
-    id: string;
-    label: string;
-    value: string;
-    unit: "percent" | "currency" | "number";
-    active: boolean;
-    removable?: boolean;
-    readonly?: boolean;
-}
-
 const uid = () => Math.random().toString(36).slice(2, 8);
 
 const makeNew = (unit: FormulaParam["unit"] = "percent"): FormulaParam => ({
@@ -77,27 +68,6 @@ const initialPlans: PlanConfig[] = [
         icon: Star, badge: "Recomendado", params: ppCompleto
     },
 ];
-
-// ─── Cálculo ──────────────────────────────────────────────────────────────────
-const isPerSqm = (label: string) => label.toLowerCase().includes("m²");
-
-const calcPp = (params: FormulaParam[], area: number) => {
-    let base = 0; let pct = 0;
-    params.filter(p => p.active).forEach(p => {
-        const v = parseFloat(p.value) || 0;
-        if (p.unit === "currency") base += isPerSqm(p.label) ? v * area : v;
-        else if (p.unit === "percent") pct += v;
-    });
-    return base * (1 + pct / 100);
-};
-
-const calcPc = (pp: number, msTotal: number, coTotal: number) => {
-    const d = 1 - coTotal / 100;
-    return d > 0 ? (pp * (1 + msTotal / 100)) / d : 0;
-};
-
-const sumActive = (params: FormulaParam[]) =>
-    params.filter(p => p.active).reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
 
 // ─── Toggle Switch ─────────────────────────────────────────────────────────────
 const ToggleSwitch = ({ active, onToggle }: { active: boolean; onToggle: () => void }) => (

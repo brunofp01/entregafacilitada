@@ -10,8 +10,10 @@ import { FileUp, Home, User, Link as LinkIcon, Loader2, Info } from "lucide-reac
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { pdf } from "@react-pdf/renderer";
+import { KontratoPDF } from "@/components/vistorias/ContratoPDF"; // Keep original name or adjust it if the user was using ContratoPDF
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
+import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive } from "@/lib/pricingCalc";
+import { Zap, Star, ShieldCheck } from "lucide-react";
 
 interface VistoriaPlataforma {
     id: string;
@@ -29,7 +31,9 @@ const ContratacaoPage = () => {
 
     // Formulário State
     const [inquilino, setInquilino] = useState({ nome: "", email: "", cpf: "", rg: "", telefone: "" });
-    const [imovel, setImovel] = useState({ cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "" });
+    const [imovel, setImovel] = useState({ cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "", area: "" });
+    const [parametrosGlobais, setParametrosGlobais] = useState<any>(null);
+    const [selectedPlanId, setSelectedPlanId] = useState<string>("completo");
     const [contratoFile, setContratoFile] = useState<File | null>(null);
     const [vistoriaTipo, setVistoriaTipo] = useState<"plataforma" | "upload">("upload");
     const [vistoriaFile, setVistoriaFile] = useState<File | null>(null);
@@ -55,8 +59,12 @@ const ContratacaoPage = () => {
                 if (!error && data) {
                     setVistoriasConcluidas(data);
                 }
+                const { data: configData } = await supabase.from('pricing_parameters_config').select('*').eq('id', 1).single();
+                if (configData) {
+                    setParametrosGlobais(configData);
+                }
             } catch (error) {
-                console.error("Erro ao buscar vistorias concluídas:", error);
+                console.error("Erro ao buscar vistorias concluídas ou configs:", error);
             } finally {
                 setFetchingVistorias(false);
             }
@@ -91,8 +99,8 @@ const ContratacaoPage = () => {
     const handleContratar = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!inquilino.nome || !inquilino.cpf || !imovel.cep) {
-            toast.error("Por favor, preencha todos os dados obrigatórios.");
+        if (!inquilino.nome || !inquilino.cpf || !imovel.cep || !imovel.area) {
+            toast.error("Por favor, preencha todos os dados obrigatórios e a metragem do imóvel.");
             return;
         }
 
@@ -134,6 +142,8 @@ const ContratacaoPage = () => {
 
             // 2. Geração do Contrato Padrão em memória
             toast.loading("Confeccionando contrato padrão Entrega Facilitada...", { id: toastId });
+            const pdfGenerator = await import('@react-pdf/renderer');
+            const pdf = pdfGenerator.pdf;
             const contratoBlob = await pdf(<ContratoPDF inquilino={inquilino} imovel={imovel} imobiliariaPerfil={imobiliariaPerfil} />).toBlob();
 
             const servicoContractId = crypto.randomUUID();
@@ -162,7 +172,24 @@ const ContratacaoPage = () => {
                 // We'll proceed so the tenant is still saved even if Autentique fails in dev without token
             }
 
-            // 4. Criação do registro no banco
+            let planoObj = null;
+            let finalPc = 0;
+            let finalParcelas = 24;
+
+            if (parametrosGlobais && selectedPlanId) {
+                const plan: PlanConfig = parametrosGlobais.plans?.find((p: any) => p.id === selectedPlanId);
+                if (plan) {
+                    planoObj = plan;
+                    const areaN = parseFloat(imovel.area) || 0;
+                    const pp = calcPp(plan.params, areaN);
+                    const ms = sumActive(parametrosGlobais.ms_params || []);
+                    const co = sumActive(parametrosGlobais.co_params || []);
+                    finalPc = calcPc(pp, ms, co);
+                    finalParcelas = parametrosGlobais.installments || 24;
+                }
+            }
+
+            // 4. Criação do registro no banco com SNAPSHOT do plano
             const { error: dbError } = await supabase.from("inquilinos").insert({
                 imobiliaria_id: imobiliariaId,
                 nome: inquilino.nome,
@@ -181,7 +208,14 @@ const ContratacaoPage = () => {
                 vistoria_id: vistoriaTipo === "plataforma" ? vistoriaIdVinculada : null,
                 vistoria_upload_url: vistoriaUploadUrl,
                 autentique_document_id: autentiqueDocId,
-                status_assinatura: 'pendente'
+                status_assinatura: 'pendente',
+                // SNAPSHOT FIELDS
+                imovel_area: parseFloat(imovel.area) || 0,
+                plano_id: planoObj?.id || null,
+                plano_nome: planoObj?.label || null,
+                plano_valor_pc: finalPc || 0,
+                plano_parcelas: finalParcelas,
+                plano_mensalidade: finalPc > 0 ? (finalPc / finalParcelas) : 0
             });
 
             if (dbError) throw dbError;
@@ -262,14 +296,18 @@ const ContratacaoPage = () => {
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6 space-y-4">
-                            <div className="grid md:grid-cols-4 gap-4">
-                                <div className="space-y-2">
+                            <div className="grid md:grid-cols-5 gap-4">
+                                <div className="space-y-2 col-span-2 md:col-span-1">
                                     <Label>CEP *</Label>
                                     <Input required placeholder="00000-000" value={imovel.cep} onChange={e => handleCepSearch(e.target.value)} maxLength={9} />
                                 </div>
                                 <div className="md:col-span-3 space-y-2">
                                     <Label>Rua / Logradouro *</Label>
                                     <Input required placeholder="Rua Presidente Kennedy..." value={imovel.rua} onChange={e => setImovel({ ...imovel, rua: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Metragem (m²) *</Label>
+                                    <Input type="number" required placeholder="Ex: 85" value={imovel.area} onChange={e => setImovel({ ...imovel, area: e.target.value })} className="font-mono text-secondary font-bold bg-secondary/5 border-secondary/30" />
                                 </div>
                             </div>
                             <div className="grid md:grid-cols-4 gap-4">
@@ -299,7 +337,97 @@ const ContratacaoPage = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Sessão 3: Documentação */}
+                    {/* Sessão 3: Planos de Proteção */}
+                    <Card className={`border-secondary/30 bg-secondary/5 backdrop-blur-sm transition-all duration-500 shadow-xl ${!imovel.area || parseFloat(imovel.area) <= 0 ? 'opacity-60 saturate-50' : 'scale-[1.01]'}`}>
+                        <CardHeader className="pb-4 border-b border-secondary/20">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-secondary text-secondary-foreground shadow-lg flex items-center justify-center">
+                                    <ShieldCheck className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1">
+                                    <CardTitle>Planos de Proteção e Reversão (Pc)</CardTitle>
+                                    <CardDescription>O cálculo financeiro é ajustado automaticamente de acordo com o M² do imóvel fornecido acima.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            {!imovel.area || parseFloat(imovel.area) <= 0 ? (
+                                <div className="text-center py-6">
+                                    <p className="text-muted-foreground font-semibold">Insira primeiramente a <span className="text-secondary uppercase">Metragem (m²)</span> do imóvel acima para gerar as propostas atuarial precisas.</p>
+                                </div>
+                            ) : !parametrosGlobais ? (
+                                <div className="flex items-center justify-center py-6 text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Calculando cotação em tempo real...</div>
+                            ) : (
+                                <div className="grid md:grid-cols-2 gap-4 or gap-6">
+                                    {parametrosGlobais.plans?.map((plan: any) => {
+                                        const isBasico = plan.id === 'basico';
+                                        const PIcon = isBasico ? Zap : Star;
+                                        const activeBg = selectedPlanId === plan.id ? 'ring-2 ring-offset-2 ring-secondary' : 'hover:border-secondary/40';
+
+                                        // Formules
+                                        const areaNumber = parseFloat(imovel.area) || 0;
+                                        const pp = calcPp(plan.params, areaNumber);
+                                        const ms = sumActive(parametrosGlobais.ms_params || []);
+                                        const co = sumActive(parametrosGlobais.co_params || []);
+                                        const finalPc = calcPc(pp, ms, co);
+                                        const parcelas = parametrosGlobais.installments || 24;
+
+                                        return (
+                                            <div
+                                                key={plan.id}
+                                                onClick={() => setSelectedPlanId(plan.id)}
+                                                className={`relative overflow-hidden cursor-pointer rounded-2xl border ${isBasico ? 'border-primary/20 bg-primary/5' : 'border-secondary/20 bg-secondary/5'} p-5 transition-all duration-300 ${activeBg}`}
+                                            >
+                                                {/* Badge Selection */}
+                                                {selectedPlanId === plan.id && (
+                                                    <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground px-3 py-1 text-xs font-bold rounded-bl-xl shadow-md z-10 flex items-center gap-1.5">
+                                                        <ShieldCheck className="w-3.5 h-3.5" /> Contratado
+                                                    </div>
+                                                )}
+
+                                                <div className={`flex items-center gap-2 ${isBasico ? 'text-primary' : 'text-secondary'} font-black text-xl mb-4`}>
+                                                    <PIcon className="w-5 h-5" /> {plan.label}
+                                                </div>
+
+                                                <div className="bg-background/80 rounded-xl p-4 border border-border shadow-inner">
+                                                    <div className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-1">Custo Estimado (Pc)</div>
+                                                    <div className="flex items-end gap-1.5 mb-2">
+                                                        <span className="text-sm font-semibold mb-1">R$</span>
+                                                        <span className={`text-4xl font-extrabold tracking-tight ${isBasico ? 'text-primary' : 'text-secondary'}`}>
+                                                            {finalPc.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="pt-3 border-t border-border mt-3 flex items-center justify-between">
+                                                        <div className="text-xs font-semibold text-muted-foreground">Forma de Pagto.</div>
+                                                        <div className="text-right">
+                                                            <div className="text-[10px] font-bold opacity-60">Mensalidade Fixa</div>
+                                                            <div className={`text-sm font-bold ${isBasico ? 'text-primary' : 'text-secondary'}`}>
+                                                                {parcelas}x de R$ {(finalPc / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-5 space-y-2">
+                                                    {plan.params.map((par: any) => par.active && (
+                                                        <div key={par.id} className="flex justify-between items-center text-xs py-1 border-b border-border/40 last:border-0">
+                                                            <span className="text-muted-foreground">{par.label}</span>
+                                                            <span className="font-bold cursor-help" title="Configuração matriz da franqueadora">
+                                                                {par.unit === 'currency' ? 'R$ ' + parseFloat(par.value).toLocaleString('pt-BR') : par.value + '%'}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Sessão 4: Documentação */}
                     <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                         <CardHeader className="pb-4 border-b border-border/50 bg-secondary/5">
                             <div className="flex items-center gap-3">
