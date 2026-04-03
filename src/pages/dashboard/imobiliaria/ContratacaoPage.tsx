@@ -54,7 +54,7 @@ const ContratacaoPage = () => {
 
                 const { data, error } = await supabase
                     .from("vistorias")
-                    .select("id, rua, numero, complemento, cidade")
+                    .select("id, rua, numero, complemento, cidade, metragem")
                     .eq("imobiliaria_id", imobiliariaId)
                     .in("status", ["concluida", "aguardando_aprovacao"])
                     .order("created_at", { ascending: false });
