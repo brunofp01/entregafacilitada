@@ -686,7 +686,7 @@ const NewVistoria = () => {
                               </>
                             )}
                           </div>
-                          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleMeterUpload(m.key as any, e)} />
+                          <input type="file" accept="image/*" className="hidden" onChange={e => handleMeterUpload(m.key as any, e)} />
                         </label>
                       </div>
                     ) : (
@@ -1063,7 +1063,7 @@ const NewVistoria = () => {
                                           <label className="shrink-0 w-24 h-24 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95">
                                             <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
                                             <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                            <input type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
+                                            <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleFileUpload(activeAmbienteId, item.id, e)} />
                                           </label>
                                         )}
 
