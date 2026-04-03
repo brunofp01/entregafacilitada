@@ -13,7 +13,7 @@ import {
     Loader2, Phone, Mail, MapPin, FileText,
     Download, ExternalLink, Building2, Package,
     Zap, Star, ShieldCheck, Filter,
-    AlertTriangle, ArrowUpRight
+    AlertTriangle, ArrowUpRight, CalendarDays
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
@@ -81,8 +81,30 @@ const PlanoGestaoPage = () => {
     const [filterStatus, setFilterStatus] = useState("todos");
     const [filterPlano, setFilterPlano] = useState("todos");
     const [filterImob, setFilterImob] = useState("todos");
+    const [filterDate, setFilterDate] = useState("todos");
+    const [customStart, setCustomStart] = useState("");
+    const [customEnd, setCustomEnd] = useState("");
     const [selected, setSelected] = useState<ClienteContrato | null>(null);
     const [sheetOpen, setSheetOpen] = useState(false);
+
+    // ── Date range helper ────────────────────────────────────────────────────
+    const getDateRange = (): { from: Date | null; to: Date | null } => {
+        const now = new Date();
+        const startOfDay = (d: Date) => { d.setHours(0, 0, 0, 0); return d; };
+        const endOfDay = (d: Date) => { d.setHours(23, 59, 59, 999); return d; };
+        if (filterDate === "hoje") return { from: startOfDay(new Date()), to: endOfDay(new Date()) };
+        if (filterDate === "ontem") {
+            const y = new Date(now); y.setDate(y.getDate() - 1);
+            return { from: startOfDay(y), to: endOfDay(new Date(y)) };
+        }
+        if (filterDate === "7d") return { from: startOfDay(new Date(now.setDate(now.getDate() - 7))), to: endOfDay(new Date()) };
+        if (filterDate === "15d") return { from: startOfDay(new Date(now.setDate(now.getDate() - 15))), to: endOfDay(new Date()) };
+        if (filterDate === "30d") return { from: startOfDay(new Date(now.setDate(now.getDate() - 30))), to: endOfDay(new Date()) };
+        if (filterDate === "custom" && customStart && customEnd) {
+            return { from: startOfDay(new Date(customStart)), to: endOfDay(new Date(customEnd)) };
+        }
+        return { from: null, to: null };
+    };
 
     const fetchAll = async () => {
         setLoading(true);
@@ -138,15 +160,21 @@ const PlanoGestaoPage = () => {
 
     // ── Filtered list ─────────────────────────────────────────────────────────
     const filtered = useMemo(() => {
+        const { from, to } = getDateRange();
         return clientes.filter(c => {
             const q = search.toLowerCase();
             const matchSearch = !q || c.nome.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.endereco_rua.toLowerCase().includes(q) || (c.cpf || "").includes(q);
             const matchStatus = filterStatus === "todos" || c.status_assinatura === filterStatus;
             const matchPlano = filterPlano === "todos" || (c.plano_id || "sem") === filterPlano;
             const matchImob = filterImob === "todos" || c.imobiliaria_id === filterImob;
-            return matchSearch && matchStatus && matchPlano && matchImob;
+            let matchDate = true;
+            if (from && to) {
+                const d = new Date(c.created_at);
+                matchDate = d >= from && d <= to;
+            }
+            return matchSearch && matchStatus && matchPlano && matchImob && matchDate;
         });
-    }, [clientes, search, filterStatus, filterPlano, filterImob]);
+    }, [clientes, search, filterStatus, filterPlano, filterImob, filterDate, customStart, customEnd]);
 
     // ── Sync Autentique ───────────────────────────────────────────────────────
     const handleSync = async () => {
@@ -250,7 +278,60 @@ const PlanoGestaoPage = () => {
 
                 <Separator />
 
-                {/* ── Filters ── */}
+                {/* ── Date Filter ── */}
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Período</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {[
+                            { key: "todos", label: "Todos" },
+                            { key: "hoje", label: "Hoje" },
+                            { key: "ontem", label: "Ontem" },
+                            { key: "7d", label: "7 dias" },
+                            { key: "15d", label: "15 dias" },
+                            { key: "30d", label: "30 dias" },
+                            { key: "custom", label: "Personalizar" },
+                        ].map(opt => (
+                            <button
+                                key={opt.key}
+                                type="button"
+                                onClick={() => setFilterDate(opt.key)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${filterDate === opt.key
+                                        ? "bg-secondary text-secondary-foreground border-secondary shadow-md shadow-secondary/20"
+                                        : "bg-card border-border/50 text-muted-foreground hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5"
+                                    }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    {filterDate === "custom" && (
+                        <div className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/40 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <label className="text-xs font-bold text-muted-foreground whitespace-nowrap">De:</label>
+                                <Input
+                                    type="date"
+                                    value={customStart}
+                                    onChange={e => setCustomStart(e.target.value)}
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <label className="text-xs font-bold text-muted-foreground whitespace-nowrap">Até:</label>
+                                <Input
+                                    type="date"
+                                    value={customEnd}
+                                    onChange={e => setCustomEnd(e.target.value)}
+                                    className="h-8 text-sm"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Search & Other Filters ── */}
                 <div className="flex flex-col md:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -305,8 +386,8 @@ const PlanoGestaoPage = () => {
                             <CardTitle className="text-base">
                                 Contratos ({filtered.length}{filtered.length !== clientes.length ? ` de ${clientes.length}` : ""})
                             </CardTitle>
-                            {(search || filterStatus !== "todos" || filterPlano !== "todos" || filterImob !== "todos") && (
-                                <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => { setSearch(""); setFilterStatus("todos"); setFilterPlano("todos"); setFilterImob("todos"); }}>
+                            {(search || filterStatus !== "todos" || filterPlano !== "todos" || filterImob !== "todos" || filterDate !== "todos") && (
+                                <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => { setSearch(""); setFilterStatus("todos"); setFilterPlano("todos"); setFilterImob("todos"); setFilterDate("todos"); setCustomStart(""); setCustomEnd(""); }}>
                                     <Filter className="w-3 h-3" /> Limpar filtros
                                 </Button>
                             )}
