@@ -101,7 +101,7 @@ const PlanoGestaoPage = () => {
         if (filterDate === "15d") return { from: startOfDay(new Date(now.setDate(now.getDate() - 15))), to: endOfDay(new Date()) };
         if (filterDate === "30d") return { from: startOfDay(new Date(now.setDate(now.getDate() - 30))), to: endOfDay(new Date()) };
         if (filterDate === "custom" && customStart && customEnd) {
-            return { from: startOfDay(new Date(customStart)), to: endOfDay(new Date(customEnd)) };
+            return { from: startOfDay(new Date(customStart + "T00:00:00")), to: endOfDay(new Date(customEnd + "T23:59:59")) };
         }
         return { from: null, to: null };
     };
@@ -244,8 +244,8 @@ const PlanoGestaoPage = () => {
                                 type="button"
                                 onClick={() => setFilterDate(opt.key)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${filterDate === opt.key
-                                        ? "bg-secondary text-secondary-foreground border-secondary shadow-md shadow-secondary/20"
-                                        : "bg-card border-border/50 text-muted-foreground hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5"
+                                    ? "bg-secondary text-secondary-foreground border-secondary shadow-md shadow-secondary/20"
+                                    : "bg-card border-border/50 text-muted-foreground hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5"
                                     }`}
                             >
                                 {opt.label}
