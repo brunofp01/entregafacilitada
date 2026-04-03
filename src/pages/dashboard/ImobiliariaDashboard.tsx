@@ -42,7 +42,7 @@ const ImobiliariaDashboard = () => {
       if (inqs) {
         setStats({
           vistoriasAprovadas: vists?.filter(v => v.status === 'concluida').length || 0,
-          pendentesAprovacao: inqs.filter(i => i.status_assinatura === 'assinado' && (!i.aprovacao_ef || i.aprovacao_ef === 'pendente')).length,
+          pendentesAprovacao: vists?.filter(v => v.status !== 'concluida').length || 0,
           contratosAtivos: inqs.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado').length,
           pendentesAssinatura: inqs.filter(i => i.status_assinatura !== 'assinado' && i.status_assinatura !== 'rejeitado').length,
         });
