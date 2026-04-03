@@ -144,10 +144,20 @@ const PlanoGestaoPage = () => {
 
     useEffect(() => { fetchAll(); }, []);
 
-    // ── KPIs ──────────────────────────────────────────────────────────────────
+    // ── Date-filtered base (feeds KPIs + table) ───────────────────────────────────
+    const dateFiltered = useMemo(() => {
+        const { from, to } = getDateRange();
+        if (!from || !to) return clientes;
+        return clientes.filter(c => {
+            const d = new Date(c.created_at);
+            return d >= from && d <= to;
+        });
+    }, [clientes, filterDate, customStart, customEnd]);
+
+    // ── KPIs (react to date filter) ────────────────────────────────────────────────
     const kpis = useMemo(() => {
-        const ativos = clientes.filter(c => c.status_assinatura === "assinado");
-        const pendentes = clientes.filter(c => c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado");
+        const ativos = dateFiltered.filter(c => c.status_assinatura === "assinado");
+        const pendentes = dateFiltered.filter(c => c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado");
         const mrrTotal = ativos.reduce((s, c) => s + (c.plano_mensalidade || 0), 0);
         const totalContratoValue = ativos.reduce((s, c) => s + (c.plano_valor_pc || 0), 0);
         const byPlan: Record<string, number> = {};
@@ -155,26 +165,20 @@ const PlanoGestaoPage = () => {
             const pn = c.plano_nome || "Sem plano";
             byPlan[pn] = (byPlan[pn] || 0) + 1;
         });
-        return { total: clientes.length, ativos: ativos.length, pendentes: pendentes.length, mrrTotal, totalContratoValue, byPlan };
-    }, [clientes]);
+        return { total: dateFiltered.length, ativos: ativos.length, pendentes: pendentes.length, mrrTotal, totalContratoValue, byPlan };
+    }, [dateFiltered]);
 
-    // ── Filtered list ─────────────────────────────────────────────────────────
+    // ── Filtered list (all filters applied) ─────────────────────────────────────
     const filtered = useMemo(() => {
-        const { from, to } = getDateRange();
-        return clientes.filter(c => {
+        return dateFiltered.filter(c => {
             const q = search.toLowerCase();
             const matchSearch = !q || c.nome.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.endereco_rua.toLowerCase().includes(q) || (c.cpf || "").includes(q);
             const matchStatus = filterStatus === "todos" || c.status_assinatura === filterStatus;
             const matchPlano = filterPlano === "todos" || (c.plano_id || "sem") === filterPlano;
             const matchImob = filterImob === "todos" || c.imobiliaria_id === filterImob;
-            let matchDate = true;
-            if (from && to) {
-                const d = new Date(c.created_at);
-                matchDate = d >= from && d <= to;
-            }
-            return matchSearch && matchStatus && matchPlano && matchImob && matchDate;
+            return matchSearch && matchStatus && matchPlano && matchImob;
         });
-    }, [clientes, search, filterStatus, filterPlano, filterImob, filterDate, customStart, customEnd]);
+    }, [dateFiltered, search, filterStatus, filterPlano, filterImob]);
 
     // ── Sync Autentique ───────────────────────────────────────────────────────
     const handleSync = async () => {
@@ -218,6 +222,49 @@ const PlanoGestaoPage = () => {
                         {syncing ? "Sincronizando..." : "Sincronizar Assinaturas"}
                     </Button>
                 </header>
+
+                {/* ── Date Filter (top — affects KPIs + table) ── */}
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Período</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {[
+                            { key: "todos", label: "Todos" },
+                            { key: "hoje", label: "Hoje" },
+                            { key: "ontem", label: "Ontem" },
+                            { key: "7d", label: "7 dias" },
+                            { key: "15d", label: "15 dias" },
+                            { key: "30d", label: "30 dias" },
+                            { key: "custom", label: "Personalizar" },
+                        ].map(opt => (
+                            <button
+                                key={opt.key}
+                                type="button"
+                                onClick={() => setFilterDate(opt.key)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${filterDate === opt.key
+                                        ? "bg-secondary text-secondary-foreground border-secondary shadow-md shadow-secondary/20"
+                                        : "bg-card border-border/50 text-muted-foreground hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5"
+                                    }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    {filterDate === "custom" && (
+                        <div className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/40 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <label className="text-xs font-bold text-muted-foreground whitespace-nowrap">De:</label>
+                                <Input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="h-8 text-sm" />
+                            </div>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <label className="text-xs font-bold text-muted-foreground whitespace-nowrap">Até:</label>
+                                <Input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="h-8 text-sm" />
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {/* ── KPI Cards ── */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -278,58 +325,6 @@ const PlanoGestaoPage = () => {
 
                 <Separator />
 
-                {/* ── Date Filter ── */}
-                <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Período</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {[
-                            { key: "todos", label: "Todos" },
-                            { key: "hoje", label: "Hoje" },
-                            { key: "ontem", label: "Ontem" },
-                            { key: "7d", label: "7 dias" },
-                            { key: "15d", label: "15 dias" },
-                            { key: "30d", label: "30 dias" },
-                            { key: "custom", label: "Personalizar" },
-                        ].map(opt => (
-                            <button
-                                key={opt.key}
-                                type="button"
-                                onClick={() => setFilterDate(opt.key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${filterDate === opt.key
-                                        ? "bg-secondary text-secondary-foreground border-secondary shadow-md shadow-secondary/20"
-                                        : "bg-card border-border/50 text-muted-foreground hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5"
-                                    }`}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </div>
-                    {filterDate === "custom" && (
-                        <div className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/40 animate-in fade-in slide-in-from-top-2">
-                            <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <label className="text-xs font-bold text-muted-foreground whitespace-nowrap">De:</label>
-                                <Input
-                                    type="date"
-                                    value={customStart}
-                                    onChange={e => setCustomStart(e.target.value)}
-                                    className="h-8 text-sm"
-                                />
-                            </div>
-                            <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <label className="text-xs font-bold text-muted-foreground whitespace-nowrap">Até:</label>
-                                <Input
-                                    type="date"
-                                    value={customEnd}
-                                    onChange={e => setCustomEnd(e.target.value)}
-                                    className="h-8 text-sm"
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
 
                 {/* ── Search & Other Filters ── */}
                 <div className="flex flex-col md:flex-row gap-3">
