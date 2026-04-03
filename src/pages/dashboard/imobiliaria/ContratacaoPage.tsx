@@ -10,10 +10,9 @@ import { FileUp, Home, User, Link as LinkIcon, Loader2, Info } from "lucide-reac
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { KontratoPDF } from "@/components/vistorias/ContratoPDF"; // Keep original name or adjust it if the user was using ContratoPDF
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
 import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive } from "@/lib/pricingCalc";
-import { Zap, Star, ShieldCheck } from "lucide-react";
+import { Zap, Star, ShieldCheck, Check } from "lucide-react";
 
 interface VistoriaPlataforma {
     id: string;
@@ -33,7 +32,9 @@ const ContratacaoPage = () => {
     const [inquilino, setInquilino] = useState({ nome: "", email: "", cpf: "", rg: "", telefone: "" });
     const [imovel, setImovel] = useState({ cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "", area: "" });
     const [parametrosGlobais, setParametrosGlobais] = useState<any>(null);
+    const [compositionItems, setCompositionItems] = useState<any[]>([]);
     const [selectedPlanId, setSelectedPlanId] = useState<string>("completo");
+    const [parcelas, setParcelas] = useState<number>(24);
     const [contratoFile, setContratoFile] = useState<File | null>(null);
     const [vistoriaTipo, setVistoriaTipo] = useState<"plataforma" | "upload">("upload");
     const [vistoriaFile, setVistoriaFile] = useState<File | null>(null);
@@ -62,6 +63,12 @@ const ContratacaoPage = () => {
                 const { data: configData } = await supabase.from('pricing_parameters_config').select('*').eq('id', 1).single();
                 if (configData) {
                     setParametrosGlobais(configData);
+                    if (configData.installments) setParcelas(configData.installments);
+                }
+
+                const { data: compData } = await supabase.from('cost_composition_items').select('*').order('created_at', { ascending: true });
+                if (compData) {
+                    setCompositionItems(compData);
                 }
             } catch (error) {
                 console.error("Erro ao buscar vistorias concluídas ou configs:", error);
@@ -185,7 +192,7 @@ const ContratacaoPage = () => {
                     const ms = sumActive(parametrosGlobais.ms_params || []);
                     const co = sumActive(parametrosGlobais.co_params || []);
                     finalPc = calcPc(pp, ms, co);
-                    finalParcelas = parametrosGlobais.installments || 24;
+                    finalParcelas = parcelas;
                 }
             }
 
@@ -361,8 +368,7 @@ const ContratacaoPage = () => {
                                 <div className="grid md:grid-cols-2 gap-4 or gap-6">
                                     {parametrosGlobais.plans?.map((plan: any) => {
                                         const isBasico = plan.id === 'basico';
-                                        const PIcon = isBasico ? Zap : Star;
-                                        const activeBg = selectedPlanId === plan.id ? 'ring-2 ring-offset-2 ring-secondary' : 'hover:border-secondary/40';
+                                        const activeBg = selectedPlanId === plan.id ? (isBasico ? 'ring-2 ring-offset-2 ring-blue-500' : 'ring-2 ring-offset-2 ring-amber-500') : 'opacity-70 hover:opacity-100 border-border shadow-none scale-[0.98]';
 
                                         // Formules
                                         const areaNumber = parseFloat(imovel.area) || 0;
@@ -370,51 +376,64 @@ const ContratacaoPage = () => {
                                         const ms = sumActive(parametrosGlobais.ms_params || []);
                                         const co = sumActive(parametrosGlobais.co_params || []);
                                         const finalPc = calcPc(pp, ms, co);
-                                        const parcelas = parametrosGlobais.installments || 24;
 
                                         return (
                                             <div
                                                 key={plan.id}
                                                 onClick={() => setSelectedPlanId(plan.id)}
-                                                className={`relative overflow-hidden cursor-pointer rounded-2xl border ${isBasico ? 'border-primary/20 bg-primary/5' : 'border-secondary/20 bg-secondary/5'} p-5 transition-all duration-300 ${activeBg}`}
+                                                className={`relative cursor-pointer rounded-2xl border ${isBasico ? 'border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10' : 'border-amber-500/20 bg-amber-50/50 dark:bg-amber-900/10'} p-5 transition-all duration-300 shadow-lg ${activeBg}`}
                                             >
                                                 {/* Badge Selection */}
                                                 {selectedPlanId === plan.id && (
-                                                    <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground px-3 py-1 text-xs font-bold rounded-bl-xl shadow-md z-10 flex items-center gap-1.5">
-                                                        <ShieldCheck className="w-3.5 h-3.5" /> Contratado
+                                                    <div className={`absolute top-0 right-0 ${isBasico ? 'bg-blue-500' : 'bg-amber-500'} text-white px-3 py-1 text-xs font-bold rounded-bl-xl shadow-md z-10 flex items-center gap-1.5`}>
+                                                        <ShieldCheck className="w-3.5 h-3.5" /> Selecionado
                                                     </div>
                                                 )}
 
-                                                <div className={`flex items-center gap-2 ${isBasico ? 'text-primary' : 'text-secondary'} font-black text-xl mb-4`}>
-                                                    <PIcon className="w-5 h-5" /> {plan.label}
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <div className={`font-black text-lg md:text-xl uppercase tracking-wide ${isBasico ? 'text-blue-500' : 'text-amber-500'}`}>
+                                                        {plan.label}
+                                                    </div>
+                                                    <div className="bg-background px-3 py-1 rounded shadow-sm border border-border/50 text-xs font-bold text-foreground">
+                                                        Total R$ {finalPc.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </div>
                                                 </div>
 
-                                                <div className="bg-background/80 rounded-xl p-4 border border-border shadow-inner">
-                                                    <div className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-1">Custo Estimado (Pc)</div>
-                                                    <div className="flex items-end gap-1.5 mb-2">
-                                                        <span className="text-sm font-semibold mb-1">R$</span>
-                                                        <span className={`text-4xl font-extrabold tracking-tight ${isBasico ? 'text-primary' : 'text-secondary'}`}>
-                                                            {finalPc.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                        </span>
+                                                {/* Installment Highlight */}
+                                                <div className="mb-6 flex flex-col items-center justify-center p-5 bg-background/80 rounded-xl border border-border/50 shadow-sm relative overflow-hidden">
+                                                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Mensalidade Fixa</div>
+                                                    <div className={`text-4xl md:text-5xl font-extrabold tracking-tighter ${isBasico ? 'text-blue-600 dark:text-blue-400' : 'text-amber-500'} flex items-baseline gap-1`}>
+                                                        <span className="text-xl font-bold">{parcelas}x</span>
+                                                        <span className="text-xl font-bold ml-1">R$</span>
+                                                        {(finalPc / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </div>
+                                                    <div className="flex gap-2 mt-5">
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => { e.stopPropagation(); setParcelas(12); }}
+                                                            className={`px-4 py-1.5 text-xs font-black uppercase rounded-full transition-colors ${parcelas === 12 ? (isBasico ? 'bg-blue-600 text-white shadow-md' : 'bg-amber-500 text-white shadow-md') : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+                                                        >
+                                                            12 Meses
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => { e.stopPropagation(); setParcelas(24); }}
+                                                            className={`px-4 py-1.5 text-xs font-black uppercase rounded-full transition-colors ${parcelas === 24 ? (isBasico ? 'bg-blue-600 text-white shadow-md' : 'bg-amber-500 text-white shadow-md') : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+                                                        >
+                                                            24 Meses
+                                                        </button>
+                                                    </div>
+                                                </div>
 
-                                                    <div className="pt-3 border-t border-border mt-3 flex items-center justify-between">
-                                                        <div className="text-xs font-semibold text-muted-foreground">Forma de Pagto.</div>
-                                                        <div className="text-right">
-                                                            <div className="text-[10px] font-bold opacity-60">Mensalidade Fixa</div>
-                                                            <div className={`text-sm font-bold ${isBasico ? 'text-primary' : 'text-secondary'}`}>
-                                                                {parcelas}x de R$ {(finalPc / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                {/* Composition Items */}
+                                                <div className="space-y-2.5">
+                                                    {compositionItems.filter(item => isBasico ? item.in_basico : item.in_completo).map(item => (
+                                                        <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg border ${isBasico ? 'bg-blue-500/10 border-blue-500/20' : 'bg-amber-500/10 border-amber-500/30'}`}>
+                                                            <div className={`shrink-0 rounded-full w-5 h-5 flex items-center justify-center text-white ${isBasico ? 'bg-slate-800 dark:bg-blue-500' : 'bg-amber-500'}`}>
+                                                                <Check className="w-3.5 h-3.5 stroke-[3]" />
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-5 space-y-2">
-                                                    {plan.params.map((par: any) => par.active && (
-                                                        <div key={par.id} className="flex justify-between items-center text-xs py-1 border-b border-border/40 last:border-0">
-                                                            <span className="text-muted-foreground">{par.label}</span>
-                                                            <span className="font-bold cursor-help" title="Configuração matriz da franqueadora">
-                                                                {par.unit === 'currency' ? 'R$ ' + parseFloat(par.value).toLocaleString('pt-BR') : par.value + '%'}
+                                                            <span className="text-sm font-bold text-foreground/80 leading-tight">
+                                                                {item.nome}
                                                             </span>
                                                         </div>
                                                     ))}
