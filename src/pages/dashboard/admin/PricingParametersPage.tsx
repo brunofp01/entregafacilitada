@@ -39,16 +39,12 @@ const ppBasico: FormulaParam[] = [
     { id: "pb1", label: "Custo de Material (Composição)", value: "0", unit: "currency", active: true, readonly: true },
     { id: "pb2", label: "Custo de Mão de Obra (Composição)", value: "0", unit: "currency", active: true, readonly: true },
     { id: "pb3", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
-    { id: "pb4", label: "Custo Fixo de Limpeza", value: "150", unit: "currency", active: true },
-    { id: "pb5", label: "Custo de Vistoria de Regulação", value: "80", unit: "currency", active: true },
 ];
 
 const ppCompleto: FormulaParam[] = [
     { id: "pm1", label: "Custo de Material (Composição)", value: "0", unit: "currency", active: true, readonly: true },
     { id: "pm2", label: "Custo de Mão de Obra (Composição)", value: "0", unit: "currency", active: true, readonly: true },
     { id: "pm3", label: "Projeção INCC Acumulado", value: "10", unit: "percent", active: true },
-    { id: "pm4", label: "Custo Fixo de Limpeza", value: "220", unit: "currency", active: true },
-    { id: "pm5", label: "Custo de Vistoria de Regulação", value: "100", unit: "currency", active: true },
 ];
 
 const initialMs: FormulaParam[] = [
