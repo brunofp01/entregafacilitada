@@ -21,8 +21,7 @@ export interface CompositionItem {
 
 interface CostCompositionSubpageProps {
     area: number;
-    onBack: () => void;
-    onApply: (basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => void;
+    onTotalsChange: (basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => void;
 }
 
 const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
@@ -33,7 +32,7 @@ const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
     valorReferencia: "",
 };
 
-export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ area, onBack, onApply }) => {
+export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ area, onTotalsChange }) => {
     const [items, setItems] = useState<CompositionItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [formItem, setFormItem] = useState<Omit<CompositionItem, "id" | "inBasico" | "inCompleto">>(emptyItem);
@@ -192,28 +191,24 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         return { basicoMat, basicoLabor, completoMat, completoLabor };
     }, [items, area]);
 
+    useEffect(() => {
+        onTotalsChange(totals.basicoMat, totals.basicoLabor, totals.completoMat, totals.completoLabor);
+    }, [totals.basicoMat, totals.basicoLabor, totals.completoMat, totals.completoLabor, onTotalsChange]);
+
     const { totalServico, execucaoPrevista, mo: moPreview, mat: matPreview } = calculateItemValues(formItem);
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Toolbar */}
             <div className="flex items-center justify-between mb-4">
-                <Button variant="ghost" onClick={onBack} className="gap-2">
-                    <ArrowLeft className="w-4 h-4" /> Voltar ao Simulador
-                </Button>
+                <h2 className="text-2xl font-bold font-heading text-foreground flex items-center gap-2">
+                    <Factory className="w-6 h-6 text-secondary" /> Composição de Custos
+                </h2>
                 <div className="flex items-center gap-4">
                     <div className="text-sm">
-                        <span className="text-muted-foreground">Área Base:</span>
+                        <span className="text-muted-foreground">O cálculo atual está utilizando a área de:</span>
                         <Badge variant="outline" className="ml-2 font-mono">{area} m²</Badge>
                     </div>
-                    <Button
-                        onClick={() => {
-                            onApply(totals.basicoMat, totals.basicoLabor, totals.completoMat, totals.completoLabor);
-                        }}
-                        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-md gap-2"
-                    >
-                        <CheckCircle2 className="w-4 h-4" /> Aplicar aos Planos
-                    </Button>
                 </div>
             </div>
 

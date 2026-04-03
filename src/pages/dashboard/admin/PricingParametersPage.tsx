@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,16 +36,16 @@ const makeNew = (unit: FormulaParam["unit"] = "percent"): FormulaParam => ({
 // ─── Dados Iniciais ──────────────────────────────────────────────────────────
 
 const ppBasico: FormulaParam[] = [
-    { id: "pb1", label: "Custo de Material por m²", value: "12", unit: "currency", active: true, readonly: true },
-    { id: "pb2", label: "Custo de Mão de Obra por m²", value: "18", unit: "currency", active: true, readonly: true },
+    { id: "pb1", label: "Custo de Material (Composição)", value: "0", unit: "currency", active: true, readonly: true },
+    { id: "pb2", label: "Custo de Mão de Obra (Composição)", value: "0", unit: "currency", active: true, readonly: true },
     { id: "pb3", label: "Custo Fixo de Limpeza", value: "150", unit: "currency", active: true },
     { id: "pb4", label: "Custo de Vistoria de Regulação", value: "80", unit: "currency", active: true },
     { id: "pb5", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
 ];
 
 const ppCompleto: FormulaParam[] = [
-    { id: "pm1", label: "Custo de Material por m²", value: "20", unit: "currency", active: true, readonly: true },
-    { id: "pm2", label: "Custo de Mão de Obra por m²", value: "28", unit: "currency", active: true, readonly: true },
+    { id: "pm1", label: "Custo de Material (Composição)", value: "0", unit: "currency", active: true, readonly: true },
+    { id: "pm2", label: "Custo de Mão de Obra (Composição)", value: "0", unit: "currency", active: true, readonly: true },
     { id: "pm3", label: "Custo Fixo de Limpeza", value: "220", unit: "currency", active: true },
     { id: "pm4", label: "Custo de Vistoria de Regulação", value: "100", unit: "currency", active: true },
     { id: "pm5", label: "Módulo de Vistoria", value: "30", unit: "currency", active: true },
@@ -174,95 +174,39 @@ const ParamRow = ({
 const PricingParametersPage = () => {
     const [msParams, setMsParams] = useState<FormulaParam[]>(initialMs);
     const [coParams, setCoParams] = useState<FormulaParam[]>(initialCo);
-    const [plans, setPlans] = useState<PlanConfig[]>(() => {
-        try {
-            const stored = localStorage.getItem("cost_composition_rates");
-            if (stored) {
-                const { bMatSqm, bLabSqm, cMatSqm, cLabSqm } = JSON.parse(stored);
-                return initialPlans.map(pl => {
-                    if (pl.id === "basico") {
-                        return {
-                            ...pl, params: pl.params.map(p => {
-                                if (p.id === "pb1") return { ...p, value: bMatSqm };
-                                if (p.id === "pb2") return { ...p, value: bLabSqm };
-                                return p;
-                            })
-                        };
-                    }
-                    if (pl.id === "completo") {
-                        return {
-                            ...pl, params: pl.params.map(p => {
-                                if (p.id === "pm1") return { ...p, value: cMatSqm };
-                                if (p.id === "pm2") return { ...p, value: cLabSqm };
-                                return p;
-                            })
-                        };
-                    }
-                    return pl;
-                });
-            }
-        } catch (e) { }
-        return initialPlans;
-    });
+    const [plans, setPlans] = useState<PlanConfig[]>(initialPlans);
     const [installments, setInstallments] = useState(12); // Número de parcelas compartilhado
     const [isDirty, setIsDirty] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
-    const [view, setView] = useState<"simulator" | "composition">("simulator");
 
-    useEffect(() => {
-        const fetchAndApplyRates = async () => {
-            const { data } = await supabase.from('cost_composition_items').select('*');
-            if (!data) return;
+    const handleCompositionTotalsUpdate = useCallback((basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => {
+        const bMatStr = basicoMat.toFixed(2);
+        const bLabStr = basicoLabor.toFixed(2);
+        const cMatStr = completoMat.toFixed(2);
+        const cLabStr = completoLabor.toFixed(2);
 
-            let basicoMat = 0, basicoLabor = 0;
-            let completoMat = 0, completoLabor = 0;
-
-            data.forEach(d => {
-                const indice = parseFloat(d.indice_sinapi) || 0;
-                const prob = parseFloat(d.probabilidade) || 0;
-                const rend = parseFloat(d.rendimento) || 1;
-                const ref = parseFloat(d.valor_referencia) || 0;
-
-                // Calculating the base constraint (per sqm) by using Area = 1
-                const totalS = 1 * indice;
-                const ex = totalS * (prob / 100);
-                const moSqm = rend > 0 ? (ex / rend) * ref * 0.57 : 0;
-                const matSqm = rend > 0 ? (ex / rend) * ref * 0.43 : 0;
-
-                if (d.in_basico) { basicoMat += matSqm; basicoLabor += moSqm; }
-                if (d.in_completo) { completoMat += matSqm; completoLabor += moSqm; }
-            });
-
-            const bMatStr = basicoMat.toFixed(2);
-            const bLabStr = basicoLabor.toFixed(2);
-            const cMatStr = completoMat.toFixed(2);
-            const cLabStr = completoLabor.toFixed(2);
-
-            setPlans(ps => ps.map(pl => {
-                if (pl.id === "basico") {
-                    return {
-                        ...pl, params: pl.params.map(p => {
-                            if (p.label.toLowerCase().includes("material")) return { ...p, value: bMatStr, active: true };
-                            if (p.label.toLowerCase().includes("obra")) return { ...p, value: bLabStr, active: true };
-                            return p;
-                        })
-                    };
-                }
-                if (pl.id === "completo") {
-                    return {
-                        ...pl, params: pl.params.map(p => {
-                            if (p.label.toLowerCase().includes("material")) return { ...p, value: cMatStr, active: true };
-                            if (p.label.toLowerCase().includes("obra")) return { ...p, value: cLabStr, active: true };
-                            return p;
-                        })
-                    };
-                }
-                return pl;
-            }));
-        };
-
-        fetchAndApplyRates();
+        setPlans(ps => ps.map(pl => {
+            if (pl.id === "basico") {
+                let changed = false;
+                const newParams = pl.params.map(p => {
+                    if (p.id === "pb1" && p.value !== bMatStr) { changed = true; return { ...p, value: bMatStr }; }
+                    if (p.id === "pb2" && p.value !== bLabStr) { changed = true; return { ...p, value: bLabStr }; }
+                    return p;
+                });
+                return changed ? { ...pl, params: newParams } : pl;
+            }
+            if (pl.id === "completo") {
+                let changed = false;
+                const newParams = pl.params.map(p => {
+                    if (p.id === "pm1" && p.value !== cMatStr) { changed = true; return { ...p, value: cMatStr }; }
+                    if (p.id === "pm2" && p.value !== cLabStr) { changed = true; return { ...p, value: cLabStr }; }
+                    return p;
+                });
+                return changed ? { ...pl, params: newParams } : pl;
+            }
+            return pl;
+        }));
     }, []);
 
     const touch = () => setIsDirty(true);
@@ -284,6 +228,17 @@ const PricingParametersPage = () => {
         setter((ps: FormulaParam[]) => [...ps, makeNew(unit)]);
         touch();
     };
+
+    // ── Totals ───────────────────────────────────────────────────────────────
+    const totalMs = sumActive(msParams);
+    const totalCo = sumActive(coParams);
+    const planPcs = plans.map(pl => {
+        const pp = calcPp(pl.params, simArea);
+        const pc = calcPc(pp, totalMs, totalCo);
+        const monthly = installments > 0 ? pc / installments : 0;
+        return { ...pl, pp, pc, monthly };
+    });
+    const simData = planPcs.find(p => p.id === simPlan);
 
     // ── Plan ────────────────────────────────────────────────────────────────
     const updatePlan = (planId: string, id: string, field: any, v: string) => {
@@ -311,68 +266,6 @@ const PricingParametersPage = () => {
         touch();
     };
 
-    // ── Totals ───────────────────────────────────────────────────────────────
-    const totalMs = sumActive(msParams);
-    const totalCo = sumActive(coParams);
-    const planPcs = plans.map(pl => {
-        const pp = calcPp(pl.params, simArea);
-        const pc = calcPc(pp, totalMs, totalCo);
-        const monthly = installments > 0 ? pc / installments : 0;
-        return { ...pl, pp, pc, monthly };
-    });
-    const simData = planPcs.find(p => p.id === simPlan);
-
-    const handleApplyComposition = (basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => {
-        // Calculate the rate per square meter since the simulator will multiply it by simArea later
-        const bMatSqm = simArea > 0 ? (basicoMat / simArea).toFixed(2) : "0";
-        const bLabSqm = simArea > 0 ? (basicoLabor / simArea).toFixed(2) : "0";
-
-        const cMatSqm = simArea > 0 ? (completoMat / simArea).toFixed(2) : "0";
-        const cLabSqm = simArea > 0 ? (completoLabor / simArea).toFixed(2) : "0";
-
-        setPlans(ps => ps.map(pl => {
-            if (pl.id === "basico") {
-                return {
-                    ...pl,
-                    params: pl.params.map(p => {
-                        if (p.label.toLowerCase().includes("material")) return { ...p, value: bMatSqm, active: true };
-                        if (p.label.toLowerCase().includes("obra")) return { ...p, value: bLabSqm, active: true };
-                        return p;
-                    })
-                };
-            }
-            if (pl.id === "completo") {
-                return {
-                    ...pl,
-                    params: pl.params.map(p => {
-                        if (p.label.toLowerCase().includes("material")) return { ...p, value: cMatSqm, active: true };
-                        if (p.label.toLowerCase().includes("obra")) return { ...p, value: cLabSqm, active: true };
-                        return p;
-                    })
-                };
-            }
-            return pl;
-        }));
-
-        localStorage.setItem("cost_composition_rates", JSON.stringify({ bMatSqm, bLabSqm, cMatSqm, cLabSqm }));
-
-        toast.success("Custos aplicados com sucesso! Os valores por m² foram atualizados.");
-        setView("simulator");
-        touch();
-    };
-
-    if (view === "composition") {
-        return (
-            <DashboardLayout role="admin">
-                <CostCompositionSubpage
-                    area={simArea}
-                    onBack={() => setView("simulator")}
-                    onApply={handleApplyComposition}
-                />
-            </DashboardLayout>
-        );
-    }
-
     return (
         <DashboardLayout role="admin">
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
@@ -384,13 +277,6 @@ const PricingParametersPage = () => {
                         <p className="text-muted-foreground">Ajuste os fatores da fórmula atuarial e simule o Pc de cada plano em tempo real.</p>
                     </div>
                     <div className="flex gap-2">
-                        <Button
-                            onClick={() => setView("composition")}
-                            variant="outline"
-                            className="text-secondary border-secondary/50 hover:bg-secondary/10 gap-2 shrink-0"
-                        >
-                            Composição de Custos
-                        </Button>
                         <Button
                             onClick={() => { toast.success("Parâmetros salvos! (Persistência no banco em breve)"); setIsDirty(false); }}
                             disabled={!isDirty}
@@ -719,6 +605,13 @@ const PricingParametersPage = () => {
                     <Info className="w-4 h-4 mt-0.5 shrink-0 text-secondary" />
                     <p>Estimativas calculadas em tempo real. Itens desativados (toggle desligado) são excluídos do cálculo. A persistência no Supabase será ativada na próxima fase.</p>
                 </div>
+
+                <Separator className="my-12 opacity-50" />
+
+                <CostCompositionSubpage
+                    area={simArea}
+                    onTotalsChange={handleCompositionTotalsUpdate}
+                />
             </div>
         </DashboardLayout>
     );
