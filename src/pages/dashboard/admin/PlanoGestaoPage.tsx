@@ -616,7 +616,7 @@ const PlanoGestaoPage = () => {
                                         </div>
                                     </div>
                                     {selected.contrato_locacao_url
-                                        ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => window.open(selected.contrato_locacao_url, "_blank")}><Download className="w-4 h-4" /></Button>
+                                        ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => window.open(selected.contrato_locacao_url, "_blank")}><ExternalLink className="w-4 h-4" /></Button>
                                         : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
                                 </div>
 
@@ -630,7 +630,7 @@ const PlanoGestaoPage = () => {
                                     </div>
                                     {(selected.vistoria_upload_url || selected.vistoria_id)
                                         ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => {
-                                            if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}`, "_blank");
+                                            if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
                                             else window.open(selected.vistoria_upload_url, "_blank");
                                         }}><ExternalLink className="w-4 h-4" /></Button>
                                         : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}

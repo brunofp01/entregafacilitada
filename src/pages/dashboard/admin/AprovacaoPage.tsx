@@ -426,7 +426,24 @@ const AprovacaoPage = () => {
                                         <p className="text-sm font-bold">Contrato de Locação</p>
                                     </div>
                                     {selected.contrato_locacao_url
-                                        ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => window.open(selected.contrato_locacao_url, "_blank")}><Download className="w-4 h-4" /></Button>
+                                        ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => window.open(selected.contrato_locacao_url, "_blank")}><ExternalLink className="w-4 h-4" /></Button>
+                                        : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
+                                </div>
+
+                                {/* Vistoria */}
+                                <div className="flex items-center justify-between p-3 border rounded-xl bg-card hover:border-secondary/40 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <FileText className="w-5 h-5 text-secondary" />
+                                        <div>
+                                            <p className="text-sm font-bold">Laudo de Vistoria</p>
+                                            <p className="text-[10px] text-muted-foreground">{selected.vistoria_id ? "Vinculada da plataforma" : "PDF externo"}</p>
+                                        </div>
+                                    </div>
+                                    {(selected.vistoria_upload_url || selected.vistoria_id)
+                                        ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => {
+                                            if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
+                                            else window.open(selected.vistoria_upload_url, "_blank");
+                                        }}><ExternalLink className="w-4 h-4" /></Button>
                                         : <Badge variant="outline" className="text-[9px]">Não anexado</Badge>}
                                 </div>
                                 {selected.autentique_document_id && (
