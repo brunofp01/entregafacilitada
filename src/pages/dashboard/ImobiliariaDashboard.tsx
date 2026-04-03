@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabaseClient";
 const ImobiliariaDashboard = () => {
   const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || "imobiliaria");
 
-  const [stats, setStats] = useState({ total: 0, pending: 0, signed: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, signed: 0, awaitingEF: 0, rejected: 0 });
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const ImobiliariaDashboard = () => {
 
       const { data: inqs } = await supabase
         .from('inquilinos')
-        .select('status_assinatura')
+        .select('status_assinatura, aprovacao_ef')
         .eq('imobiliaria_id', imobiliariaId);
 
       if (inqs) {
@@ -32,6 +32,8 @@ const ImobiliariaDashboard = () => {
           total: inqs.length,
           pending: inqs.filter(i => i.status_assinatura === 'pendente').length,
           signed: inqs.filter(i => i.status_assinatura === 'assinado').length,
+          awaitingEF: inqs.filter(i => i.status_assinatura === 'assinado' && (!i.aprovacao_ef || i.aprovacao_ef === 'pendente')).length,
+          rejected: inqs.filter(i => i.status_assinatura === 'recusado' || i.aprovacao_ef === 'recusado').length,
         });
       }
       setLoadingStats(false);
@@ -116,14 +118,14 @@ const ImobiliariaDashboard = () => {
           </Card>
           <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">Assinados</CardDescription>
-              <CardTitle className="text-2xl font-black text-emerald-500">{loadingStats ? "..." : stats.signed}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-violet-500">Aguardando EF</CardDescription>
+              <CardTitle className="text-2xl font-black text-violet-500">{loadingStats ? "..." : stats.awaitingEF}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-border/50 bg-emerald-500/10 backdrop-blur-sm border-emerald-500/20">
+          <Card className={stats.rejected > 0 ? "border-red-500/20 bg-red-500/10" : "border-border/50 bg-card/40"}>
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Vistorias Grátis</CardDescription>
-              <CardTitle className="text-2xl font-black text-emerald-600">Ilimitadas</CardTitle>
+              <CardDescription className={`text-[10px] font-bold uppercase tracking-wider ${stats.rejected > 0 ? "text-red-600" : "text-muted-foreground"}`}>Recusados</CardDescription>
+              <CardTitle className={`text-2xl font-black ${stats.rejected > 0 ? "text-red-600" : "text-muted-foreground"}`}>{loadingStats ? "..." : stats.rejected}</CardTitle>
             </CardHeader>
           </Card>
         </div>

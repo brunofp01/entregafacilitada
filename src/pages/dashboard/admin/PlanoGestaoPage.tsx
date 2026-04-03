@@ -51,12 +51,22 @@ interface ClienteContrato {
     // Joined imobiliaria
     imobiliaria_nome?: string;
     motivo_recusa?: string;
+    aprovacao_ef?: string;
 }
 
-const statusBadge = (status: string) => {
-    if (status === "assinado") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Assinado</Badge>;
-    if (status === "rejeitado" || status === "recusado") return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado</Badge>;
-    return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
+const statusBadge = (item: ClienteContrato) => {
+    const status = item.status_assinatura;
+    const ef = item.aprovacao_ef || 'pendente';
+
+    if (status === "rejeitado" || status === "recusado" || ef === "recusado")
+        return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado</Badge>;
+
+    if (status === "assinado") {
+        if (ef === "aprovado") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovado</Badge>;
+        return <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando EF</Badge>;
+    }
+
+    return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Assinatura Pendente</Badge>;
 };
 
 const planIcon = (planoId?: string) => {
@@ -162,8 +172,9 @@ const PlanoGestaoPage = () => {
 
     // ── KPIs (react to date filter) ────────────────────────────────────────────────
     const kpis = useMemo(() => {
-        const ativos = dateFiltered.filter(c => c.status_assinatura === "assinado");
-        const pendentes = dateFiltered.filter(c => c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado");
+        const ativos = dateFiltered.filter(c => c.status_assinatura === "assinado" && c.aprovacao_ef === "aprovado");
+        const aguardandoEF = dateFiltered.filter(c => c.status_assinatura === "assinado" && (!c.aprovacao_ef || c.aprovacao_ef === "pendente"));
+        const pendentesAssinatura = dateFiltered.filter(c => c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado");
         const mrrTotal = ativos.reduce((s, c) => s + (c.plano_mensalidade || 0), 0);
         const totalContratoValue = ativos.reduce((s, c) => s + (c.plano_valor_pc || 0), 0);
         const byPlan: Record<string, number> = {};
@@ -171,7 +182,7 @@ const PlanoGestaoPage = () => {
             const pn = c.plano_nome || "Sem plano";
             byPlan[pn] = (byPlan[pn] || 0) + 1;
         });
-        return { total: dateFiltered.length, ativos: ativos.length, pendentes: pendentes.length, mrrTotal, totalContratoValue, byPlan };
+        return { total: dateFiltered.length, ativos: ativos.length, aguardandoEF: aguardandoEF.length, pendentesAssinatura: pendentesAssinatura.length, mrrTotal, totalContratoValue, byPlan };
     }, [dateFiltered]);
 
     // ── Filtered list (all filters applied) ─────────────────────────────────────
@@ -308,10 +319,20 @@ const PlanoGestaoPage = () => {
                     <Card className="border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm">
                         <CardContent className="pt-5 pb-4">
                             <div className="flex items-center justify-between mb-2">
-                                <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Ativos</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Ativos (Aprovados)</p>
                                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             </div>
                             <p className="text-3xl font-extrabold font-mono text-emerald-600">{kpis.ativos}</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="border-violet-500/20 bg-violet-500/5 backdrop-blur-sm shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => window.location.href = '/admin/aprovacoes'}>
+                        <CardContent className="pt-5 pb-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Aguardando EF</p>
+                                <FileSignature className="w-4 h-4 text-violet-500" />
+                            </div>
+                            <p className="text-3xl font-extrabold font-mono text-violet-600">{kpis.aguardandoEF}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5 whitespace-nowrap">clique para aprovar</p>
                         </CardContent>
                     </Card>
                     <Card className="border-border/50 bg-card/60 backdrop-blur-sm md:col-span-1">
@@ -480,7 +501,7 @@ const PlanoGestaoPage = () => {
                                                     <span className="font-mono text-xs text-muted-foreground">{fmtMoney(c.plano_valor_pc)}</span>
                                                 </td>
                                                 <td className="px-5 py-4">
-                                                    {statusBadge(c.status_assinatura)}
+                                                    {statusBadge(c)}
                                                 </td>
                                                 <td className="px-5 py-4 hidden md:table-cell text-xs text-muted-foreground">
                                                     {fmtDate(c.created_at)}
@@ -518,7 +539,7 @@ const PlanoGestaoPage = () => {
                                     {selected.nome}
                                 </SheetTitle>
                                 <SheetDescription className="flex items-center gap-2">
-                                    {statusBadge(selected.status_assinatura)}
+                                    {statusBadge(selected)}
                                     {selected.plano_nome && (
                                         <span className={`flex items-center gap-1 text-xs font-bold ${planColor(selected.plano_id)}`}>
                                             {planIcon(selected.plano_id)} {selected.plano_nome}
