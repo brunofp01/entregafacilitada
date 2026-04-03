@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,18 @@ const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
 };
 
 export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ area, onBack, onApply }) => {
-    const [items, setItems] = useState<CompositionItem[]>([]);
+    const [items, setItems] = useState<CompositionItem[]>(() => {
+        try {
+            const saved = localStorage.getItem("cost_composition_items");
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            return [];
+        }
+    });
+
+    useEffect(() => {
+        localStorage.setItem("cost_composition_items", JSON.stringify(items));
+    }, [items]);
     const [formItem, setFormItem] = useState<Omit<CompositionItem, "id" | "inBasico" | "inCompleto">>(emptyItem);
     const [editingId, setEditingId] = useState<string | null>(null);
 

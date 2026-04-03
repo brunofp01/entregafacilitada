@@ -23,6 +23,7 @@ interface FormulaParam {
     unit: "percent" | "currency" | "number";
     active: boolean;
     removable?: boolean;
+    readonly?: boolean;
 }
 
 const uid = () => Math.random().toString(36).slice(2, 8);
@@ -34,16 +35,16 @@ const makeNew = (unit: FormulaParam["unit"] = "percent"): FormulaParam => ({
 // ─── Dados Iniciais ──────────────────────────────────────────────────────────
 
 const ppBasico: FormulaParam[] = [
-    { id: "pb1", label: "Custo de Material por m²", value: "12", unit: "currency", active: true },
-    { id: "pb2", label: "Custo de Mão de Obra por m²", value: "18", unit: "currency", active: true },
+    { id: "pb1", label: "Custo de Material por m²", value: "12", unit: "currency", active: true, readonly: true },
+    { id: "pb2", label: "Custo de Mão de Obra por m²", value: "18", unit: "currency", active: true, readonly: true },
     { id: "pb3", label: "Custo Fixo de Limpeza", value: "150", unit: "currency", active: true },
     { id: "pb4", label: "Custo de Vistoria de Regulação", value: "80", unit: "currency", active: true },
     { id: "pb5", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
 ];
 
 const ppCompleto: FormulaParam[] = [
-    { id: "pm1", label: "Custo de Material por m²", value: "20", unit: "currency", active: true },
-    { id: "pm2", label: "Custo de Mão de Obra por m²", value: "28", unit: "currency", active: true },
+    { id: "pm1", label: "Custo de Material por m²", value: "20", unit: "currency", active: true, readonly: true },
+    { id: "pm2", label: "Custo de Mão de Obra por m²", value: "28", unit: "currency", active: true, readonly: true },
     { id: "pm3", label: "Custo Fixo de Limpeza", value: "220", unit: "currency", active: true },
     { id: "pm4", label: "Custo de Vistoria de Regulação", value: "100", unit: "currency", active: true },
     { id: "pm5", label: "Módulo de Vistoria", value: "30", unit: "currency", active: true },
@@ -132,7 +133,7 @@ const ParamRow = ({
                 type="text"
                 value={param.label}
                 onChange={e => onUpdate(param.id, "label", e.target.value)}
-                disabled={!param.active}
+                disabled={!param.active || param.readonly}
                 className="bg-transparent border-0 focus:outline-none text-sm font-medium text-foreground w-full placeholder:text-muted-foreground disabled:cursor-not-allowed"
                 placeholder="Nome da despesa"
             />
@@ -141,7 +142,7 @@ const ParamRow = ({
             <select
                 value={param.unit}
                 onChange={e => onUpdate(param.id, "unit", e.target.value)}
-                disabled={!param.active}
+                disabled={!param.active || param.readonly}
                 className="text-[10px] bg-muted/50 border border-border/40 rounded px-1 py-1 text-muted-foreground cursor-pointer disabled:cursor-not-allowed"
             >
                 <option value="currency">R$</option>
@@ -153,7 +154,7 @@ const ParamRow = ({
                 {param.unit === "percent" && <Percent className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />}
                 <Input
                     type="number" step="0.01" value={param.value}
-                    disabled={!param.active}
+                    disabled={!param.active || param.readonly}
                     onChange={e => onUpdate(param.id, "value", e.target.value)}
                     className={`${param.unit !== "number" ? "pl-6" : ""} bg-background/60 border-border/50 font-mono text-sm h-8 focus:border-secondary/50 disabled:cursor-not-allowed`}
                 />
@@ -172,7 +173,36 @@ const ParamRow = ({
 const PricingParametersPage = () => {
     const [msParams, setMsParams] = useState<FormulaParam[]>(initialMs);
     const [coParams, setCoParams] = useState<FormulaParam[]>(initialCo);
-    const [plans, setPlans] = useState<PlanConfig[]>(initialPlans);
+    const [plans, setPlans] = useState<PlanConfig[]>(() => {
+        try {
+            const stored = localStorage.getItem("cost_composition_rates");
+            if (stored) {
+                const { bMatSqm, bLabSqm, cMatSqm, cLabSqm } = JSON.parse(stored);
+                return initialPlans.map(pl => {
+                    if (pl.id === "basico") {
+                        return {
+                            ...pl, params: pl.params.map(p => {
+                                if (p.id === "pb1") return { ...p, value: bMatSqm };
+                                if (p.id === "pb2") return { ...p, value: bLabSqm };
+                                return p;
+                            })
+                        };
+                    }
+                    if (pl.id === "completo") {
+                        return {
+                            ...pl, params: pl.params.map(p => {
+                                if (p.id === "pm1") return { ...p, value: cMatSqm };
+                                if (p.id === "pm2") return { ...p, value: cLabSqm };
+                                return p;
+                            })
+                        };
+                    }
+                    return pl;
+                });
+            }
+        } catch (e) { }
+        return initialPlans;
+    });
     const [installments, setInstallments] = useState(12); // Número de parcelas compartilhado
     const [isDirty, setIsDirty] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
@@ -267,6 +297,8 @@ const PricingParametersPage = () => {
             }
             return pl;
         }));
+
+        localStorage.setItem("cost_composition_rates", JSON.stringify({ bMatSqm, bLabSqm, cMatSqm, cLabSqm }));
 
         toast.success("Custos aplicados com sucesso! Os valores por m² foram atualizados.");
         setView("simulator");
