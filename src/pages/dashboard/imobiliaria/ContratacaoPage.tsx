@@ -54,9 +54,9 @@ const ContratacaoPage = () => {
 
                 const { data, error } = await supabase
                     .from("vistorias")
-                    .select("id, rua, numero, complemento, cidade, metragem")
+                    .select("id, rua, numero, complemento, cidade, metragem, status")
                     .eq("imobiliaria_id", imobiliariaId)
-                    .eq("status", "concluida")
+                    .in("status", ["concluida", "aguardando_aprovacao"])
                     .order("created_at", { ascending: false });
 
                 if (!error && data) {
@@ -240,11 +240,25 @@ const ContratacaoPage = () => {
         }
     };
 
-    const matchingVistorias = vistoriasConcluidas.filter(v =>
-        imovel.rua && imovel.numero &&
-        v.rua?.toLowerCase().trim() === imovel.rua.toLowerCase().trim() &&
-        v.numero?.trim() === imovel.numero.trim()
-    );
+    const normalizeAddress = (str: string) => {
+        if (!str) return "";
+        return str
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Remove accents
+            .replace(/\b(rua|avenida|av|r|travessa|al|alameda|praca|estrada|rodovia)\.?\b/g, "") // Remove common prefixes
+            .trim();
+    };
+
+    const matchingVistorias = vistoriasConcluidas.filter(v => {
+        const inputRua = normalizeAddress(imovel.rua);
+        const dbRua = normalizeAddress(v.rua);
+        return (
+            inputRua && imovel.numero &&
+            inputRua === dbRua &&
+            v.numero?.trim() === imovel.numero.trim()
+        );
+    });
 
     const selectedVistoria = vistoriasConcluidas.find(v => v.id === vistoriaIdVinculada);
     const showComplementWarning = selectedVistoria?.complemento && imovel.complemento &&
