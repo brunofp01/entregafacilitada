@@ -245,17 +245,17 @@ const VistoriasPage = () => {
           ].map((filter) => (
             <Button
               key={filter.id}
-              variant={statusFilter === filter.id ? "default" : "outline"}
+              variant="outline"
               onClick={() => setStatusFilter(filter.id as any)}
               className={cn(
-                "rounded-full px-5 py-5 font-bold gap-2 transition-all",
+                "rounded-full px-5 py-5 font-bold gap-2 transition-all border-border/50 text-muted-foreground",
                 statusFilter === filter.id
-                  ? `${filter.color} shadow-lg`
-                  : "border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? `${filter.color} border-transparent shadow-lg text-white hover:opacity-90`
+                  : "hover:text-foreground hover:bg-muted"
               )}
             >
               {filter.label}
-              <Badge variant="secondary" className="ml-1 bg-background/50 text-[10px] px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full">
+              <Badge variant="secondary" className={cn("ml-1 bg-background/20 text-[10px] px-1.5 h-5 min-w-5 flex items-center justify-center rounded-full text-current", statusFilter === filter.id ? "text-white" : "text-muted-foreground")}>
                 {filter.count}
               </Badge>
             </Button>
