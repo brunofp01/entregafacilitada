@@ -288,8 +288,14 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                                             <div className="flex-1 min-w-0 w-full">
                                                 <div className="font-bold text-sm truncate">{item.nome}</div>
                                                 <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                                                    <span className="flex items-center gap-1"><Hammer className="w-3 h-3 text-emerald-500" /> R$ {mo.toFixed(2)}</span>
-                                                    <span className="flex items-center gap-1"><Box className="w-3 h-3 text-rose-500" /> R$ {mat.toFixed(2)}</span>
+                                                    <span className="flex items-center gap-1">
+                                                        <Hammer className="w-3 h-3 text-emerald-500" /> R$ {mo.toFixed(2)}
+                                                        <span className="text-[10px] opacity-60 ml-0.5">(R$ {(area > 0 ? mo / area : 0).toFixed(2)}/m²)</span>
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <Box className="w-3 h-3 text-rose-500" /> R$ {mat.toFixed(2)}
+                                                        <span className="text-[10px] opacity-60 ml-0.5">(R$ {(area > 0 ? mat / area : 0).toFixed(2)}/m²)</span>
+                                                    </span>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-1 shrink-0 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
