@@ -21,7 +21,8 @@ const SegurosPage = () => {
                     <h2 className="text-3xl font-heading font-bold mb-4 italic">Em desenvolvimento</h2>
                     <p className="text-muted-foreground max-w-md text-lg">
                         Estamos preparando um novo cockpit para gestão de apólices e garantias.
-                        Em breve, você poderá consultar e acionar proteções diretamente por aqui.
+                        Em breve, você poderá contratar e gerenciar seus seguros diretamente pela plataforma,
+                        com apenas alguns cliques.
                     </p>
                 </Card>
             </div>
