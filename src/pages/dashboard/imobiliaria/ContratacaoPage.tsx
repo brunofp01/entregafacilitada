@@ -18,6 +18,7 @@ interface VistoriaPlataforma {
     id: string;
     rua: string;
     numero: string;
+    complemento: string;
     cidade: string;
 }
 
@@ -52,7 +53,7 @@ const ContratacaoPage = () => {
 
                 const { data, error } = await supabase
                     .from("vistorias")
-                    .select("id, rua, numero, cidade")
+                    .select("id, rua, numero, complemento, cidade")
                     .eq("imobiliaria_id", imobiliariaId)
                     .eq("status", "concluida")
                     .order("created_at", { ascending: false });
@@ -238,6 +239,16 @@ const ContratacaoPage = () => {
         }
     };
 
+    const matchingVistorias = vistoriasConcluidas.filter(v =>
+        imovel.rua && imovel.numero &&
+        v.rua?.toLowerCase().trim() === imovel.rua.toLowerCase().trim() &&
+        v.numero?.trim() === imovel.numero.trim()
+    );
+
+    const selectedVistoria = vistoriasConcluidas.find(v => v.id === vistoriaIdVinculada);
+    const showComplementWarning = selectedVistoria?.complemento && imovel.complemento &&
+        selectedVistoria.complemento.toLowerCase().trim() !== imovel.complemento.toLowerCase().trim();
+
     return (
         <DashboardLayout role="imobiliaria">
             <div className="max-w-4xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -341,6 +352,51 @@ const ContratacaoPage = () => {
                                     <Input required placeholder="SP" value={imovel.estado} onChange={e => setImovel({ ...imovel, estado: e.target.value })} maxLength={2} />
                                 </div>
                             </div>
+
+                            {matchingVistorias.length > 0 && (
+                                <div className="mt-6 p-5 border border-amber-500/30 bg-amber-500/10 rounded-xl space-y-4 animate-in fade-in slide-in-from-top-4 shadow-sm">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shrink-0 shadow-md">
+                                            <Info className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-lg font-black text-amber-600 dark:text-amber-500 tracking-tight">Vistoria Compatível Encontrada!</h4>
+                                            <p className="text-sm font-semibold text-amber-700/90 dark:text-amber-400/80 mt-1">A plataforma detectou {matchingVistorias.length} vistoria(s) concluída(s) para o endereço <strong>{imovel.rua}, {imovel.numero}</strong>. Selecione abaixo para vincular automaticamente.</p>
+                                        </div>
+                                    </div>
+                                    <div className="pl-14">
+                                        <Select
+                                            value={vistoriaTipo === 'plataforma' ? vistoriaIdVinculada : ""}
+                                            onValueChange={(val) => {
+                                                setVistoriaIdVinculada(val);
+                                                setVistoriaTipo('plataforma');
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-full bg-background border-amber-500/40 text-foreground font-bold border-2 focus:ring-amber-500 h-12">
+                                                <SelectValue placeholder="Toque para vincular a vistoria correspondente a este endereço..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {matchingVistorias.map(v => (
+                                                    <SelectItem key={v.id} value={v.id} className="font-semibold cursor-pointer py-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <LinkIcon className="w-4 h-4 text-amber-500 shrink-0" />
+                                                            <span>Vistoria Validada: {v.complemento ? `${v.rua}, n ${v.numero} - ${v.complemento}` : `${v.rua}, n ${v.numero}`}</span>
+                                                            <span className="text-[10px] uppercase font-black text-white bg-amber-500 px-2 py-0.5 rounded-full border border-amber-600/50 shadow-sm ml-2">ID: {v.id.split('-')[0]}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
+                                        {showComplementWarning && (
+                                            <div className="mt-4 text-xs font-bold leading-relaxed bg-white dark:bg-background border-2 border-red-500/50 text-red-600 dark:text-red-400 p-4 rounded-xl flex items-start gap-3 shadow-sm animate-in fade-in slide-in-from-top-2">
+                                                <div className="w-2.5 h-2.5 mt-0.5 rounded-full bg-red-500 shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" />
+                                                <span><strong>ATENÇÃO:</strong> O complemento informado para este imóvel <strong>({imovel.complemento})</strong> não é exatamente igual ao complemento da vistoria selecionada <strong>({selectedVistoria?.complemento})</strong>. Confirme com atenção se você está usando a vistoria do apartamento correto antes de emitir o contrato!</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -352,8 +408,8 @@ const ContratacaoPage = () => {
                                     <ShieldCheck className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                    <CardTitle>Planos de Proteção e Reversão (Pc)</CardTitle>
-                                    <CardDescription>O cálculo financeiro é ajustado automaticamente de acordo com o M² do imóvel fornecido acima.</CardDescription>
+                                    <CardTitle>Selecione o Plano Ideal</CardTitle>
+                                    <CardDescription>O valor do plano é ajustado automaticamente de acordo com o M² do imóvel fornecido acima.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -393,9 +449,6 @@ const ContratacaoPage = () => {
                                                 <div className="flex items-center justify-between mb-6">
                                                     <div className={`font-black text-lg md:text-xl uppercase tracking-wide ${isBasico ? 'text-blue-500' : 'text-amber-500'}`}>
                                                         {plan.label}
-                                                    </div>
-                                                    <div className="bg-background px-3 py-1 rounded shadow-sm border border-border/50 text-xs font-bold text-foreground">
-                                                        Total R$ {finalPc.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </div>
                                                 </div>
 
