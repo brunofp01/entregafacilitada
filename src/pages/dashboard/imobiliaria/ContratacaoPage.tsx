@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileUp, Home, User, Link as LinkIcon, Loader2, Info } from "lucide-react";
+import { FileUp, Home, User, Link as LinkIcon, Loader2, Info, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ interface VistoriaPlataforma {
     numero: string;
     complemento: string;
     cidade: string;
+    metragem?: number;
 }
 
 const ContratacaoPage = () => {
@@ -53,7 +54,7 @@ const ContratacaoPage = () => {
 
                 const { data, error } = await supabase
                     .from("vistorias")
-                    .select("id, rua, numero, complemento, cidade")
+                    .select("id, rua, numero, complemento, cidade, metragem")
                     .eq("imobiliaria_id", imobiliariaId)
                     .eq("status", "concluida")
                     .order("created_at", { ascending: false });
@@ -314,7 +315,7 @@ const ContratacaoPage = () => {
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6 space-y-4">
-                            <div className="grid md:grid-cols-5 gap-4">
+                            <div className="grid md:grid-cols-4 gap-4">
                                 <div className="space-y-2 col-span-2 md:col-span-1">
                                     <Label>CEP *</Label>
                                     <Input required placeholder="00000-000" value={imovel.cep} onChange={e => handleCepSearch(e.target.value)} maxLength={9} />
@@ -322,10 +323,6 @@ const ContratacaoPage = () => {
                                 <div className="md:col-span-3 space-y-2">
                                     <Label>Rua / Logradouro *</Label>
                                     <Input required placeholder="Rua Presidente Kennedy..." value={imovel.rua} onChange={e => setImovel({ ...imovel, rua: e.target.value })} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Metragem (m²) *</Label>
-                                    <Input type="number" required placeholder="Ex: 85" value={imovel.area} onChange={e => setImovel({ ...imovel, area: e.target.value })} className="font-mono text-secondary font-bold bg-secondary/5 border-secondary/30" />
                                 </div>
                             </div>
                             <div className="grid md:grid-cols-4 gap-4">
@@ -370,6 +367,10 @@ const ContratacaoPage = () => {
                                             onValueChange={(val) => {
                                                 setVistoriaIdVinculada(val);
                                                 setVistoriaTipo('plataforma');
+                                                const selectedV = matchingVistorias.find(x => x.id === val);
+                                                if (selectedV && selectedV.metragem) {
+                                                    setImovel(prev => ({ ...prev, area: String(selectedV.metragem) }));
+                                                }
                                             }}
                                         >
                                             <SelectTrigger className="w-full bg-background border-amber-500/40 text-foreground font-bold border-2 focus:ring-amber-500 h-12">
@@ -394,6 +395,37 @@ const ContratacaoPage = () => {
                                                 <span><strong>ATENÇÃO:</strong> O complemento informado para este imóvel <strong>({imovel.complemento})</strong> não é exatamente igual ao complemento da vistoria selecionada <strong>({selectedVistoria?.complemento})</strong>. Confirme com atenção se você está usando a vistoria do apartamento correto antes de emitir o contrato!</span>
                                             </div>
                                         )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {vistoriaTipo === 'plataforma' && vistoriaIdVinculada && matchingVistorias.find(v => v.id === vistoriaIdVinculada) ? (
+                                <div className="mt-6 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-top-2">
+                                    <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Parâmetro Atuarial</h3>
+                                    <div className="space-y-2 max-w-[240px]">
+                                        <Label>Metragem Computada (m²)</Label>
+                                        <Input
+                                            type="number"
+                                            value={imovel.area}
+                                            readOnly
+                                            className="font-mono text-emerald-600 font-bold bg-emerald-50 border-emerald-200 h-11 text-lg dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-500/30"
+                                        />
+                                        <p className="text-[10px] text-muted-foreground font-semibold mt-1">Preenchido e travado pela vistoria.</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mt-6 pt-4 border-t border-border/50">
+                                    <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Parâmetro Atuarial</h3>
+                                    <div className="space-y-2 max-w-[240px]">
+                                        <Label>Metragem (m²) *</Label>
+                                        <Input
+                                            type="number"
+                                            required
+                                            placeholder="Ex: 85"
+                                            value={imovel.area}
+                                            onChange={e => setImovel({ ...imovel, area: e.target.value })}
+                                            className="font-mono text-secondary font-bold bg-secondary/5 border-secondary/30 h-11"
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -534,89 +566,98 @@ const ContratacaoPage = () => {
                                 </div>
                             </div>
 
-                            {/* Vistoria */}
-                            <div className="space-y-4 pt-4 border-t border-border">
-                                <div>
-                                    <Label className="text-base font-bold">2. Laudo de Vistoria do Imóvel *</Label>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        Como você prefere anexar a vistoria inicial deste imóvel?
-                                    </p>
+                            {vistoriaTipo === 'plataforma' && vistoriaIdVinculada && matchingVistorias.find(v => v.id === vistoriaIdVinculada) ? (
+                                <div className="mt-8 bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-xl flex items-start gap-4">
+                                    <div className="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+                                        <CheckCircle2 className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <Label className="text-base font-bold text-emerald-700 dark:text-emerald-400">2. Laudo de Vistoria Integrado via Plataforma</Label>
+                                        <p className="text-sm font-semibold text-emerald-600/80 dark:text-emerald-400/80 mt-1">A Vistoria de Plataforma compatível foi selecionada na Sessão 2. O anexo será vinculado automaticamente à vida do contrato. Se você quer mudar, altere na Sessão 2!</p>
+                                    </div>
                                 </div>
-
-                                <div className="bg-muted/10 p-5 rounded-xl border border-border space-y-6">
-                                    <RadioGroup defaultValue={vistoriaTipo} onValueChange={(v: "plataforma" | "upload") => setVistoriaTipo(v)} className="flex flex-col space-y-4">
-                                        <div className="flex items-start space-x-3">
-                                            <RadioGroupItem value="upload" id="upload" className="mt-1" />
-                                            <div>
-                                                <Label htmlFor="upload" className="text-base cursor-pointer">Fazer Upload de Arquivo</Label>
-                                                <p className="text-sm text-muted-foreground">Use se a vistoria inicial foi feita fora do nosso sistema e você tem o PDF.</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start space-x-3">
-                                            <RadioGroupItem value="plataforma" id="plataforma" className="mt-1" />
-                                            <div>
-                                                <Label htmlFor="plataforma" className="text-base flex items-center gap-2 cursor-pointer">
-                                                    Vincular Vistoria da Plataforma
-                                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-wider">Recomendado</span>
-                                                </Label>
-                                                <p className="text-sm text-muted-foreground">O inquilino não precisa subir arquivo. O laudo já aprovado na plataforma será vinculado a ele.</p>
-                                            </div>
-                                        </div>
-                                    </RadioGroup>
-
-                                    {/* Render Condicional da Escolha da Vistoria */}
-                                    <div className="pt-2 pl-7">
-                                        {vistoriaTipo === "upload" ? (
-                                            <div className="animate-in slide-in-from-top-2 fade-in">
-                                                <label htmlFor="vistoria-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted transition-colors border-border/60 hover:border-secondary/50">
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <FileUp className="w-8 h-8 mb-3 text-muted-foreground/50" />
-                                                        <p className="text-sm text-muted-foreground">Clique para enviar o **PDF da vistoria**</p>
-                                                        {vistoriaFile && <p className="text-xs font-bold text-emerald-500 mt-2 bg-emerald-500/10 px-3 py-1 rounded-full">{vistoriaFile.name}</p>}
-                                                    </div>
-                                                    <input id="vistoria-file" type="file" className="hidden" accept=".pdf" onChange={e => setVistoriaFile(e.target.files?.[0] || null)} />
-                                                </label>
-                                            </div>
-                                        ) : (
-                                            <div className="animate-in slide-in-from-top-2 fade-in space-y-3">
-                                                <div className="flex items-start gap-2 bg-blue-500/10 text-blue-600 p-3 rounded-lg text-xs md:text-sm border border-blue-500/20">
-                                                    <Info className="w-5 h-5 shrink-0 mt-0.5" />
-                                                    <p>
-                                                        Abaixo listamos apenas as vistorias <strong>FINALIZADAS (LAUDO DISPONÍVEL)</strong> geradas na plataforma que não foram atreladas a nenhum inquilino.
-                                                    </p>
-                                                </div>
-                                                {fetchingVistorias ? (
-                                                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                                                        <Loader2 className="w-4 h-4 animate-spin" /> Buscando vistorias concluídas...
-                                                    </div>
-                                                ) : vistoriasConcluidas.length > 0 ? (
-                                                    <Select onValueChange={setVistoriaIdVinculada} value={vistoriaIdVinculada}>
-                                                        <SelectTrigger className="w-full text-left h-auto py-3">
-                                                            <SelectValue placeholder="Selecione uma vistoria concluída..." />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {vistoriasConcluidas.map(v => (
-                                                                <SelectItem key={v.id} value={v.id}>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <LinkIcon className="w-4 h-4 text-secondary/70 shrink-0" />
-                                                                        <span>{v.rua}{v.numero ? `, nº ${v.numero}` : ''} - {v.cidade}</span>
-                                                                        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-2">ID: {v.id.split('-')[0]}</span>
-                                                                    </div>
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                ) : (
-                                                    <div className="text-sm font-bold text-destructive bg-destructive/10 p-4 border border-destructive/20 rounded-lg">
-                                                        Você não possui nenhuma vistoria "Concluída" pronta para ser vinculada. Adicione a Vistoria manualmente por upload.
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                            ) : (
+                                <div className="space-y-4 pt-4 border-t border-border mt-4">
+                                    <div>
+                                        <Label className="text-base font-bold">2. Laudo de Vistoria do Imóvel *</Label>
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            Como você prefere anexar a vistoria inicial deste imóvel?
+                                        </p>
                                     </div>
 
+                                    <div className="bg-muted/10 p-5 rounded-xl border border-border space-y-6">
+                                        <RadioGroup defaultValue={vistoriaTipo} onValueChange={(v: "plataforma" | "upload") => setVistoriaTipo(v)} className="flex flex-col space-y-4">
+                                            <div className="flex items-start space-x-3">
+                                                <RadioGroupItem value="upload" id="upload" className="mt-1" />
+                                                <div>
+                                                    <Label htmlFor="upload" className="text-base cursor-pointer">Fazer Upload de Arquivo Manualmente</Label>
+                                                    <p className="text-sm text-muted-foreground">Use se a vistoria já foi feita externamente fora da plataforma e você tem o PDF.</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start space-x-3">
+                                                <RadioGroupItem value="plataforma" id="plataforma" className="mt-1" />
+                                                <div>
+                                                    <Label htmlFor="plataforma" className="text-base flex items-center gap-2 cursor-pointer">
+                                                        Vincular a uma Vistoria da Plataforma Existente
+                                                    </Label>
+                                                    <p className="text-sm text-muted-foreground">Selecione uma vistoria gerada aqui dentro da plataforma para vincular.</p>
+                                                </div>
+                                            </div>
+                                        </RadioGroup>
+
+                                        {/* Render Condicional da Escolha da Vistoria */}
+                                        <div className="pt-2 pl-7">
+                                            {vistoriaTipo === "upload" ? (
+                                                <div className="animate-in slide-in-from-top-2 fade-in">
+                                                    <label htmlFor="vistoria-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted transition-colors border-border/60 hover:border-secondary/50">
+                                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                            <FileUp className="w-8 h-8 mb-3 text-muted-foreground/50" />
+                                                            <p className="text-sm text-muted-foreground">Clique para enviar o **PDF da vistoria**</p>
+                                                            {vistoriaFile && <p className="text-xs font-bold text-emerald-500 mt-2 bg-emerald-500/10 px-3 py-1 rounded-full">{vistoriaFile.name}</p>}
+                                                        </div>
+                                                        <input id="vistoria-file" type="file" className="hidden" accept=".pdf" onChange={e => setVistoriaFile(e.target.files?.[0] || null)} />
+                                                    </label>
+                                                </div>
+                                            ) : (
+                                                <div className="animate-in slide-in-from-top-2 fade-in space-y-3">
+                                                    <div className="flex items-start gap-2 bg-blue-500/10 text-blue-600 p-3 rounded-lg text-xs md:text-sm border border-blue-500/20">
+                                                        <Info className="w-5 h-5 shrink-0 mt-0.5" />
+                                                        <p>
+                                                            Abaixo listamos apenas as vistorias <strong>FINALIZADAS (LAUDO DISPONÍVEL)</strong> geradas na plataforma que não foram atreladas a nenhum inquilino.
+                                                        </p>
+                                                    </div>
+                                                    {fetchingVistorias ? (
+                                                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                                                            <Loader2 className="w-4 h-4 animate-spin" /> Buscando vistorias concluídas...
+                                                        </div>
+                                                    ) : vistoriasConcluidas.length > 0 ? (
+                                                        <Select onValueChange={setVistoriaIdVinculada} value={vistoriaIdVinculada}>
+                                                            <SelectTrigger className="w-full text-left h-auto py-3">
+                                                                <SelectValue placeholder="Selecione uma vistoria concluída..." />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {vistoriasConcluidas.map(v => (
+                                                                    <SelectItem key={v.id} value={v.id}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <LinkIcon className="w-4 h-4 text-secondary/70 shrink-0" />
+                                                                            <span>{v.rua}{v.numero ? `, nº ${v.numero}` : ''} - {v.cidade}</span>
+                                                                            <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-2">ID: {v.id.split('-')[0]}</span>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-destructive bg-destructive/10 p-4 border border-destructive/20 rounded-lg">
+                                                            Você não possui nenhuma vistoria "Concluída" pronta para ser vinculada. Adicione a Vistoria manualmente por upload.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </CardContent>
                     </Card>
 

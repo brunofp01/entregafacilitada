@@ -275,6 +275,8 @@ interface VistoriaData {
   cidade: string;
   estado: string;
   complemento?: string;
+  metragem?: number;
+  tipo?: string;
   created_at?: string;
   medidores: any;
   perfil?: {
@@ -349,6 +351,14 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           <View style={styles.propertyRow}>
             <Text style={styles.label}>Data:</Text>
             <Text style={styles.value}>{displayDate}</Text>
+          </View>
+          <View style={styles.propertyRow}>
+            <Text style={styles.label}>Metragem:</Text>
+            <Text style={styles.value}>{data.metragem ? `${data.metragem} m²` : '--'}</Text>
+          </View>
+          <View style={styles.propertyRow}>
+            <Text style={styles.label}>Tipo:</Text>
+            <Text style={[styles.value, { textTransform: 'capitalize', fontWeight: 'bold' }]}>{data.tipo || '--'}</Text>
           </View>
         </View>
 

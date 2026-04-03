@@ -72,7 +72,9 @@ const NewVistoria = () => {
     bairro: "",
     cidade: "",
     estado: "",
-    complemento: ""
+    complemento: "",
+    metragem: "",
+    tipo: ""
   });
 
   const [medidores, setMedidores] = useState({
@@ -134,7 +136,9 @@ const NewVistoria = () => {
         bairro: data.bairro || "",
         cidade: data.cidade || "",
         estado: data.estado || "",
-        complemento: data.complemento || ""
+        complemento: data.complemento || "",
+        metragem: data.metragem ? String(data.metragem) : "",
+        tipo: data.tipo || ""
       });
       setMedidores(data.medidores || medidores);
       setStatus(data.status);
@@ -230,6 +234,8 @@ const NewVistoria = () => {
         cidade: imovel.cidade,
         estado: imovel.estado,
         complemento: imovel.complemento,
+        metragem: parseFloat(imovel.metragem) || 0,
+        tipo: imovel.tipo,
         medidores,
         status: 'rascunho'
       };
@@ -429,9 +435,26 @@ const NewVistoria = () => {
       const { data: profile } = await supabase.from('profiles').select('imobiliaria_id').eq('id', user.id).single();
       const imobiliariaId = profile?.imobiliaria_id || user.id;
 
+      // Validação Estrita na Avanço para Aba 2 (Medidores)
+      if (targetStep === 2) {
+        if (!imovel.metragem || !imovel.tipo) {
+          toast.error("Metragem e Tipo de Vistoria são obrigatórios.");
+          setLoading(false);
+          return;
+        }
+      }
+
       const payload = {
         imobiliaria_id: imobiliariaId,
-        ...imovel,
+        cep: imovel.cep,
+        rua: imovel.rua,
+        numero: imovel.numero,
+        bairro: imovel.bairro,
+        cidade: imovel.cidade,
+        estado: imovel.estado,
+        complemento: imovel.complemento,
+        metragem: parseFloat(imovel.metragem) || 0,
+        tipo: imovel.tipo,
         medidores,
         status: status || 'rascunho'
       };
@@ -491,7 +514,15 @@ const NewVistoria = () => {
 
       const payload = {
         imobiliaria_id: imobiliariaId,
-        ...imovel,
+        cep: imovel.cep,
+        rua: imovel.rua,
+        numero: imovel.numero,
+        bairro: imovel.bairro,
+        cidade: imovel.cidade,
+        estado: imovel.estado,
+        complemento: imovel.complemento,
+        metragem: parseFloat(imovel.metragem) || 0,
+        tipo: imovel.tipo,
         medidores,
         relatorio_url: publicUrl,
         status: 'aguardando_aprovacao'
@@ -591,6 +622,25 @@ const NewVistoria = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-bold">Estado (UF)</label>
                     <Input disabled={isViewOnly} placeholder="SP" value={imovel.estado} onChange={e => setImovel({ ...imovel, estado: e.target.value })} maxLength={2} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold w-full flex items-center justify-between">Metragem do Imóvel (m²) <span className="text-destructive">*</span></label>
+                    <Input type="number" disabled={isViewOnly} placeholder="Ex: 85" value={imovel.metragem} onChange={e => setImovel({ ...imovel, metragem: e.target.value })} className="font-mono font-bold text-secondary" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold w-full flex items-center justify-between">Tipo de Vistoria <span className="text-destructive">*</span></label>
+                    <Select disabled={isViewOnly} value={imovel.tipo} onValueChange={val => setImovel({ ...imovel, tipo: val })}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Toque para selecionar..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="entrada" className="font-bold">📝 Vistoria de Entrada (Locação)</SelectItem>
+                        <SelectItem value="saida" className="font-bold">🚪 Vistoria de Saída (Devolução)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
