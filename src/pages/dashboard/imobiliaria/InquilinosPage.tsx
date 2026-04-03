@@ -179,7 +179,18 @@ const InquilinosPage = () => {
         }
         const ef = inquilino.aprovacao_ef || 'pendente';
         if (ef === 'aprovado') return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovado — Cobrança Ativa</Badge>;
-        if (ef === 'recusado') return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado pela EF</Badge>;
+        if (ef === 'recusado') return (
+            <div className="flex flex-col gap-1 items-start">
+                <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold">
+                    <XCircle className="w-3 h-3 mr-1" />Recusado pela EF
+                </Badge>
+                {inquilino.motivo_recusa && (
+                    <span className="text-[10px] text-red-500/80 font-medium leading-tight max-w-[150px] italic">
+                        "{inquilino.motivo_recusa}"
+                    </span>
+                )}
+            </div>
+        );
         return <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando Aprovação EF</Badge>;
     };
 
@@ -274,7 +285,7 @@ const InquilinosPage = () => {
                                             <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70">Locatário</th>
                                             <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70 hidden sm:table-cell">Imóvel</th>
                                             <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70">Assinatura</th>
-                                            <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70 hidden md:table-cell">Mensalidades</th>
+                                            <th className="px-3 md:px-6 py-4 font-bold text-secondary-foreground/70 hidden md:table-cell">Status EF</th>
                                             <th className="px-3 md:px-6 py-4 font-bold text-right text-secondary-foreground/70">Ação</th>
                                         </tr>
                                     </thead>
