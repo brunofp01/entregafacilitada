@@ -61,7 +61,6 @@ const ImobiliariaDashboard = () => {
       icon: Users,
       href: "/imobiliaria/inquilinos",
       color: "bg-blue-500/10 text-blue-500",
-      restrictedOnly: false,
     },
     {
       title: "Módulo de Vistoria",
@@ -70,15 +69,6 @@ const ImobiliariaDashboard = () => {
       href: "/imobiliaria/vistorias",
       color: "bg-emerald-500/10 text-emerald-500",
       badge: "Grátis",
-      restrictedOnly: false,
-    },
-    {
-      title: "Minha Equipe",
-      description: "Adicione funcionários e gerencie acessos da sua organização.",
-      icon: UserPlus,
-      href: "/imobiliaria/equipe",
-      color: "bg-purple-500/10 text-purple-500",
-      ownerOnly: true,
     },
     {
       title: "Seguros e Garantias",
@@ -86,19 +76,10 @@ const ImobiliariaDashboard = () => {
       icon: Shield,
       href: "/imobiliaria/seguros",
       color: "bg-orange-500/10 text-orange-500",
-      restrictedOnly: false,
-    },
-    {
-      title: "Perfil da Imobiliária",
-      description: "Configure sua logo e dados de contato para os laudos.",
-      icon: FileText,
-      href: "/imobiliaria/perfil",
-      color: "bg-pink-500/10 text-pink-500",
-      ownerOnly: true,
     },
   ];
 
-  const modules = allModules.filter(m => !m.ownerOnly || !isIntegrante);
+  const modules = allModules;
 
   return (
     <DashboardLayout role={userRole as "imobiliaria" | "integrante_imobiliaria"}>

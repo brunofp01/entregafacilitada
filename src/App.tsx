@@ -22,6 +22,7 @@ import PerfilPage from "./pages/dashboard/imobiliaria/PerfilPage.tsx";
 import ContratacaoPage from "./pages/dashboard/imobiliaria/ContratacaoPage.tsx";
 import InquilinosPage from "./pages/dashboard/imobiliaria/InquilinosPage.tsx";
 import SegurosPage from "./pages/dashboard/imobiliaria/SegurosPage.tsx";
+import MeuPerfilPage from "./pages/dashboard/imobiliaria/MeuPerfilPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -118,6 +119,18 @@ const App = () => (
           <Route path="/imobiliaria/perfil" element={
             <ProtectedRoute allowedRole="imobiliaria">
               <PerfilPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/imobiliaria/meu-perfil" element={
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+              <MeuPerfilPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/imobiliaria/equipe" element={
+            <ProtectedRoute allowedRole="imobiliaria">
+              <EquipePage />
             </ProtectedRoute>
           } />
 

@@ -15,7 +15,8 @@ import {
   Bell,
   Calculator,
   Package,
-  ClipboardCheck
+  ClipboardCheck,
+  Shield
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -81,15 +82,18 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: Users, label: "Clientes EF", href: "/imobiliaria/inquilinos" },
-      { icon: Users, label: "Minha Equipe", href: "/imobiliaria/equipe" },
       { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
-      { icon: Settings, label: "Configurações", href: "/imobiliaria/configuracoes" },
+      { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
+      { icon: Users, label: "Minha Equipe", href: "/imobiliaria/equipe" },
+      { icon: Building2, label: "Perfil da Imobiliária", href: "/imobiliaria/perfil" },
+      { icon: User, label: "Meu Perfil", href: "/imobiliaria/meu-perfil" },
     ],
     integrante_imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
       { icon: Users, label: "Gestão de Clientes EF", href: "/imobiliaria/inquilinos" },
-      { icon: User, label: "Contratar Entrega Facilitada", href: "/imobiliaria/contratar" },
+      { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
+      { icon: User, label: "Meu Perfil", href: "/imobiliaria/meu-perfil" },
     ],
     inquilino: [
       { icon: LayoutDashboard, label: "Meu Plano", href: "/inquilino" },
@@ -183,7 +187,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background" />
             </Button>
 
-            <div className="flex items-center gap-3 pl-4 border-l border-border text-sm">
+            <Link to="/imobiliaria/meu-perfil" className="flex items-center gap-3 pl-4 border-l border-border text-sm hover:opacity-80 transition-opacity">
               <div className="text-right hidden sm:block">
                 <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{activeRole}</p>
@@ -191,7 +195,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner">
                 {userName.charAt(0).toUpperCase()}
               </div>
-            </div>
+            </Link>
 
             <Button
               variant="ghost"
