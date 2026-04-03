@@ -384,33 +384,25 @@ const VistoriasPage = () => {
           <div className="space-y-6">
             <Card className="border-border/50 bg-secondary/5 overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-lg">Como funciona?</CardTitle>
+                <CardTitle className="text-lg">Como funciona a Vistoria?</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 {[
-                  { step: "01", title: "Cadastro", desc: "Insira os dados do imóvel e locatário no portal." },
-                  { step: "02", title: "Vistoria", desc: "Use o checklist no celular para detalhar os ambientes." },
-                  { step: "03", title: "Fotos", desc: "Capture fotos otimizadas diretamente pelo sistema." },
-                  { step: "04", title: "Laudo", desc: "O PDF oficial é gerado instantaneamente após finalizar." },
+                  { step: "1", title: "Iniciar", desc: "Clique em 'Nova Vistoria' e informe o endereço e dados básicos." },
+                  { step: "2", title: "Estruturar", desc: "Adicione os cômodos (ambientes) e os itens que serão vistoriados." },
+                  { step: "3", title: "Inspecionar", desc: "Pelo celular ou PC, adicione fotos, estados (novo, usado) e detalhes de cada item." },
+                  { step: "4", title: "Finalizar", desc: "Ao concluir, clique em Aprovar para gerar o Laudo em PDF automático." },
                 ].map((item, i) => (
-                  <div key={i} className="flex gap-4">
-                    <span className="text-xl font-bold text-secondary/30">{item.step}</span>
+                  <div key={i} className="flex gap-4 items-start">
+                    <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+                      <span className="font-bold text-secondary">{item.step}</span>
+                    </div>
                     <div>
-                      <p className="text-sm font-bold">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      <p className="font-bold leading-none mb-1">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
                     </div>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <h4 className="font-bold mb-2 uppercase tracking-widest text-[10px] text-muted-foreground">Laudos Jurídicos</h4>
-                <p className="text-sm text-foreground/80 mb-4 italic">
-                  "Nossa metodologia garante laudos aceitos juridicamente, evitando contestações e trazendo segurança para sua imobiliária."
-                </p>
-                <Button variant="link" className="p-0 h-auto text-secondary font-bold text-[10px] uppercase">Ver Modelo de Laudo</Button>
               </CardContent>
             </Card>
           </div>
