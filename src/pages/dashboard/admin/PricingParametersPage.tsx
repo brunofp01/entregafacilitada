@@ -186,7 +186,16 @@ const PricingParametersPage = () => {
             if (data && !error) {
                 if (data.ms_params?.length) setMsParams(data.ms_params);
                 if (data.co_params?.length) setCoParams(data.co_params);
-                if (data.plans?.length) setPlans(data.plans);
+                if (data.plans?.length) {
+                    const restoredPlans = data.plans.map((dbPlan: any) => {
+                        const orig = initialPlans.find(p => p.id === dbPlan.id);
+                        return {
+                            ...dbPlan,
+                            icon: orig?.icon // Restaura os componentes React que o JSON ignorou
+                        };
+                    });
+                    setPlans(restoredPlans);
+                }
                 if (data.installments) setInstallments(data.installments);
             }
         };
