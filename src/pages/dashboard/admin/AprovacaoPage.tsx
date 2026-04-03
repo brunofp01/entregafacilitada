@@ -86,7 +86,7 @@ const AprovacaoPage = () => {
                 .from("inquilinos")
                 .select(`
                     *,
-                    vistorias:vistoria_id (
+                    vistorias (
                         relatorio_url
                     )
                 `)
@@ -447,7 +447,10 @@ const AprovacaoPage = () => {
                                     </div>
                                     {(selected.vistoria_upload_url || selected.vistoria_id)
                                         ? <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" onClick={() => {
-                                            const url = selected.vistorias?.relatorio_url || selected.vistoria_upload_url;
+                                            // @ts-ignore - Supabase join returns object or array
+                                            const relUrl = Array.isArray(selected.vistorias) ? selected.vistorias[0]?.relatorio_url : selected.vistorias?.relatorio_url;
+                                            const url = relUrl || selected.vistoria_upload_url;
+
                                             if (url) window.open(url, "_blank");
                                             else if (selected.vistoria_id) window.open(`/imobiliaria/vistorias/nova?id=${selected.vistoria_id}&view=true`, "_blank");
                                         }}><ExternalLink className="w-4 h-4" /></Button>
