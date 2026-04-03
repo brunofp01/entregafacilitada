@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Users, TrendingUp, DollarSign, FileSignature,
     CheckCircle2, Clock, Search, Eye, RefreshCw,
     Loader2, Phone, Mail, MapPin, FileText,
     Download, ExternalLink, Building2, Package,
     Zap, Star, ShieldCheck, Filter,
-    AlertTriangle, ArrowUpRight, CalendarDays
+    AlertTriangle, ArrowUpRight, CalendarDays, XCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
@@ -48,11 +50,12 @@ interface ClienteContrato {
     plano_mensalidade?: number;
     // Joined imobiliaria
     imobiliaria_nome?: string;
+    motivo_recusa?: string;
 }
 
 const statusBadge = (status: string) => {
     if (status === "assinado") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Assinado</Badge>;
-    if (status === "rejeitado") return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><AlertTriangle className="w-3 h-3 mr-1" />Rejeitado</Badge>;
+    if (status === "rejeitado" || status === "recusado") return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado</Badge>;
     return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
 };
 
@@ -86,6 +89,9 @@ const PlanoGestaoPage = () => {
     const [customEnd, setCustomEnd] = useState("");
     const [selected, setSelected] = useState<ClienteContrato | null>(null);
     const [sheetOpen, setSheetOpen] = useState(false);
+    const [recusaOpen, setRecusaOpen] = useState(false);
+    const [motivoRecusa, setMotivoRecusa] = useState("");
+    const [recusando, setRecusando] = useState(false);
 
     // ── Date range helper ────────────────────────────────────────────────────
     const getDateRange = (): { from: Date | null; to: Date | null } => {
@@ -205,6 +211,28 @@ const PlanoGestaoPage = () => {
             }
         } catch { toast.error("Erro na sincronização."); }
         finally { setSyncing(false); }
+    };
+
+    // ── Recusar plano ───────────────────────────────────────────────────────────
+    const handleRecusar = async () => {
+        if (!selected || !motivoRecusa.trim()) return;
+        setRecusando(true);
+        try {
+            const { error } = await supabase
+                .from("inquilinos")
+                .update({ status_assinatura: "recusado", motivo_recusa: motivoRecusa.trim() })
+                .eq("id", selected.id);
+            if (error) throw error;
+            toast.success("Plano recusado e imobiliária notificada.");
+            setRecusaOpen(false);
+            setSheetOpen(false);
+            setMotivoRecusa("");
+            fetchAll();
+        } catch {
+            toast.error("Erro ao recusar o plano.");
+        } finally {
+            setRecusando(false);
+        }
     };
 
     return (
@@ -603,13 +631,71 @@ const PlanoGestaoPage = () => {
                                 )}
                             </div>
 
-                            <div className="pt-2">
+                            <div className="pt-2 space-y-3">
                                 <p className="text-[10px] text-muted-foreground text-center">Contratado em {fmtDate(selected.created_at)}</p>
+
+                                {/* Recusar Plano — admin only */}
+                                {selected.motivo_recusa ? (
+                                    <div className="p-3 bg-red-500/5 border border-red-500/20 rounded-xl">
+                                        <p className="text-xs font-bold text-red-600 mb-1 flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> Plano Recusado</p>
+                                        <p className="text-xs text-muted-foreground italic">"{selected.motivo_recusa}"</p>
+                                    </div>
+                                ) : selected.status_assinatura !== "recusado" && (
+                                    <Button
+                                        variant="outline"
+                                        className="w-full border-red-500/30 text-red-600 hover:bg-red-500/5 hover:border-red-500/50 gap-2 font-bold"
+                                        onClick={() => { setMotivoRecusa(""); setRecusaOpen(true); }}
+                                    >
+                                        <XCircle className="w-4 h-4" />
+                                        Recusar Plano
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )}
                 </SheetContent>
             </Sheet>
+
+            {/* ── Recusa Dialog ── */}
+            <Dialog open={recusaOpen} onOpenChange={open => { if (!recusando) setRecusaOpen(open); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                            <XCircle className="w-5 h-5" /> Recusar Plano
+                        </DialogTitle>
+                        <DialogDescription>
+                            Esta ação marcará o contrato de <strong>{selected?.nome}</strong> como recusado.
+                            Informe o motivo para que a imobiliária responsável possa tomar as providências cabíveis.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-3 py-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Motivo da Recusa <span className="text-red-500">*</span></label>
+                        <Textarea
+                            placeholder="Descreva o motivo pelo qual este plano está sendo recusado..."
+                            value={motivoRecusa}
+                            onChange={e => setMotivoRecusa(e.target.value)}
+                            rows={4}
+                            className="resize-none"
+                        />
+                        <p className="text-[10px] text-muted-foreground">{motivoRecusa.length}/500 caracteres</p>
+                    </div>
+
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setRecusaOpen(false)} disabled={recusando}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleRecusar}
+                            disabled={!motivoRecusa.trim() || recusando}
+                            className="bg-red-600 hover:bg-red-700 text-white gap-2"
+                        >
+                            {recusando ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                            {recusando ? "Processando..." : "Confirmar Recusa"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </DashboardLayout>
     );
 };
