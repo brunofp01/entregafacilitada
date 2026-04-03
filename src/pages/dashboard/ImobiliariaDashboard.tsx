@@ -9,7 +9,12 @@ import { supabase } from "@/lib/supabaseClient";
 const ImobiliariaDashboard = () => {
   const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || "imobiliaria");
 
-  const [stats, setStats] = useState({ total: 0, pending: 0, signed: 0, awaitingEF: 0, rejected: 0 });
+  const [stats, setStats] = useState({
+    vistoriasAprovadas: 0,
+    pendentesAprovacao: 0,
+    contratosAtivos: 0,
+    pendentesAssinatura: 0
+  });
   const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
@@ -22,18 +27,24 @@ const ImobiliariaDashboard = () => {
 
       const imobiliariaId = profile?.imobiliaria_id || user.id;
 
+      // Buscar Inquilinos (Contratos)
       const { data: inqs } = await supabase
         .from('inquilinos')
         .select('status_assinatura, aprovacao_ef')
         .eq('imobiliaria_id', imobiliariaId);
 
+      // Buscar Vistorias
+      const { data: vists } = await supabase
+        .from('vistorias')
+        .select('status')
+        .eq('imobiliaria_id', imobiliariaId);
+
       if (inqs) {
         setStats({
-          total: inqs.length,
-          pending: inqs.filter(i => i.status_assinatura === 'pendente').length,
-          signed: inqs.filter(i => i.status_assinatura === 'assinado').length,
-          awaitingEF: inqs.filter(i => i.status_assinatura === 'assinado' && (!i.aprovacao_ef || i.aprovacao_ef === 'pendente')).length,
-          rejected: inqs.filter(i => i.status_assinatura === 'recusado' || i.aprovacao_ef === 'recusado').length,
+          vistoriasAprovadas: vists?.filter(v => v.status === 'concluida').length || 0,
+          pendentesAprovacao: inqs.filter(i => i.status_assinatura === 'assinado' && (!i.aprovacao_ef || i.aprovacao_ef === 'pendente')).length,
+          contratosAtivos: inqs.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado').length,
+          pendentesAssinatura: inqs.filter(i => i.status_assinatura !== 'assinado' && i.status_assinatura !== 'rejeitado').length,
         });
       }
       setLoadingStats(false);
@@ -45,8 +56,8 @@ const ImobiliariaDashboard = () => {
 
   const allModules = [
     {
-      title: "Gestão de Inquilinos com Entrega Facilitada",
-      description: "Visualize e gerencie todos os inquilinos vinculados à sua imobiliária.",
+      title: "Gestão de Clientes EF",
+      description: "Acompanhe os contratos, assinaturas e status de aprovação.",
       icon: Users,
       href: "/imobiliaria/inquilinos",
       color: "bg-blue-500/10 text-blue-500",
@@ -104,28 +115,28 @@ const ImobiliariaDashboard = () => {
 
         {/* Stats Banner */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+          <Card className="border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider">Total de Inquilinos</CardDescription>
-              <CardTitle className="text-2xl font-black">{loadingStats ? "..." : stats.total}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Vistorias Aprovadas</CardDescription>
+              <CardTitle className="text-2xl font-black text-emerald-600">{loadingStats ? "..." : stats.vistoriasAprovadas}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+          <Card className="border-violet-500/20 bg-violet-500/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-orange-500">Pendentes</CardDescription>
-              <CardTitle className="text-2xl font-black text-orange-500">{loadingStats ? "..." : stats.pending}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-violet-600">Pendentes de Aprovação</CardDescription>
+              <CardTitle className="text-2xl font-black text-violet-600">{loadingStats ? "..." : stats.pendentesAprovacao}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-border/50 bg-card/40 backdrop-blur-sm">
+          <Card className="border-secondary/20 bg-secondary/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-violet-500">Aguardando EF</CardDescription>
-              <CardTitle className="text-2xl font-black text-violet-500">{loadingStats ? "..." : stats.awaitingEF}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-secondary">Contratos Ativos</CardDescription>
+              <CardTitle className="text-2xl font-black text-secondary">{loadingStats ? "..." : stats.contratosAtivos}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className={stats.rejected > 0 ? "border-red-500/20 bg-red-500/10" : "border-border/50 bg-card/40"}>
+          <Card className="border-orange-500/20 bg-orange-500/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className={`text-[10px] font-bold uppercase tracking-wider ${stats.rejected > 0 ? "text-red-600" : "text-muted-foreground"}`}>Recusados</CardDescription>
-              <CardTitle className={`text-2xl font-black ${stats.rejected > 0 ? "text-red-600" : "text-muted-foreground"}`}>{loadingStats ? "..." : stats.rejected}</CardTitle>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Pendentes de Assinatura</CardDescription>
+              <CardTitle className="text-2xl font-black text-orange-600">{loadingStats ? "..." : stats.pendentesAssinatura}</CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -162,26 +173,6 @@ const ImobiliariaDashboard = () => {
           ))}
         </div>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
-          <div className="p-8 flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-1 space-y-4">
-              <h2 className="text-2xl font-bold">Precisando de suporte?</h2>
-              <p className="text-muted-foreground">
-                Nossa equipe técnica está pronta para ajudar com vistorias complexas,
-                dúvidas sobre a plataforma ou integrações de API.
-              </p>
-              <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary/10">
-                Falar com Especialista
-              </Button>
-            </div>
-            <div className="w-full md:w-1/3 aspect-video bg-gradient-to-br from-secondary/20 to-primary/20 rounded-2xl border border-secondary/20 flex items-center justify-center p-6 text-center">
-              <p className="text-xs font-medium text-muted-foreground italic">
-                "A Entrega Facilitada reduziu nosso tempo de vistoria em 70%."
-                <br />— Imobiliária Exemplo
-              </p>
-            </div>
-          </div>
-        </Card>
       </div>
     </DashboardLayout>
   );
