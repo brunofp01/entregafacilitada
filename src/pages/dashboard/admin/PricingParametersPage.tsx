@@ -13,6 +13,7 @@ import {
     Plus, Trash2, PlayCircle, Ruler, CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CostCompositionSubpage } from "./CostCompositionSubpage";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface FormulaParam {
@@ -176,6 +177,7 @@ const PricingParametersPage = () => {
     const [isDirty, setIsDirty] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
+    const [view, setView] = useState<"simulator" | "composition">("simulator");
 
     const touch = () => setIsDirty(true);
 
@@ -234,6 +236,55 @@ const PricingParametersPage = () => {
     });
     const simData = planPcs.find(p => p.id === simPlan);
 
+    const handleApplyComposition = (basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => {
+        // Calculate the rate per square meter since the simulator will multiply it by simArea later
+        const bMatSqm = simArea > 0 ? (basicoMat / simArea).toFixed(2) : "0";
+        const bLabSqm = simArea > 0 ? (basicoLabor / simArea).toFixed(2) : "0";
+
+        const cMatSqm = simArea > 0 ? (completoMat / simArea).toFixed(2) : "0";
+        const cLabSqm = simArea > 0 ? (completoLabor / simArea).toFixed(2) : "0";
+
+        setPlans(ps => ps.map(pl => {
+            if (pl.id === "basico") {
+                return {
+                    ...pl,
+                    params: pl.params.map(p => {
+                        if (p.label.toLowerCase().includes("material")) return { ...p, value: bMatSqm, active: true };
+                        if (p.label.toLowerCase().includes("obra")) return { ...p, value: bLabSqm, active: true };
+                        return p;
+                    })
+                };
+            }
+            if (pl.id === "completo") {
+                return {
+                    ...pl,
+                    params: pl.params.map(p => {
+                        if (p.label.toLowerCase().includes("material")) return { ...p, value: cMatSqm, active: true };
+                        if (p.label.toLowerCase().includes("obra")) return { ...p, value: cLabSqm, active: true };
+                        return p;
+                    })
+                };
+            }
+            return pl;
+        }));
+
+        toast.success("Custos aplicados com sucesso! Os valores por m² foram atualizados.");
+        setView("simulator");
+        touch();
+    };
+
+    if (view === "composition") {
+        return (
+            <DashboardLayout role="admin">
+                <CostCompositionSubpage
+                    area={simArea}
+                    onBack={() => setView("simulator")}
+                    onApply={handleApplyComposition}
+                />
+            </DashboardLayout>
+        );
+    }
+
     return (
         <DashboardLayout role="admin">
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
@@ -244,14 +295,23 @@ const PricingParametersPage = () => {
                         <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Parâmetros de Cálculo</h1>
                         <p className="text-muted-foreground">Ajuste os fatores da fórmula atuarial e simule o Pc de cada plano em tempo real.</p>
                     </div>
-                    <Button
-                        onClick={() => { toast.success("Parâmetros salvos! (Persistência no banco em breve)"); setIsDirty(false); }}
-                        disabled={!isDirty}
-                        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 shadow-lg shadow-secondary/20 shrink-0"
-                    >
-                        <Save className="w-4 h-4" />
-                        {isDirty ? "Salvar Alterações" : "Nenhuma Alteração"}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={() => setView("composition")}
+                            variant="outline"
+                            className="text-secondary border-secondary/50 hover:bg-secondary/10 gap-2 shrink-0"
+                        >
+                            Composição de Custos
+                        </Button>
+                        <Button
+                            onClick={() => { toast.success("Parâmetros salvos! (Persistência no banco em breve)"); setIsDirty(false); }}
+                            disabled={!isDirty}
+                            className="bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 shadow-lg shadow-secondary/20 shrink-0"
+                        >
+                            <Save className="w-4 h-4" />
+                            {isDirty ? "Salvar Alterações" : "Nesta Sessão"}
+                        </Button>
+                    </div>
                 </header>
 
                 {/* ══ SIMULADOR ══ */}
@@ -294,8 +354,8 @@ const PricingParametersPage = () => {
                                 return (
                                     <button key={plan.id} onClick={() => setSimPlan(plan.id)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-sm transition-all ${simPlan === plan.id
-                                                ? `${plan.bgColor} ${plan.color} ${plan.borderColor} shadow-md scale-105`
-                                                : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/60"
+                                            ? `${plan.bgColor} ${plan.color} ${plan.borderColor} shadow-md scale-105`
+                                            : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/60"
                                             }`}>
                                         <PIcon className="w-4 h-4" /> {plan.label}
                                     </button>
