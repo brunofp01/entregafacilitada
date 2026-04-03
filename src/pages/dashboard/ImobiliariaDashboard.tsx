@@ -123,19 +123,19 @@ const ImobiliariaDashboard = () => {
           </Card>
           <Card className="border-violet-500/20 bg-violet-500/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-violet-600">Pendentes de Aprovação</CardDescription>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-violet-600">Vistorias Pendentes de Aprovação</CardDescription>
               <CardTitle className="text-2xl font-black text-violet-600">{loadingStats ? "..." : stats.pendentesAprovacao}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="border-secondary/20 bg-secondary/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-secondary">Contratos Ativos</CardDescription>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-secondary">EF: Contratos Ativos</CardDescription>
               <CardTitle className="text-2xl font-black text-secondary">{loadingStats ? "..." : stats.contratosAtivos}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="border-orange-500/20 bg-orange-500/5 backdrop-blur-sm">
             <CardHeader className="p-4 pb-2">
-              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-orange-600">Pendentes de Assinatura</CardDescription>
+              <CardDescription className="text-[10px] font-bold uppercase tracking-wider text-orange-600">EF:Pendentes de Assinatura</CardDescription>
               <CardTitle className="text-2xl font-black text-orange-600">{loadingStats ? "..." : stats.pendentesAssinatura}</CardTitle>
             </CardHeader>
           </Card>
