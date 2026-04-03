@@ -238,19 +238,19 @@ const VistoriasPage = () => {
         {/* Filtros de Status */}
         <div className="flex flex-wrap gap-2">
           {[
-            { id: "todas", label: "Todas", count: vistorias.length },
-            { id: "aprovadas", label: "Aprovadas", count: vistorias.filter(v => v.status === "concluida").length },
-            { id: "pendentes", label: "Pendentes", count: vistorias.filter(v => ["agendada", "pendente", "aguardando_aprovacao", "rascunho"].includes(v.status)).length },
-            { id: "reprovadas", label: "Reprovadas", count: vistorias.filter(v => v.status === "cancelada").length },
+            { id: "todas", label: "Todas", count: vistorias.length, color: "bg-secondary text-secondary-foreground shadow-secondary/20" },
+            { id: "aprovadas", label: "Aprovadas", count: vistorias.filter(v => v.status === "concluida").length, color: "bg-emerald-500 text-white shadow-emerald-500/20" },
+            { id: "pendentes", label: "Pendentes", count: vistorias.filter(v => ["agendada", "pendente", "aguardando_aprovacao", "rascunho"].includes(v.status)).length, color: "bg-orange-500 text-white shadow-orange-500/20" },
+            { id: "reprovadas", label: "Reprovadas", count: vistorias.filter(v => v.status === "cancelada").length, color: "bg-destructive text-destructive-foreground shadow-destructive/20" },
           ].map((filter) => (
             <Button
               key={filter.id}
-              variant={statusFilter === filter.id ? "secondary" : "outline"}
+              variant={statusFilter === filter.id ? "default" : "outline"}
               onClick={() => setStatusFilter(filter.id as any)}
               className={cn(
                 "rounded-full px-5 py-5 font-bold gap-2 transition-all",
                 statusFilter === filter.id
-                  ? "bg-secondary text-secondary-foreground shadow-lg shadow-secondary/20"
+                  ? `${filter.color} shadow-lg scale-105`
                   : "border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
