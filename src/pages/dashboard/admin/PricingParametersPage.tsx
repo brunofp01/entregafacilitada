@@ -10,7 +10,7 @@ import {
     Save, Info, Calculator, Settings2,
     Zap, Star, Globe,
     Percent, DollarSign, TrendingUp, Shield,
-    Plus, Trash2, PlayCircle, Ruler, CalendarDays,
+    Plus, Trash2, PlayCircle, Ruler, CalendarDays, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { CostCompositionSubpage } from "./CostCompositionSubpage";
@@ -174,10 +174,44 @@ const PricingParametersPage = () => {
     const [msParams, setMsParams] = useState<FormulaParam[]>(initialMs);
     const [coParams, setCoParams] = useState<FormulaParam[]>(initialCo);
     const [plans, setPlans] = useState<PlanConfig[]>(initialPlans);
-    const [installments, setInstallments] = useState(12); // Número de parcelas compartilhado
+    const [installments, setInstallments] = useState(24);
     const [isDirty, setIsDirty] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
+
+    useEffect(() => {
+        const loadGlobals = async () => {
+            const { data, error } = await supabase.from('pricing_parameters_config').select('*').eq('id', 1).single();
+            if (data && !error) {
+                if (data.ms_params?.length) setMsParams(data.ms_params);
+                if (data.co_params?.length) setCoParams(data.co_params);
+                if (data.plans?.length) setPlans(data.plans);
+                if (data.installments) setInstallments(data.installments);
+            }
+        };
+        loadGlobals();
+    }, []);
+
+    const handleSaveGlobalParams = async () => {
+        setIsSaving(true);
+        const { error } = await supabase.from('pricing_parameters_config').upsert({
+            id: 1,
+            ms_params: msParams,
+            co_params: coParams,
+            plans: plans,
+            installments: installments,
+            updated_at: new Date().toISOString()
+        });
+        setIsSaving(false);
+        if (error) {
+            toast.error("Erro ao salvar parâmetros no banco de dados.");
+            console.error(error);
+        } else {
+            toast.success("Parâmetros globais salvos com sucesso!");
+            setIsDirty(false);
+        }
+    };
 
     const handleCompositionTotalsUpdate = useCallback((basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => {
         const bMatStr = basicoMat.toFixed(2);
@@ -277,12 +311,12 @@ const PricingParametersPage = () => {
                     </div>
                     <div className="flex gap-2">
                         <Button
-                            onClick={() => { toast.success("Parâmetros salvos! (Persistência no banco em breve)"); setIsDirty(false); }}
-                            disabled={!isDirty}
+                            onClick={handleSaveGlobalParams}
+                            disabled={!isDirty || isSaving}
                             className="bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-2 shadow-lg shadow-secondary/20 shrink-0"
                         >
-                            <Save className="w-4 h-4" />
-                            {isDirty ? "Salvar Alterações" : "Nesta Sessão"}
+                            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            {isDirty ? "Salvar Alterações" : "Salvo no Banco"}
                         </Button>
                     </div>
                 </header>
@@ -416,28 +450,25 @@ const PricingParametersPage = () => {
                                 <div className="flex items-center gap-6">
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between mb-3">
-                                            <label className="text-sm font-semibold text-foreground">Parcelas</label>
+                                            <label className="text-sm font-semibold text-foreground">Opções de Parcelamento</label>
                                             <span className="font-mono font-bold text-violet-500 text-lg">{installments}x</span>
                                         </div>
-                                        <Slider
-                                            value={[installments]}
-                                            onValueChange={v => { setInstallments(v[0]); touch(); }}
-                                            min={1} max={60} step={1}
-                                            className="[&_[role=slider]]:bg-violet-500 [&_[role=slider]]:border-violet-500 [&_.relative>div]:bg-violet-500"
-                                        />
-                                        <div className="flex justify-between mt-1">
-                                            <span className="text-xs text-muted-foreground">1x</span>
-                                            <span className="text-xs text-muted-foreground">60x</span>
+                                        <div className="flex items-center gap-3 w-full">
+                                            <Button
+                                                variant={installments === 12 ? "default" : "outline"}
+                                                className={`flex-1 transition-all ${installments === 12 ? "bg-violet-500 hover:bg-violet-600 text-white shadow-md shadow-violet-500/20" : "border-border/50 hover:bg-black/5 dark:hover:bg-white/5"}`}
+                                                onClick={() => { setInstallments(12); touch(); }}
+                                            >
+                                                12 Parcelas
+                                            </Button>
+                                            <Button
+                                                variant={installments === 24 ? "default" : "outline"}
+                                                className={`flex-1 transition-all ${installments === 24 ? "bg-violet-500 hover:bg-violet-600 text-white shadow-md shadow-violet-500/20" : "border-border/50 hover:bg-black/5 dark:hover:bg-white/5"}`}
+                                                onClick={() => { setInstallments(24); touch(); }}
+                                            >
+                                                24 Parcelas
+                                            </Button>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <Input
-                                            type="number" min={1} max={60}
-                                            value={installments}
-                                            onChange={e => { const v = Math.max(1, Math.min(60, parseInt(e.target.value) || 1)); setInstallments(v); touch(); }}
-                                            className="w-20 font-mono text-center text-sm bg-background/60 border-border/50"
-                                        />
-                                        <span className="text-sm text-muted-foreground font-medium">meses</span>
                                     </div>
                                 </div>
                             </CardContent>
