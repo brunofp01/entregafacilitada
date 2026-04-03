@@ -95,18 +95,21 @@ const PlanoGestaoPage = () => {
 
             if (error) throw error;
 
-            // Fetch imobiliarias for labeling
+            // Imobiliarias are profiles with role='imobiliaria'
             const { data: imobData } = await supabase
-                .from("imobiliarias")
-                .select("id, nome");
+                .from("profiles")
+                .select("id, full_name")
+                .eq("role", "imobiliaria");
 
+            // Build lookup: profile.id → name (direct owner)
+            // Also: if imobiliaria has members, their imobiliaria_id points to the owner's profile
             const imobMap = new Map<string, string>();
-            imobData?.forEach(i => imobMap.set(i.id, i.nome));
-            setImobiliarias(imobData?.map(i => ({ id: i.id, nome: i.nome })) || []);
+            imobData?.forEach(i => imobMap.set(i.id, i.full_name || "Imobiliária"));
+            setImobiliarias(imobData?.map(i => ({ id: i.id, nome: i.full_name || "Imobiliária" })) || []);
 
             const enriched = (clientesData || []).map(c => ({
                 ...c,
-                imobiliaria_nome: imobMap.get(c.imobiliaria_id) || "—",
+                imobiliaria_nome: imobMap.get(c.imobiliaria_id) || "Imobiliária",
             }));
             setClientes(enriched);
         } catch (err) {
