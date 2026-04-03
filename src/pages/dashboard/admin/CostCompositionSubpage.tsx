@@ -155,7 +155,6 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
             valorMinimo: item.valorMinimo,
         });
         setEditingId(item.id);
-        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleRemoveItem = async (id: string) => {
