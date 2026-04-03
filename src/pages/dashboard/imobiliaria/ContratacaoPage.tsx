@@ -21,6 +21,8 @@ interface VistoriaPlataforma {
     complemento: string;
     cidade: string;
     metragem?: number;
+    tipo?: string;
+    created_at?: string;
 }
 
 const ContratacaoPage = () => {
@@ -54,7 +56,7 @@ const ContratacaoPage = () => {
 
                 const { data, error } = await supabase
                     .from("vistorias")
-                    .select("id, rua, numero, complemento, cidade, metragem")
+                    .select("id, rua, numero, complemento, cidade, metragem, tipo, created_at")
                     .eq("imobiliaria_id", imobiliariaId)
                     .in("status", ["concluida", "aguardando_aprovacao"])
                     .order("created_at", { ascending: false });
@@ -245,13 +247,46 @@ const ContratacaoPage = () => {
         }
     };
 
-    const matchingVistorias = vistoriasConcluidas.filter(v => {
+    // Smart filter: per address, find the most recent vistoria.
+    // Only suggest if the most recent is 'entrada' AND within the last 2 months.
+    const getSmartSuggestions = (): VistoriaPlataforma[] => {
         const iRua = (imovel.rua || "").toLowerCase().trim();
         const iNum = (imovel.numero || "").trim();
-        const vRua = (v.rua || "").toLowerCase().trim();
-        const vNum = (v.numero || "").trim();
-        return iRua && iNum && vRua === iRua && vNum === iNum;
-    });
+        if (!iRua || !iNum) return [];
+
+        // Filter all vistorias that match the address
+        const addressMatches = vistoriasConcluidas.filter(v => {
+            const vRua = (v.rua || "").toLowerCase().trim();
+            const vNum = (v.numero || "").trim();
+            return vRua === iRua && vNum === iNum;
+        });
+
+        if (addressMatches.length === 0) return [];
+
+        // Sort by date, most recent first
+        const sorted = [...addressMatches].sort((a, b) => {
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        });
+
+        // Rule 1: If the most recent vistoria is 'saida', don't suggest any.
+        const mostRecent = sorted[0];
+        if (mostRecent.tipo === 'saida') return [];
+
+        // Rule 2: Only accept 'entrada' vistorias within 2 months from today.
+        const twoMonthsAgo = new Date();
+        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+        const validEntradas = sorted.filter(v => {
+            if (v.tipo !== 'entrada') return false;
+            const vDate = new Date(v.created_at || 0);
+            return vDate >= twoMonthsAgo;
+        });
+
+        // Rule 3: Return only the most recent valid 'entrada'
+        return validEntradas.length > 0 ? [validEntradas[0]] : [];
+    };
+
+    const matchingVistorias = getSmartSuggestions();
 
     const selectedVistoria = vistoriasConcluidas.find(v => v.id === vistoriaIdVinculada);
     const showComplementWarning = selectedVistoria?.complemento && imovel.complemento &&
@@ -408,7 +443,7 @@ const ContratacaoPage = () => {
 
                             {vistoriaTipo === 'plataforma' && vistoriaIdVinculada && matchingVistorias.find(v => v.id === vistoriaIdVinculada) ? (
                                 <div className="mt-6 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-top-2">
-                                    <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Parâmetro Atuarial</h3>
+                                    <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Parâmetro de Análise</h3>
                                     <div className="space-y-2 max-w-[240px]">
                                         <Label>Metragem Computada (m²)</Label>
                                         <Input
@@ -422,7 +457,7 @@ const ContratacaoPage = () => {
                                 </div>
                             ) : (
                                 <div className="mt-6 pt-4 border-t border-border/50">
-                                    <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Parâmetro Atuarial</h3>
+                                    <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider">Parâmetro de Análise</h3>
                                     <div className="space-y-2 max-w-[240px]">
                                         <Label>Metragem (m²) *</Label>
                                         <Input
