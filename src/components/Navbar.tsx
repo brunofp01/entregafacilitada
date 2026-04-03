@@ -8,6 +8,7 @@ import logoIcon from "@/assets/logo-icon.png";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole'));
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,15 +18,41 @@ const Navbar = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (!session) {
+        setUserRole(null);
+        localStorage.removeItem('userRole');
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const fetchRole = async () => {
+      if (session?.user?.id && !userRole) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+        if (data?.role) {
+          setUserRole(data.role);
+          localStorage.setItem('userRole', data.role);
+        }
+      }
+    };
+    fetchRole();
+  }, [session, userRole]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUserRole(null);
+    localStorage.removeItem('userRole');
     setOpen(false);
     navigate("/");
+  };
+
+  const getDashboardPath = () => {
+    if (!userRole) return "/auth";
+    if (userRole === "admin") return "/admin";
+    if (userRole === "imobiliaria" || userRole === "integrante_imobiliaria") return "/imobiliaria";
+    return "/inquilino";
   };
 
   const links = [
@@ -51,10 +78,10 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          
+
           {session ? (
             <div className="flex items-center gap-3">
-              <Link to="/auth">
+              <Link to={getDashboardPath()}>
                 <Button size="sm" variant="outline" className="gap-2 font-bold border-secondary text-secondary hover:bg-secondary/10">
                   <LayoutDashboard className="w-4 h-4" />
                   Meu Painel
@@ -86,10 +113,10 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          
+
           {session ? (
             <div className="flex flex-col gap-2">
-              <Link to="/auth" onClick={() => setOpen(false)}>
+              <Link to={getDashboardPath()} onClick={() => setOpen(false)}>
                 <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold gap-2">
                   <LayoutDashboard className="w-4 h-4" />
                   Ir para o Painel

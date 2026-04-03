@@ -21,7 +21,21 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        // Fetch role to redirect correctly
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profile?.role) {
+          localStorage.setItem('userRole', profile.role);
+          if (profile.role === "admin") navigate("/admin");
+          else if (profile.role === "imobiliaria" || profile.role === "integrante_imobiliaria") navigate("/imobiliaria");
+          else navigate("/inquilino");
+        } else {
+          navigate("/"); // Fallback
+        }
       }
     };
     checkUser();
