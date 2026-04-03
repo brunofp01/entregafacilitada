@@ -14,52 +14,15 @@ const SegurosPage = () => {
                     <p className="text-muted-foreground">Consulte coberturas, apólices e status das garantias locatícias ativas.</p>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                        <CardHeader>
-                            <ShieldAlert className="w-8 h-8 text-orange-500 mb-2" />
-                            <CardTitle className="text-lg">Acionar Cobertura</CardTitle>
-                            <CardDescription>Inicie um processo de sinistro ou desocupação.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold">Solicitar</Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                        <CardHeader>
-                            <FileSearch className="w-8 h-8 text-blue-500 mb-2" />
-                            <CardTitle className="text-lg">Consultar Apólices</CardTitle>
-                            <CardDescription>Busque por documentos de garantia específica.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button variant="outline" className="w-full">Buscar</Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                        <CardHeader>
-                            <HelpCircle className="w-8 h-8 text-purple-500 mb-2" />
-                            <CardTitle className="text-lg">Central de Ajuda</CardTitle>
-                            <CardDescription>Entenda como funcionam as proteções.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button variant="secondary" className="w-full">Acessar</Button>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl p-12 text-center">
-                    <div className="max-w-md mx-auto space-y-4">
-                        <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Shield className="w-8 h-8 text-orange-500" />
-                        </div>
-                        <h2 className="text-2xl font-bold italic">Dashboard de Apólices</h2>
-                        <p className="text-muted-foreground">
-                            Você ainda não possui seguros ativos ou garantias vinculadas neste módulo.
-                            Contrate o **Entrega Facilitada** para começar a visualizar suas proteções aqui.
-                        </p>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-xl p-20 text-center flex flex-col items-center justify-center min-h-[400px]">
+                    <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mb-6">
+                        <Shield className="w-10 h-10 text-orange-500 animate-pulse" />
                     </div>
+                    <h2 className="text-3xl font-heading font-bold mb-4 italic">Em desenvolvimento</h2>
+                    <p className="text-muted-foreground max-w-md text-lg">
+                        Estamos preparando um novo cockpit para gestão de apólices e garantias.
+                        Em breve, você poderá consultar e acionar proteções diretamente por aqui.
+                    </p>
                 </Card>
             </div>
         </DashboardLayout>
