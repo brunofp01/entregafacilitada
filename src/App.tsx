@@ -13,6 +13,7 @@ import RelatoriosPage from "./pages/dashboard/admin/RelatoriosPage.tsx";
 import ConfiguracoesPage from "./pages/dashboard/admin/ConfiguracoesPage.tsx";
 import AdminPerfilPage from "./pages/dashboard/admin/PerfilPage.tsx";
 import PlanoGestaoPage from "./pages/dashboard/admin/PlanoGestaoPage.tsx";
+import AprovacaoPage from "./pages/dashboard/admin/AprovacaoPage.tsx";
 import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
 import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
 import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
@@ -80,6 +81,11 @@ const App = () => (
           <Route path="/admin/planos" element={
             <ProtectedRoute allowedRole="admin">
               <PlanoGestaoPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/aprovacoes" element={
+            <ProtectedRoute allowedRole="admin">
+              <AprovacaoPage />
             </ProtectedRoute>
           } />
 

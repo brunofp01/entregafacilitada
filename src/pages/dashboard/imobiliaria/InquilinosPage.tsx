@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, FileSignature, Wallet, ArrowRight, Eye, CheckCircle2, Clock, RefreshCw, Phone, Mail, MapPin, FileText, Download, ExternalLink, Trash2 } from "lucide-react";
+import { Loader2, Users, FileSignature, Wallet, ArrowRight, Eye, CheckCircle2, Clock, RefreshCw, Phone, Mail, MapPin, FileText, Download, ExternalLink, Trash2, ClipboardCheck, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
@@ -26,6 +26,8 @@ interface InquilinoRow {
     endereco_cidade: string;
     endereco_estado: string;
     status_assinatura: string;
+    aprovacao_ef?: string;
+    motivo_recusa?: string;
     autentique_document_id?: string;
     contrato_locacao_url?: string;
     contratos_servico_url?: string;
@@ -171,11 +173,14 @@ const InquilinosPage = () => {
         return <Badge className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border-orange-500/20"><Clock className="w-3 h-3 mr-1" /> Pendente no Autentique</Badge>;
     };
 
-    const getBillingBadge = (statusSig: string) => {
-        if (statusSig !== 'assinado') {
+    const getAprovacaoBadge = (inquilino: InquilinoRow) => {
+        if (inquilino.status_assinatura !== 'assinado') {
             return <Badge variant="outline" className="text-muted-foreground border-border/50">Aguardando Assinatura</Badge>;
         }
-        return <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20">Em dia</Badge>;
+        const ef = inquilino.aprovacao_ef || 'pendente';
+        if (ef === 'aprovado') return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovado — Cobrança Ativa</Badge>;
+        if (ef === 'recusado') return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado pela EF</Badge>;
+        return <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando Aprovação EF</Badge>;
     };
 
     return (
@@ -279,7 +284,7 @@ const InquilinosPage = () => {
                                                     {getSignatureBadge(inquilino.status_assinatura)}
                                                 </td>
                                                 <td className="px-3 md:px-6 py-4 hidden md:table-cell">
-                                                    {getBillingBadge(inquilino.status_assinatura)}
+                                                    {getAprovacaoBadge(inquilino)}
                                                 </td>
                                                 <td className="px-3 md:px-6 py-4 text-right">
                                                     <Button
@@ -362,7 +367,7 @@ const InquilinosPage = () => {
                                             </div>
                                             <div className="p-3 border rounded-lg bg-background flex flex-col gap-1">
                                                 <span className="text-[10px] text-muted-foreground font-bold">PAGAMENTO</span>
-                                                {getBillingBadge(selectedInquilino.status_assinatura)}
+                                                {getAprovacaoBadge(selectedInquilino)}
                                             </div>
                                         </div>
                                     </div>

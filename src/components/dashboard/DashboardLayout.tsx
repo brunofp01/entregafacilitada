@@ -14,7 +14,8 @@ import {
   User,
   Bell,
   Calculator,
-  Package
+  Package,
+  ClipboardCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -70,6 +71,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
       { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
       { icon: Package, label: "Gestão de Planos", href: "/admin/planos" },
+      { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
       { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
       { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },
