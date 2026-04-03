@@ -4,8 +4,9 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Plus, Edit2, Trash2, CheckCircle2, Factory, Hammer, DollarSign, Box } from "lucide-react";
+import { ArrowLeft, Save, Plus, Edit2, Trash2, CheckCircle2, Factory, Hammer, DollarSign, Box, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
 
 export interface CompositionItem {
     id: string;
@@ -33,20 +34,34 @@ const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
 };
 
 export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ area, onBack, onApply }) => {
-    const [items, setItems] = useState<CompositionItem[]>(() => {
-        try {
-            const saved = localStorage.getItem("cost_composition_items");
-            return saved ? JSON.parse(saved) : [];
-        } catch (e) {
-            return [];
-        }
-    });
-
-    useEffect(() => {
-        localStorage.setItem("cost_composition_items", JSON.stringify(items));
-    }, [items]);
+    const [items, setItems] = useState<CompositionItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [formItem, setFormItem] = useState<Omit<CompositionItem, "id" | "inBasico" | "inCompleto">>(emptyItem);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        const fetchItems = async () => {
+            const { data, error } = await supabase.from('cost_composition_items').select('*').order('created_at', { ascending: true });
+            if (error) {
+                toast.error("Erro ao carregar insumos do banco de dados.");
+                console.error(error);
+            } else if (data) {
+                setItems(data.map(d => ({
+                    id: d.id,
+                    nome: d.nome,
+                    indiceSinapi: d.indice_sinapi?.toString() || "",
+                    probabilidade: d.probabilidade?.toString() || "",
+                    rendimento: d.rendimento?.toString() || "",
+                    valorReferencia: d.valor_referencia?.toString() || "",
+                    inBasico: d.in_basico,
+                    inCompleto: d.in_completo
+                })));
+            }
+            setIsLoading(false);
+        };
+        fetchItems();
+    }, []);
 
     // Calc helper
     const calculateItemValues = (item: Omit<CompositionItem, "id" | "inBasico" | "inCompleto">) => {
@@ -65,28 +80,53 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         return { totalServico, execucaoPrevista, mo, mat };
     };
 
-    const handleSaveItem = () => {
+    const handleSaveItem = async () => {
         if (!formItem.nome || !formItem.rendimento || !formItem.valorReferencia) {
             toast.error("Preencha ao menos Nome, Rendimento e Valor de Referência");
             return;
         }
 
-        if (editingId) {
-            setItems(prev => prev.map(i => i.id === editingId ? { ...i, ...formItem } : i));
-            toast.success("Item atualizado!");
-        } else {
-            const newItem: CompositionItem = {
-                ...formItem,
-                id: Math.random().toString(36).substring(2, 9),
-                inBasico: false,
-                inCompleto: false,
-            };
-            setItems(prev => [...prev, newItem]);
-            toast.success("Item cadastrado!");
-        }
+        setIsSaving(true);
+        const dbPayload = {
+            nome: formItem.nome,
+            indice_sinapi: parseFloat(formItem.indiceSinapi) || 0,
+            probabilidade: parseFloat(formItem.probabilidade) || 0,
+            rendimento: parseFloat(formItem.rendimento) || 1,
+            valor_referencia: parseFloat(formItem.valorReferencia) || 0,
+        };
 
-        setFormItem(emptyItem);
-        setEditingId(null);
+        if (editingId) {
+            const { error } = await supabase.from('cost_composition_items').update(dbPayload).eq('id', editingId);
+            if (error) {
+                toast.error("Erro ao atualizar item.");
+            } else {
+                setItems(prev => prev.map(i => i.id === editingId ? { ...i, ...formItem } : i));
+                toast.success("Item atualizado!");
+                setFormItem(emptyItem);
+                setEditingId(null);
+            }
+        } else {
+            const { data, error } = await supabase.from('cost_composition_items').insert([{
+                ...dbPayload,
+                in_basico: false,
+                in_completo: false
+            }]).select();
+
+            if (error || !data) {
+                toast.error("Erro ao cadastrar item no banco.");
+            } else {
+                const inserted = data[0];
+                setItems(prev => [...prev, {
+                    ...formItem,
+                    id: inserted.id,
+                    inBasico: inserted.in_basico,
+                    inCompleto: inserted.in_completo
+                }]);
+                toast.success("Item cadastrado!");
+                setFormItem(emptyItem);
+            }
+        }
+        setIsSaving(false);
     };
 
     const handleEditItem = (item: CompositionItem) => {
@@ -101,16 +141,35 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const handleRemoveItem = (id: string) => {
+    const handleRemoveItem = async (id: string) => {
+        const original = [...items];
         setItems(prev => prev.filter(i => i.id !== id));
         if (editingId === id) {
             setFormItem(emptyItem);
             setEditingId(null);
         }
+
+        const { error } = await supabase.from('cost_composition_items').delete().eq('id', id);
+        if (error) {
+            toast.error("Erro ao remover item.");
+            setItems(original);
+        }
     };
 
-    const togglePlan = (id: string, plan: "inBasico" | "inCompleto") => {
-        setItems(prev => prev.map(i => i.id === id ? { ...i, [plan]: !i[plan] } : i));
+    const togglePlan = async (id: string, plan: "inBasico" | "inCompleto") => {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+
+        const newValue = !item[plan];
+        setItems(prev => prev.map(i => i.id === id ? { ...i, [plan]: newValue } : i));
+
+        const dbField = plan === "inBasico" ? "in_basico" : "in_completo";
+        const { error } = await supabase.from('cost_composition_items').update({ [dbField]: newValue }).eq('id', id);
+        if (error) {
+            toast.error("Erro ao sincronizar com o banco.");
+            // Reverter em caso de erro
+            setItems(prev => prev.map(i => i.id === id ? { ...i, [plan]: item[plan] } : i));
+        }
     };
 
     // Calculate plan totals
@@ -263,8 +322,9 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                                 </div>
                             </div>
 
-                            <Button onClick={handleSaveItem} className="w-full mt-4 gap-2">
-                                {editingId ? <><Save className="w-4 h-4" />Atualizar Item</> : <><Plus className="w-4 h-4" />Adicionar Item</>}
+                            <Button onClick={handleSaveItem} disabled={isSaving} className="w-full mt-4 gap-2">
+                                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : editingId ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                {editingId ? "Atualizar Item" : "Adicionar Item"}
                             </Button>
                             {editingId && (
                                 <Button variant="ghost" onClick={() => { setEditingId(null); setFormItem(emptyItem); }} className="w-full mt-2">
@@ -287,7 +347,11 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4 space-y-3 max-h-[300px] overflow-y-auto">
-                            {items.length === 0 ? (
+                            {isLoading ? (
+                                <div className="flex items-center justify-center py-6 text-muted-foreground">
+                                    <Loader2 className="w-6 h-6 animate-spin" />
+                                </div>
+                            ) : items.length === 0 ? (
                                 <div className="text-center py-6 text-sm text-muted-foreground border border-dashed rounded-xl">
                                     Nenhum item cadastrado. Crie o primeiro ao lado.
                                 </div>

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { CostCompositionSubpage } from "./CostCompositionSubpage";
+import { supabase } from "@/lib/supabaseClient";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface FormulaParam {
@@ -208,6 +209,61 @@ const PricingParametersPage = () => {
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
     const [view, setView] = useState<"simulator" | "composition">("simulator");
+
+    useEffect(() => {
+        const fetchAndApplyRates = async () => {
+            const { data } = await supabase.from('cost_composition_items').select('*');
+            if (!data) return;
+
+            let basicoMat = 0, basicoLabor = 0;
+            let completoMat = 0, completoLabor = 0;
+
+            data.forEach(d => {
+                const indice = parseFloat(d.indice_sinapi) || 0;
+                const prob = parseFloat(d.probabilidade) || 0;
+                const rend = parseFloat(d.rendimento) || 1;
+                const ref = parseFloat(d.valor_referencia) || 0;
+
+                // Calculating the base constraint (per sqm) by using Area = 1
+                const totalS = 1 * indice;
+                const ex = totalS * (prob / 100);
+                const moSqm = rend > 0 ? (ex / rend) * ref * 0.57 : 0;
+                const matSqm = rend > 0 ? (ex / rend) * ref * 0.43 : 0;
+
+                if (d.in_basico) { basicoMat += matSqm; basicoLabor += moSqm; }
+                if (d.in_completo) { completoMat += matSqm; completoLabor += moSqm; }
+            });
+
+            const bMatStr = basicoMat.toFixed(2);
+            const bLabStr = basicoLabor.toFixed(2);
+            const cMatStr = completoMat.toFixed(2);
+            const cLabStr = completoLabor.toFixed(2);
+
+            setPlans(ps => ps.map(pl => {
+                if (pl.id === "basico") {
+                    return {
+                        ...pl, params: pl.params.map(p => {
+                            if (p.label.toLowerCase().includes("material")) return { ...p, value: bMatStr, active: true };
+                            if (p.label.toLowerCase().includes("obra")) return { ...p, value: bLabStr, active: true };
+                            return p;
+                        })
+                    };
+                }
+                if (pl.id === "completo") {
+                    return {
+                        ...pl, params: pl.params.map(p => {
+                            if (p.label.toLowerCase().includes("material")) return { ...p, value: cMatStr, active: true };
+                            if (p.label.toLowerCase().includes("obra")) return { ...p, value: cLabStr, active: true };
+                            return p;
+                        })
+                    };
+                }
+                return pl;
+            }));
+        };
+
+        fetchAndApplyRates();
+    }, []);
 
     const touch = () => setIsDirty(true);
 
