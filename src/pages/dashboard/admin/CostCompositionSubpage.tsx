@@ -357,7 +357,11 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                                         <div key={item.id} className="flex flex-col sm:flex-row gap-3 items-center justify-between p-3 rounded-lg border border-border/40 bg-background/50 hover:bg-background/80 transition-colors group">
                                             <div className="flex-1 min-w-0 w-full">
                                                 <div className="font-bold text-sm truncate">{item.nome}</div>
-                                                <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                                                <div className="flex flex-wrap items-center gap-4 mt-1 text-xs text-muted-foreground">
+                                                    <span className="flex items-center gap-1 font-extrabold text-foreground bg-background px-2 py-0.5 rounded shadow-sm border border-border/50">
+                                                        <DollarSign className="w-3 h-3 text-secondary" /> R$ {(mo + mat).toFixed(2)}
+                                                        <span className="text-[10px] opacity-70 ml-0.5 font-normal">(R$ {(area > 0 ? (mo + mat) / area : 0).toFixed(2)}/m²)</span>
+                                                    </span>
                                                     <span className="flex items-center gap-1">
                                                         <Hammer className="w-3 h-3 text-emerald-500" /> R$ {mo.toFixed(2)}
                                                         <span className="text-[10px] opacity-60 ml-0.5">(R$ {(area > 0 ? mo / area : 0).toFixed(2)}/m²)</span>
