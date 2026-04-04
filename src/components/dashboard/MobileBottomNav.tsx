@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Plus, Menu } from "lucide-react";
+import { LayoutDashboard, Users, Plus, Menu, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MobileBottomNavProps {
@@ -28,7 +28,7 @@ export const MobileBottomNav = ({ role, onMenuOpen }: MobileBottomNavProps) => {
     ],
     inquilino: [
       { icon: LayoutDashboard, label: "Meu Plano", href: "/inquilino" },
-      { icon: Users, label: "Suporte", href: "/inquilino/perfil" },
+      { icon: User, label: "Meu Perfil", href: "/inquilino/perfil" },
     ],
   };
 

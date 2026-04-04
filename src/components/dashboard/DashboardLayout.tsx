@@ -192,7 +192,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
             >
               <div className="text-right hidden sm:block">
                 <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{activeRole}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+                  {activeRole === 'inquilino' ? 'Cliente EF' : activeRole === 'integrante_imobiliaria' ? 'Integrante' : activeRole}
+                </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner">
                 {userName.charAt(0).toUpperCase()}

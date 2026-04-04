@@ -73,7 +73,7 @@ const InquilinoDashboard = () => {
         <div className="max-w-3xl mx-auto space-y-6">
           <div>
             <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Meu Plano</h1>
-            <p className="text-muted-foreground">Gerencie sua locação e acompanhe o status.</p>
+            <p className="text-muted-foreground">Acompanhe seu plano e status da cobertura EF.</p>
           </div>
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm p-12 text-center flex flex-col items-center justify-center">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -112,7 +112,7 @@ const InquilinoDashboard = () => {
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
           <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Meu Plano</h1>
-          <p className="text-muted-foreground">Gerencie sua desocupação garantida e acompanhe o status.</p>
+          <p className="text-muted-foreground">Acompanhe seu plano e status da cobertura EF.</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
