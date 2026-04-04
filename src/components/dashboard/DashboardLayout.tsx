@@ -16,7 +16,10 @@ import {
   Calculator,
   Package,
   ClipboardCheck,
-  Shield
+  Shield,
+  CreditCard,
+  Key,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -96,7 +99,11 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: User, label: "Meu Perfil", href: "/imobiliaria/meu-perfil" },
     ],
     inquilino: [
-      { icon: LayoutDashboard, label: "Meu Plano", href: "/inquilino" },
+      { icon: LayoutDashboard, label: "Dashboard", href: "/inquilino" },
+      { icon: FileText, label: "Meu Contrato", href: "/inquilino/contrato" },
+      { icon: CreditCard, label: "Pagamentos", href: "/inquilino/pagamentos" },
+      { icon: Key, label: "Solicitar Entrega", href: "/inquilino/solicitacao" },
+      { icon: MessageSquare, label: "Atendimento", href: "/inquilino/atendimento" },
       { icon: User, label: "Meu Perfil", href: "/inquilino/perfil" },
     ],
   };

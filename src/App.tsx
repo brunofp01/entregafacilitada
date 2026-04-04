@@ -25,6 +25,10 @@ import SegurosPage from "./pages/dashboard/imobiliaria/SegurosPage.tsx";
 import MeuPerfilPage from "./pages/dashboard/imobiliaria/MeuPerfilPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import PerfilInquilinoPage from "./pages/dashboard/inquilino/PerfilInquilinoPage.tsx";
+import ContratoEFPage from "./pages/dashboard/inquilino/ContratoEFPage.tsx";
+import PagamentosPage from "./pages/dashboard/inquilino/PagamentosPage.tsx";
+import SolicitacaoEntregaPage from "./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx";
+import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -144,6 +148,30 @@ const App = () => (
           <Route path="/inquilino/perfil" element={
             <ProtectedRoute allowedRole="inquilino">
               <PerfilInquilinoPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inquilino/contrato" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <ContratoEFPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inquilino/pagamentos" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <PagamentosPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inquilino/solicitacao" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <SolicitacaoEntregaPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inquilino/atendimento" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <AtendimentoPage />
             </ProtectedRoute>
           } />
 
