@@ -97,7 +97,6 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
     inquilino: [
       { icon: LayoutDashboard, label: "Meu Plano", href: "/inquilino" },
-      { icon: FileText, label: "Pagamentos", href: "/inquilino/pagamentos" },
       { icon: User, label: "Meu Perfil", href: "/inquilino/perfil" },
     ],
   };
@@ -187,7 +186,10 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background" />
             </Button>
 
-            <Link to="/imobiliaria/meu-perfil" className="flex items-center gap-3 pl-4 border-l border-border text-sm hover:opacity-80 transition-opacity">
+            <Link
+              to={activeRole === 'admin' ? '/admin/perfil' : activeRole === 'inquilino' ? '/inquilino/perfil' : '/imobiliaria/meu-perfil'}
+              className="flex items-center gap-3 pl-4 border-l border-border text-sm hover:opacity-80 transition-opacity"
+            >
               <div className="text-right hidden sm:block">
                 <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{activeRole}</p>
