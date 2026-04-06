@@ -151,24 +151,32 @@ export default async function handler(req, res) {
             </html>
         `;
 
-        const resendApiKey = process.env.RESEND_API_KEY;
-        if (resendApiKey) {
+        const gmailUser = process.env.GMAIL_USER;
+        const gmailPass = process.env.GMAIL_APP_PASS;
+
+        if (gmailUser && gmailPass) {
             try {
-                const { Resend } = await import('resend');
-                const resend = new Resend(resendApiKey);
-                await resend.emails.send({
-                    from: 'Entrega Facilitada <onboarding@resend.dev>', // IMPORTANTE: Para enviar para qualquer e-mail, valide seu domínio no Resend!
-                    to: [email],
-                    subject: `Bem-vindo à Entrega Facilitada, ${firstName}!`,
-                    html: emailHtml
+                const { default: nodemailer } = await import('nodemailer');
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: gmailUser,
+                        pass: gmailPass,
+                    },
                 });
-                console.log(`[RESEND] E-mail enviado com sucesso para ${email}`);
+
+                await transporter.sendMail({
+                    from: `"Entrega Facilitada" <${gmailUser}>`,
+                    to: email,
+                    subject: `Bem-vindo à Entrega Facilitada, ${firstName}!`,
+                    html: emailHtml,
+                });
+                console.log(`[NODEMAILER] E-mail enviado com sucesso para ${email}`);
             } catch (emailError) {
-                console.error('[RESEND ERROR] Falha ao enviar e-mail:', emailError.message);
-                console.log('--- DICA: Verifique se o domínio foi validado no painel do Resend ---');
+                console.error('[NODEMAILER ERROR] Falha ao enviar e-mail:', emailError.message);
             }
         } else {
-            console.warn('[RESEND WARNING] RESEND_API_KEY não encontrada. E-mail não será enviado.');
+            console.warn('[NODEMAILER WARNING] Credenciais do Gmail não encontradas.');
         }
 
         return res.status(200).json({ success: true, user_id: userId });
