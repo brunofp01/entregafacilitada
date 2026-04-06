@@ -90,18 +90,26 @@ const ContratoEFPage = () => {
                         fetchPendingInvoice(row.email);
                     }
 
-                    // Build simple history (conceptual - just to show the list exists but without buttons)
-                    // ... (rest of simple history logic)
+                    // Build history: show only past and current months to avoid confusion with future projections
                     const adesao = new Date(row.created_at);
                     const list: Payment[] = [];
+                    const hoje = new Date();
+
                     for (let i = 0; i < (row.plano_parcelas || 1); i++) {
                         const venc = new Date(adesao.getFullYear(), adesao.getMonth() + i, 10);
-                        const isPast = venc < new Date();
+
+                        // We only show the month if it's the current month or in the past
+                        // This prevents showing 12/24 rows of "pending" future dates
+                        const isFuture = venc > hoje && (venc.getMonth() !== hoje.getMonth() || venc.getFullYear() !== hoje.getFullYear());
+                        if (isFuture) continue;
+
+                        const isPast = venc < hoje && (venc.getMonth() !== hoje.getMonth() || venc.getFullYear() !== hoje.getFullYear());
+
                         list.push({
                             ref: venc.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
                             vencimento: venc.toLocaleDateString("pt-BR"),
                             valor: row.plano_mensalidade,
-                            status: isPast ? "pago" : "pendente"
+                            status: isPast || row.status_pagamento === 'pago' ? "pago" : "pendente"
                         });
                     }
                     setPayments(list);
