@@ -199,6 +199,12 @@ const PagamentosPage = () => {
                             </Card>
                         </div>
 
+                        {/* DEBUG DATA - Visible only if there's an issue */}
+                        <div className="text-[10px] text-muted-foreground flex justify-between px-2">
+                            <span>ID: {inquilino.id}</span>
+                            <span>Status DB: <span className="font-bold underline uppercase">{inquilino.status_pagamento || 'ausente'}</span></span>
+                        </div>
+
                         {/* Payment History */}
                         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                             <CardHeader className="border-b border-border/50 pb-4 flex flex-row items-center justify-between">

@@ -29,6 +29,7 @@ export default async function handler(req, res) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     let event;
+    console.log(`🔔 Webhook received! Signature: ${sig?.substring(0, 10)}... Secret configured: ${!!webhookSecret}`);
 
     try {
         const rawBody = await buffer(req);
@@ -43,7 +44,7 @@ export default async function handler(req, res) {
         const session = event.data.object;
         const inquilinoId = session.client_reference_id || session.metadata.inquilino_id;
 
-        console.log(`🔔 Payment successful for Inquilino: ${inquilinoId}`);
+        console.log(`🔔 Payment successful! Session: ${session.id}, Inquilino: ${inquilinoId}`);
 
         if (inquilinoId && supabaseUrl && supabaseServiceKey) {
             const supabase = createClient(supabaseUrl, supabaseServiceKey);
