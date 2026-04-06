@@ -29,6 +29,7 @@ import ContratoEFPage from "./pages/dashboard/inquilino/ContratoEFPage.tsx";
 import PagamentosPage from "./pages/dashboard/inquilino/PagamentosPage.tsx";
 import SolicitacaoEntregaPage from "./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx";
 import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
+import PagamentoSucessoPage from "./pages/dashboard/inquilino/PagamentoSucessoPage.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -160,6 +161,12 @@ const App = () => (
           <Route path="/inquilino/pagamentos" element={
             <ProtectedRoute allowedRole="inquilino">
               <PagamentosPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inquilino/pagamento-sucesso" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <PagamentoSucessoPage />
             </ProtectedRoute>
           } />
 

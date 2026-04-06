@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreditCard, Loader2, FileText, CheckCircle2, Clock, AlertCircle, ExternalLink } from "lucide-react";
+import { CreditCard, Loader2, FileText, CheckCircle2, Clock, AlertCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { loadStripe } from "@stripe/stripe-js";
 
 interface InquilinoData {
     id: string;
@@ -13,6 +15,7 @@ interface InquilinoData {
     plano_parcelas: number;
     status_assinatura: string;
     aprovacao_ef: string;
+    email: string;
 }
 
 // Simulated payment records — in a real app these would come from a payments table
@@ -32,6 +35,7 @@ const statusMap: Record<PaymentStatus, { label: string; className: string; Icon:
 
 const PagamentosPage = () => {
     const [loading, setLoading] = useState(true);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [inquilino, setInquilino] = useState<InquilinoData | null>(null);
     const [payments, setPayments] = useState<Payment[]>([]);
 
@@ -42,7 +46,7 @@ const PagamentosPage = () => {
                 if (!user?.email) return;
                 const { data: row } = await supabase
                     .from("inquilinos")
-                    .select("id, plano_nome, plano_mensalidade, plano_parcelas, status_assinatura, aprovacao_ef")
+                    .select("id, plano_nome, plano_mensalidade, plano_parcelas, status_assinatura, aprovacao_ef, email")
                     .eq("email", user.email)
                     .order("created_at", { ascending: false })
                     .limit(1)
@@ -73,6 +77,36 @@ const PagamentosPage = () => {
         fetchData();
     }, []);
 
+    const handleCheckout = async () => {
+        if (!inquilino) return;
+
+        try {
+            setCheckoutLoading(true);
+            const response = await fetch('/api/stripe-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    plan_name: inquilino.plano_nome,
+                    price_amount: inquilino.plano_mensalidade,
+                    customer_email: inquilino.email,
+                    inquilino_id: inquilino.id,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error(data.error || 'Erro ao gerar checkout');
+            }
+        } catch (error: any) {
+            console.error('Erro checkout:', error);
+            toast.error(error.message || 'Ocorreu um erro ao processar o pagamento.');
+        } finally {
+            setCheckoutLoading(false);
+        }
+    };
+
     const isAtivo = inquilino?.status_assinatura === "assinado" && inquilino?.aprovacao_ef === "aprovado";
     const totalPago = payments.filter(p => p.status === "pago").reduce((sum, p) => sum + p.valor, 0);
 
@@ -96,6 +130,39 @@ const PagamentosPage = () => {
 
                 {inquilino ? (
                     <>
+                        {/* Status Alert for Unpaid */}
+                        {!isAtivo && (
+                            <Card className="border-orange-500/20 bg-orange-500/5 backdrop-blur-sm border-l-4 border-l-orange-500 overflow-hidden">
+                                <CardHeader className="flex flex-row items-center justify-between pb-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="p-2 bg-orange-500/20 rounded-full text-orange-600">
+                                            <AlertCircle className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-lg font-bold text-orange-700 dark:text-orange-400 uppercase tracking-tight">
+                                                Adesão Pendente
+                                            </CardTitle>
+                                            <CardDescription className="text-orange-600/80 font-medium">
+                                                Seu plano está em análise. Para ativar sua garantia imediatamente, realize o pagamento da primeira mensalidade.
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={handleCheckout}
+                                        disabled={checkoutLoading}
+                                        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black shadow-lg shadow-secondary/20 h-12 px-8 uppercase"
+                                    >
+                                        {checkoutLoading ? (
+                                            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                        ) : (
+                                            <ShieldCheck className="w-5 h-5 mr-2" />
+                                        )}
+                                        Pagar com Stripe
+                                    </Button>
+                                </CardHeader>
+                            </Card>
+                        )}
+
                         {/* Summary Cards */}
                         <div className="grid sm:grid-cols-3 gap-4">
                             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -133,7 +200,7 @@ const PagamentosPage = () => {
                                 </div>
                                 {isAtivo && (
                                     <Button variant="outline" size="sm" className="gap-2 text-xs font-bold border-border/50 hover:text-secondary" disabled>
-                                        <ExternalLink className="w-3 h-3" /> 2ª Via <span className="text-muted-foreground">(em breve)</span>
+                                        <ExternalLink className="w-3 h-3" /> Porta do Cliente Stripe <span className="text-muted-foreground">(em breve)</span>
                                     </Button>
                                 )}
                             </CardHeader>
