@@ -31,6 +31,7 @@ const ContratacaoPage = () => {
     const [fetchingVistorias, setFetchingVistorias] = useState(true);
     const [vistoriasConcluidas, setVistoriasConcluidas] = useState<VistoriaPlataforma[]>([]);
     const [imobiliariaPerfil, setImobiliariaPerfil] = useState<any>(null);
+    const [userRole, setUserRole] = useState<string>("imobiliaria");
 
     // Formulário State
     const [inquilino, setInquilino] = useState({ nome: "", email: "", cpf: "", rg: "", telefone: "" });
@@ -52,6 +53,18 @@ const ContratacaoPage = () => {
 
                 const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
                 setImobiliariaPerfil(profile);
+                setUserRole(profile?.role || "imobiliaria");
+
+                // If inquilino, pre-fill data
+                if (profile?.role === 'inquilino') {
+                    setInquilino(prev => ({
+                        ...prev,
+                        nome: profile.full_name || "",
+                        email: profile.email || ""
+                    }));
+                    setVistoriaTipo("upload"); // Force upload for inquilinos
+                }
+
                 const imobiliariaId = profile?.imobiliaria_id || user.id;
 
                 const { data, error } = await supabase
@@ -139,6 +152,25 @@ const ContratacaoPage = () => {
         const toastId = toast.loading("Processando e gerando contrato de prestação de serviços...");
 
         try {
+            // 0. Check if we need to create an Auth user (only for Admin/Imobiliaria creating for someone else)
+            if (userRole !== 'inquilino' && inquilino.email) {
+                try {
+                    await fetch('/api/create-sale', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nome: inquilino.nome,
+                            email: inquilino.email,
+                            telefone: inquilino.telefone,
+                            imobiliaria_id: imobiliariaPerfil?.imobiliaria_id || imobiliariaPerfil?.id
+                        })
+                    });
+                    console.log("Auth check/creation completed via API.");
+                } catch (e) {
+                    console.warn("Auth creation/check failed, proceeding with DB insert anyway:", e);
+                }
+            }
+
             // Identifier do inquilino e ambiente
             const imobiliariaId = imobiliariaPerfil?.imobiliaria_id || imobiliariaPerfil?.id;
 
@@ -237,7 +269,13 @@ const ContratacaoPage = () => {
             if (dbError) throw dbError;
 
             toast.success("O Contrato foi gerado e disparado para o Locatário com sucesso!", { id: toastId });
-            setTimeout(() => navigate('/imobiliaria/inquilinos'), 1500);
+            setTimeout(() => {
+                if (userRole === 'inquilino') {
+                    navigate('/inquilino');
+                } else {
+                    navigate('/imobiliaria/inquilinos');
+                }
+            }, 1500);
 
         } catch (error: any) {
             console.error(error);
@@ -293,7 +331,7 @@ const ContratacaoPage = () => {
         selectedVistoria.complemento.toLowerCase().trim() !== imovel.complemento.toLowerCase().trim();
 
     return (
-        <DashboardLayout role="imobiliaria">
+        <DashboardLayout role={userRole as any}>
             <div className="max-w-4xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <header className="mb-8">
                     <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Contratar Entrega Facilitada</h1>
@@ -321,11 +359,24 @@ const ContratacaoPage = () => {
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Nome Completo *</Label>
-                                    <Input required placeholder="Ex: João da Silva" value={inquilino.nome} onChange={e => setInquilino({ ...inquilino, nome: e.target.value })} />
+                                    <Input
+                                        required
+                                        placeholder="Ex: João da Silva"
+                                        value={inquilino.nome}
+                                        onChange={e => setInquilino({ ...inquilino, nome: e.target.value })}
+                                        disabled={userRole === 'inquilino'}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>E-mail *</Label>
-                                    <Input type="email" required placeholder="joao@email.com" value={inquilino.email} onChange={e => setInquilino({ ...inquilino, email: e.target.value })} />
+                                    <Input
+                                        type="email"
+                                        required
+                                        placeholder="joao@email.com"
+                                        value={inquilino.email}
+                                        onChange={e => setInquilino({ ...inquilino, email: e.target.value })}
+                                        disabled={userRole === 'inquilino'}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>CPF *</Label>
@@ -392,7 +443,7 @@ const ContratacaoPage = () => {
                                 </div>
                             </div>
 
-                            {matchingVistorias.length > 0 && (
+                            {userRole !== 'inquilino' && matchingVistorias.length > 0 && (
                                 <div className="mt-6 p-5 border border-amber-500/30 bg-amber-500/10 rounded-xl space-y-4 animate-in fade-in slide-in-from-top-4 shadow-sm">
                                     <div className="flex items-start gap-4">
                                         <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shrink-0 shadow-md">
@@ -628,7 +679,12 @@ const ContratacaoPage = () => {
                                     </div>
 
                                     <div className="bg-muted/10 p-5 rounded-xl border border-border space-y-6">
-                                        <RadioGroup defaultValue={vistoriaTipo} onValueChange={(v: "plataforma" | "upload") => setVistoriaTipo(v)} className="flex flex-col space-y-4">
+                                        <RadioGroup
+                                            defaultValue={vistoriaTipo}
+                                            onValueChange={(v: "plataforma" | "upload") => setVistoriaTipo(v)}
+                                            className="flex flex-col space-y-4"
+                                            disabled={userRole === 'inquilino'}
+                                        >
                                             <div className="flex items-start space-x-3">
                                                 <RadioGroupItem value="upload" id="upload" className="mt-1" />
                                                 <div>
@@ -636,15 +692,17 @@ const ContratacaoPage = () => {
                                                     <p className="text-sm text-muted-foreground">Use se a vistoria já foi feita externamente fora da plataforma e você tem o PDF.</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-start space-x-3">
-                                                <RadioGroupItem value="plataforma" id="plataforma" className="mt-1" />
-                                                <div>
-                                                    <Label htmlFor="plataforma" className="text-base flex items-center gap-2 cursor-pointer">
-                                                        Vincular a uma Vistoria da Plataforma Existente
-                                                    </Label>
-                                                    <p className="text-sm text-muted-foreground">Selecione uma vistoria gerada aqui dentro da plataforma para vincular.</p>
+                                            {userRole !== 'inquilino' && (
+                                                <div className="flex items-start space-x-3">
+                                                    <RadioGroupItem value="plataforma" id="plataforma" className="mt-1" />
+                                                    <div>
+                                                        <Label htmlFor="plataforma" className="text-base flex items-center gap-2 cursor-pointer">
+                                                            Vincular a uma Vistoria da Plataforma Existente
+                                                        </Label>
+                                                        <p className="text-sm text-muted-foreground">Selecione uma vistoria gerada aqui dentro da plataforma para vincular.</p>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </RadioGroup>
 
                                         {/* Render Condicional da Escolha da Vistoria */}

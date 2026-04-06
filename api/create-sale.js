@@ -51,27 +51,7 @@ export default async function handler(req, res) {
             if (profileError) throw profileError;
         }
 
-        // 3. Create Inquilino Record (The "Sale")
-        const { data: inqData, error: inqError } = await supabase
-            .from('inquilinos')
-            .insert({
-                nome,
-                email,
-                cpf,
-                rg,
-                telefone,
-                imobiliaria_id: imobiliaria_id || null,
-                plano_id: plano_id || null,
-                plano_nome: plano_nome || 'A definir',
-                plano_mensalidade: plano_mensalidade || 0,
-                plano_parcelas: plano_parcelas || 12,
-                status_assinatura: 'pendente',
-                aprovacao_ef: 'aprovado' // Assume sales are pre-approved or pending signature
-            })
-            .select()
-            .single();
-
-        if (inqError) throw inqError;
+        // 3. (REMOVED: Inquilino record creation will be handled by the frontend)
 
         // 4. "Send" Personalized Email (Mocked)
         const emailHtml = `
@@ -98,9 +78,9 @@ export default async function handler(req, res) {
         console.log('Conteúdo:', emailHtml);
         console.log('--------------------------------------');
 
-        return res.status(200).json({ success: true, inquilino_id: inqData.id });
+        return res.status(200).json({ success: true, user_id: userId });
     } catch (error) {
-        console.error('Erro ao gerar venda:', error.message);
+        console.error('Erro ao criar usuário:', error.message);
         return res.status(500).json({ error: error.message });
     }
 }
