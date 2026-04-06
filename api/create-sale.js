@@ -157,15 +157,18 @@ export default async function handler(req, res) {
                 const { Resend } = await import('resend');
                 const resend = new Resend(resendApiKey);
                 await resend.emails.send({
-                    from: 'Entrega Facilitada <onboarding@resend.dev>', // Usar domínio verificado se tiver
+                    from: 'Entrega Facilitada <onboarding@resend.dev>', // IMPORTANTE: Para enviar para qualquer e-mail, valide seu domínio no Resend!
                     to: [email],
                     subject: `Bem-vindo à Entrega Facilitada, ${firstName}!`,
                     html: emailHtml
                 });
-                console.log(`E-mail enviado com sucesso via Resend para ${email}`);
+                console.log(`[RESEND] E-mail enviado com sucesso para ${email}`);
             } catch (emailError) {
-                console.error('Erro ao enviar e-mail via Resend:', emailError.message);
+                console.error('[RESEND ERROR] Falha ao enviar e-mail:', emailError.message);
+                console.log('--- DICA: Verifique se o domínio foi validado no painel do Resend ---');
             }
+        } else {
+            console.warn('[RESEND WARNING] RESEND_API_KEY não encontrada. E-mail não será enviado.');
         }
 
         return res.status(200).json({ success: true, user_id: userId });

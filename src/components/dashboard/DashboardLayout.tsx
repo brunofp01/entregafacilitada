@@ -105,7 +105,6 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     inquilino: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/inquilino" },
       { icon: FileText, label: "Meu Contrato", href: "/inquilino/contrato" },
-      { icon: CreditCard, label: "Pagamentos", href: "/inquilino/pagamentos" },
       { icon: Key, label: "Solicitar Entrega", href: "/inquilino/solicitacao" },
       { icon: MessageSquare, label: "Atendimento", href: "/inquilino/atendimento" },
       { icon: User, label: "Meu Perfil", href: "/inquilino/perfil" },

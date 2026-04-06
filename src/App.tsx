@@ -26,7 +26,6 @@ import MeuPerfilPage from "./pages/dashboard/imobiliaria/MeuPerfilPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import PerfilInquilinoPage from "./pages/dashboard/inquilino/PerfilInquilinoPage.tsx";
 import ContratoEFPage from "./pages/dashboard/inquilino/ContratoEFPage.tsx";
-import PagamentosPage from "./pages/dashboard/inquilino/PagamentosPage.tsx";
 import SolicitacaoEntregaPage from "./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx";
 import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
 import PagamentoSucessoPage from "./pages/dashboard/inquilino/PagamentoSucessoPage.tsx";
@@ -159,11 +158,6 @@ const App = () => (
             </ProtectedRoute>
           } />
 
-          <Route path="/inquilino/pagamentos" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <PagamentosPage />
-            </ProtectedRoute>
-          } />
 
           <Route path="/inquilino/contratar" element={
             <ProtectedRoute allowedRole={["inquilino", "admin", "imobiliaria", "integrante_imobiliaria"]}>
