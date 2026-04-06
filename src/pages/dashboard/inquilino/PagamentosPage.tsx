@@ -34,7 +34,7 @@ const statusMap: Record<PaymentStatus, { label: string; className: string; Icon:
     vencido: { label: "Vencido", className: "bg-destructive/10 text-destructive", Icon: AlertCircle },
 };
 
-// Build Version: 2026-04-06 09:16
+// Build Version: 2026-04-06 12:28
 const PagamentosPage = () => {
     const [loading, setLoading] = useState(true);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
