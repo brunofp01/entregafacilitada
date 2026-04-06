@@ -175,7 +175,7 @@ const PagamentosPage = () => {
                                 <CardContent className="pt-6">
                                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">Mensalidade</p>
                                     <p className="font-black text-2xl">
-                                        R$ {inquilino.plano_mensalidade?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                        R$ {inquilino.plano_mensalidade?.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </CardContent>
                             </Card>
@@ -183,7 +183,7 @@ const PagamentosPage = () => {
                                 <CardContent className="pt-6">
                                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">Total Pago</p>
                                     <p className="font-black text-2xl text-emerald-600">
-                                        R$ {totalPago.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                        R$ {totalPago.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </CardContent>
                             </Card>
@@ -213,24 +213,40 @@ const PagamentosPage = () => {
                                                     <th className="px-6 py-3">Referência</th>
                                                     <th className="px-6 py-3">Vencimento</th>
                                                     <th className="px-6 py-3">Valor</th>
-                                                    <th className="px-6 py-3">Status</th>
+                                                    <th className="px-6 py-3 text-center">Status</th>
+                                                    <th className="px-6 py-3 text-right">Ação</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border">
                                                 {payments.map((p, i) => {
                                                     const st = statusMap[p.status];
+                                                    const isPending = p.status === "pendente" || p.status === "vencido";
                                                     return (
-                                                        <tr key={i} className="hover:bg-muted/20 transition-colors">
+                                                        <tr key={i} className="hover:bg-muted/20 transition-colors group">
                                                             <td className="px-6 py-4 font-medium capitalize">{p.ref}</td>
                                                             <td className="px-6 py-4 text-muted-foreground">{p.vencimento}</td>
                                                             <td className="px-6 py-4 font-mono font-bold">
-                                                                R$ {p.valor?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                                                R$ {p.valor?.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </td>
-                                                            <td className="px-6 py-4">
+                                                            <td className="px-6 py-4 text-center">
                                                                 <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold", st.className)}>
                                                                     <st.Icon className="w-3.5 h-3.5" />
                                                                     {st.label}
                                                                 </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right">
+                                                                {isPending ? (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        onClick={handleCheckout}
+                                                                        disabled={checkoutLoading}
+                                                                        className="h-8 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold text-xs uppercase shadow-sm"
+                                                                    >
+                                                                        {checkoutLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Pagar"}
+                                                                    </Button>
+                                                                ) : (
+                                                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 ml-auto opacity-40" />
+                                                                )}
                                                             </td>
                                                         </tr>
                                                     );
