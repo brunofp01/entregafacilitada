@@ -62,12 +62,7 @@ const PagamentosPage = () => {
                         const isPast = venc < hoje;
                         const isCurrentMonth = venc.getMonth() === hoje.getMonth() && venc.getFullYear() === hoje.getFullYear();
 
-                        let status: PaymentStatus = isPast && !isCurrentMonth ? "pago" : "pendente";
-
-                        // Overwrite with real DB status for the current pending month if it was already marked as paid
-                        if (isCurrentMonth && row.status_pagamento === 'pago') {
-                            status = "pago";
-                        }
+                        const status: PaymentStatus = isPast && !isCurrentMonth ? "pago" : "pendente";
 
                         return {
                             ref: venc.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
