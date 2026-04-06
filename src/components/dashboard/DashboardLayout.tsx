@@ -20,6 +20,7 @@ import {
   CreditCard,
   Key,
   MessageSquare,
+  ShoppingCart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -73,6 +74,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const menuItems = {
     admin: [
       { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
+      { icon: ShoppingCart, label: "Gerar Venda", href: "/admin/vendas" },
       { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
       { icon: Package, label: "Gestão de Planos", href: "/admin/planos" },
       { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
@@ -84,6 +86,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
+      { icon: ShoppingCart, label: "Gerar Venda", href: "/admin/vendas" },
       { icon: Users, label: "Clientes EF", href: "/imobiliaria/inquilinos" },
       { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
       { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
@@ -93,6 +96,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
     integrante_imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
+      { icon: ShoppingCart, label: "Gerar Venda", href: "/admin/vendas" },
       { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
       { icon: Users, label: "Gestão de Clientes EF", href: "/imobiliaria/inquilinos" },
       { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
