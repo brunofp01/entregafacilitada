@@ -162,6 +162,7 @@ const ContratoEFPage = () => {
                     price_amount: data.plano_mensalidade,
                     customer_email: data.email,
                     inquilino_id: data.id,
+                    plano_parcelas: data.plano_parcelas,
                 }),
             });
             const resData = await response.json();
