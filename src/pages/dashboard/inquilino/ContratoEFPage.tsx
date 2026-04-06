@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
     ShieldCheck, Clock, AlertTriangle, CheckCircle2, Loader2,
     FileText, FileUp, Home, CreditCard, BadgeCheck, Calendar, Hash,
@@ -27,6 +28,7 @@ interface InquilinoData {
     plano_parcelas: number;
     contrato_locacao_url: string;
     vistoria_upload_url: string;
+    autentique_document_id?: string;
     created_at: string;
     status_pagamento?: string;
 }
@@ -37,6 +39,14 @@ interface Payment {
     vencimento: string;
     valor: number;
     status: PaymentStatus;
+}
+
+interface StripeInvoice {
+    hasPending: boolean;
+    status?: string;
+    invoiceUrl?: string;
+    dueDate?: string;
+    amount?: number;
 }
 
 const steps = [
@@ -57,6 +67,7 @@ const ContratoEFPage = () => {
     const [data, setData] = useState<InquilinoData | null>(null);
     const [payments, setPayments] = useState<Payment[]>([]);
     const [syncing, setSyncing] = useState(false);
+    const [pendingInvoice, setPendingInvoice] = useState<StripeInvoice | null>(null);
 
     useEffect(() => {
         const fetch = async () => {
@@ -74,32 +85,26 @@ const ContratoEFPage = () => {
                 if (row) {
                     setData(row as InquilinoData);
 
-                    // Build payments only if approved
-                    if (row.aprovacao_ef === 'aprovado') {
-                        const hoje = new Date();
-                        // Mostramos apenas a parcela atual ou histórico real se tivéssemos tabela de pagamentos
-                        // Para evitar a lista gigante de "fake payments", vamos mostrar apenas as parcelas a partir da adesão
-                        const adesao = new Date(row.created_at);
-                        const parcelas: Payment[] = [];
-
-                        // Geramos apenas as parcelas que fazem sentido (da adesão em diante)
-                        for (let i = 0; i < (row.plano_parcelas || 1); i++) {
-                            const venc = new Date(adesao.getFullYear(), adesao.getMonth() + i, 10);
-                            const isPast = venc < hoje;
-                            const isCurrentMonth = venc.getMonth() === hoje.getMonth() && venc.getFullYear() === hoje.getFullYear();
-
-                            let status: PaymentStatus = isPast && !isCurrentMonth ? "pago" : "pendente";
-                            if (isCurrentMonth && row.status_pagamento === 'pago') status = "pago";
-
-                            parcelas.push({
-                                ref: venc.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
-                                vencimento: venc.toLocaleDateString("pt-BR"),
-                                valor: row.plano_mensalidade,
-                                status
-                            });
-                        }
-                        setPayments(parcelas);
+                    // Fetch Pending Invoice (Boleto) from Stripe if approved
+                    if (row.aprovacao_ef === 'aprovado' || row.status_pagamento === 'pago') {
+                        fetchPendingInvoice(row.email);
                     }
+
+                    // Build simple history (conceptual - just to show the list exists but without buttons)
+                    // ... (rest of simple history logic)
+                    const adesao = new Date(row.created_at);
+                    const list: Payment[] = [];
+                    for (let i = 0; i < (row.plano_parcelas || 1); i++) {
+                        const venc = new Date(adesao.getFullYear(), adesao.getMonth() + i, 10);
+                        const isPast = venc < new Date();
+                        list.push({
+                            ref: venc.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+                            vencimento: venc.toLocaleDateString("pt-BR"),
+                            valor: row.plano_mensalidade,
+                            status: isPast ? "pago" : "pendente"
+                        });
+                    }
+                    setPayments(list);
                 }
             } finally {
                 setLoading(false);
@@ -107,6 +112,22 @@ const ContratoEFPage = () => {
         };
         fetch();
     }, []);
+
+    const fetchPendingInvoice = async (email: string) => {
+        try {
+            const res = await fetch('/api/get-invoice-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const resData = await res.json();
+            if (resData.success) {
+                setPendingInvoice(resData);
+            }
+        } catch (err) {
+            console.error("Erro ao buscar fatura:", err);
+        }
+    };
 
     // Sincronização automática com Autentique
     useEffect(() => {
@@ -221,6 +242,29 @@ const ContratoEFPage = () => {
                         <p className="text-muted-foreground text-sm mt-1">{statusConfig.desc}</p>
                     </div>
                 </div>
+
+                {/* Banner de Cobrança Pendente / Boleto */}
+                {pendingInvoice?.hasPending && (
+                    <div className="bg-amber-500/10 border-2 border-amber-500/30 p-5 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-2">
+                        <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
+                                <AlertTriangle className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="font-black text-amber-700 text-lg">⚠️ Pagamento Pendente!</p>
+                                <p className="text-amber-800/70 text-sm font-semibold">
+                                    Sua fatura de **R$ {pendingInvoice.amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}** com vencimento em **{pendingInvoice.dueDate}** está disponível.
+                                </p>
+                            </div>
+                        </div>
+                        <Button
+                            className="bg-amber-600 hover:bg-amber-700 text-white font-black shadow-lg shadow-amber-600/20 px-6"
+                            onClick={() => window.open(pendingInvoice.invoiceUrl, '_blank')}
+                        >
+                            VER BOLETO / PIX
+                        </Button>
+                    </div>
+                )}
 
                 {/* Progress Steps */}
                 <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -340,15 +384,39 @@ const ContratoEFPage = () => {
                         </div>
 
                         {/* Pagamentos Section - Only visible if Approved */}
-                        {isAtivo ? (
+                        {isAtivo || data.status_pagamento === 'pago' ? (
                             <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
-                                <CardHeader className="border-b border-border/50 pb-4 flex flex-row items-center justify-between">
+                                <CardHeader className="border-b border-border/50 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div>
                                         <CardTitle className="text-base flex items-center gap-2">
-                                            <CreditCard className="w-4 h-4 text-secondary" /> Histórico de Faturas
+                                            <CreditCard className="w-4 h-4 text-secondary" /> Gestão de Pagamentos
                                         </CardTitle>
-                                        <CardDescription>Acompanhe suas mensalidades e status de pagamento.</CardDescription>
+                                        <CardDescription>Suas cobranças são processadas automaticamente via assinatura.</CardDescription>
                                     </div>
+                                    {data.status_pagamento !== 'pago' ? (
+                                        <Button
+                                            onClick={handleCheckout}
+                                            disabled={checkoutLoading}
+                                            className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black shadow-xl shadow-secondary/20 h-12 px-8 uppercase"
+                                        >
+                                            {checkoutLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CreditCard className="w-5 h-5 mr-2" />}
+                                            Ativar Minha Proteção Agora
+                                        </Button>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {pendingInvoice?.hasPending && (
+                                                <Button
+                                                    onClick={() => window.open(pendingInvoice.invoiceUrl, '_blank')}
+                                                    className="bg-amber-600 hover:bg-amber-700 text-white font-black shadow-lg shadow-amber-600/20"
+                                                >
+                                                    Pagar Boleto Pendente
+                                                </Button>
+                                            )}
+                                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 h-10 px-4 flex items-center gap-2 font-bold select-none">
+                                                <BadgeCheck className="w-5 h-5" /> Assinatura Ativa
+                                            </Badge>
+                                        </div>
+                                    )}
                                 </CardHeader>
                                 <CardContent className="p-0">
                                     <div className="overflow-x-auto">
@@ -358,40 +426,24 @@ const ContratoEFPage = () => {
                                                     <th className="px-6 py-3">Referência</th>
                                                     <th className="px-6 py-3">Vencimento</th>
                                                     <th className="px-6 py-3">Valor</th>
-                                                    <th className="px-6 py-3 text-center">Status</th>
-                                                    <th className="px-6 py-3 text-right">Ação</th>
+                                                    <th className="px-6 py-3 text-right">Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border">
                                                 {payments.map((p, i) => {
                                                     const st = statusMap[p.status];
-                                                    const isPending = p.status === "pendente" || p.status === "vencido";
                                                     return (
-                                                        <tr key={i} className="hover:bg-muted/20 transition-colors group">
+                                                        <tr key={i} className="hover:bg-muted/10 transition-colors group">
                                                             <td className="px-6 py-4 font-medium capitalize">{p.ref}</td>
                                                             <td className="px-6 py-4 text-muted-foreground">{p.vencimento}</td>
                                                             <td className="px-6 py-4 font-mono font-bold text-foreground">
                                                                 R$ {p.valor?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                                                             </td>
-                                                            <td className="px-6 py-4 text-center">
-                                                                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold", st.className)}>
+                                                            <td className="px-6 py-4 text-right">
+                                                                <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase", st.className)}>
                                                                     <st.Icon className="w-3.5 h-3.5" />
                                                                     {st.label}
                                                                 </span>
-                                                            </td>
-                                                            <td className="px-6 py-4 text-right">
-                                                                {isPending ? (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        onClick={handleCheckout}
-                                                                        disabled={checkoutLoading}
-                                                                        className="h-8 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold text-xs uppercase"
-                                                                    >
-                                                                        {checkoutLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Pagar"}
-                                                                    </Button>
-                                                                ) : (
-                                                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 ml-auto opacity-40" />
-                                                                )}
                                                             </td>
                                                         </tr>
                                                     );
