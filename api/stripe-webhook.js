@@ -30,13 +30,21 @@ export default async function handler(req, res) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     let event;
-    console.log(`🔔 Webhook received! Signature: ${sig?.substring(0, 10)}... Secret configured: ${!!webhookSecret}`);
+    let rawBody;
 
     try {
-        const rawBody = await buffer(req);
-        event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+        rawBody = await buffer(req);
+        console.log(`🔔 Webhook received! Body size: ${rawBody.length} bytes. Signature header: ${!!sig}`);
+
+        if (process.env.SKIP_STRIPE_SIG_VERIFY === 'true') {
+            console.warn('⚠️ WARNING: Skipping Stripe signature verification (SKIP_STRIPE_SIG_VERIFY is true)');
+            event = JSON.parse(rawBody.toString());
+        } else {
+            event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+        }
     } catch (err) {
-        console.error(`❌ Webhook signature verification failed: ${err.message}`);
+        console.error(`❌ Webhook Error: ${err.message}`);
+        // If we have a raw body but signature failed, it might be the secret.
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
