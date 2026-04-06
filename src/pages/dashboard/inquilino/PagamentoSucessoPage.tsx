@@ -59,11 +59,9 @@ const PagamentoSucessoPage = () => {
                         <CardContent className="text-center space-y-8 pb-12">
                             <div className="space-y-4">
                                 <p className="text-lg font-medium text-foreground">
-                                    Parabéns! Sua assinatura do plano Entrega Facilitada foi processada com sucesso.
+                                    Parabéns! Seu pagamento do plano Entrega Facilitada foi processada com sucesso.
                                 </p>
-                                <p className="text-muted-foreground">
-                                    Seu imóvel agora está protegido e sua garantia está ativa. Você receberá um e-mail de confirmação em instantes.
-                                </p>
+
                                 {sessionId && (
                                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">
                                         Ref: {sessionId.substring(0, 20)}...
