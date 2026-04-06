@@ -16,7 +16,6 @@ interface InquilinoData {
     status_assinatura: string;
     aprovacao_ef: string;
     email: string;
-    status_pagamento?: string;
 }
 
 // Simulated payment records — in a real app these would come from a payments table
@@ -48,7 +47,7 @@ const PagamentosPage = () => {
                 if (!user?.email) return;
                 const { data: row } = await supabase
                     .from("inquilinos")
-                    .select("id, plano_nome, plano_mensalidade, plano_parcelas, status_assinatura, aprovacao_ef, email, status_pagamento")
+                    .select("id, plano_nome, plano_mensalidade, plano_parcelas, status_assinatura, aprovacao_ef, email")
                     .eq("email", user.email)
                     .order("created_at", { ascending: false })
                     .limit(1)
