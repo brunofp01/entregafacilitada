@@ -56,6 +56,7 @@ const ContratoEFPage = () => {
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [data, setData] = useState<InquilinoData | null>(null);
     const [payments, setPayments] = useState<Payment[]>([]);
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
         const fetch = async () => {
@@ -106,6 +107,48 @@ const ContratoEFPage = () => {
         };
         fetch();
     }, []);
+
+    // Sincronização automática com Autentique
+    useEffect(() => {
+        if (!loading && data && data.status_assinatura !== 'assinado' && data.autentique_document_id && !syncing) {
+            handleSyncAssinaturas(data.autentique_document_id);
+        }
+    }, [loading, data?.status_assinatura, data?.autentique_document_id]);
+
+    const handleSyncAssinaturas = async (docId: string) => {
+        try {
+            setSyncing(true);
+            const apiRes = await fetch("/api/sync-autentique", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ documentIds: [docId] })
+            });
+
+            const apiData = await apiRes.json();
+            if (apiData.success && apiData.statuses && apiData.statuses.length > 0) {
+                const item = apiData.statuses[0];
+                if (item.status === 'assinado' || item.status === 'rejeitado') {
+                    // Atualiza no banco
+                    const { error } = await supabase
+                        .from('inquilinos')
+                        .update({ status_assinatura: item.status })
+                        .eq('autentique_document_id', docId);
+
+                    if (!error) {
+                        // Atualiza estado local para refletir na UI sem recarregar
+                        setData(prev => prev ? { ...prev, status_assinatura: item.status } : null);
+                        if (item.status === 'assinado') {
+                            toast.success("Documento assinado detectado! Seu contrato foi atualizado.");
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Erro na sincronização:", err);
+        } finally {
+            setSyncing(false);
+        }
+    };
 
     const handleCheckout = async () => {
         if (!data) return;
