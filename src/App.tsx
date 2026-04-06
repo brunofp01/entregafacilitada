@@ -142,19 +142,15 @@ const App = () => (
             </ProtectedRoute>
           } />
 
-          <Route path="/admin" element={
-            <ProtectedRoute allowedRole="admin">
-              <AdminDashboard />
+          <Route path="/imobiliaria/*" element={
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+              <ImobiliariaDashboard />
             </ProtectedRoute>
           } />
+
           <Route path="/admin/vendas" element={
             <ProtectedRoute allowedRole={["admin", "imobiliaria", "integrante_imobiliaria"]}>
               <VendasPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/*" element={
-            <ProtectedRoute allowedRole="admin">
-              <AdminDashboard />
             </ProtectedRoute>
           } />
 
