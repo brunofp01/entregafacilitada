@@ -26,10 +26,10 @@ import MeuPerfilPage from "./pages/dashboard/imobiliaria/MeuPerfilPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import PerfilInquilinoPage from "./pages/dashboard/inquilino/PerfilInquilinoPage.tsx";
 import ContratoEFPage from "./pages/dashboard/inquilino/ContratoEFPage.tsx";
-import PagamentosPage from "./pages/dashboard/inquilino/PagamentosPage.tsx";
-import SolicitacaoEntregaPage from "./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx";
 import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
 import PagamentoSucessoPage from "./pages/dashboard/inquilino/PagamentoSucessoPage.tsx";
+import VendasPage from "./pages/dashboard/SalesPage.tsx";
+import ContratarPlanoPage from "./pages/dashboard/inquilino/ContratarPlanoPage.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -140,9 +140,19 @@ const App = () => (
             </ProtectedRoute>
           } />
 
-          <Route path="/imobiliaria/*" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <ImobiliariaDashboard />
+          <Route path="/admin" element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/vendas" element={
+            <ProtectedRoute allowedRole={["admin", "imobiliaria", "integrante_imobiliaria"]}>
+              <VendasPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/*" element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminDashboard />
             </ProtectedRoute>
           } />
 
@@ -161,6 +171,12 @@ const App = () => (
           <Route path="/inquilino/pagamentos" element={
             <ProtectedRoute allowedRole="inquilino">
               <PagamentosPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/inquilino/contratar" element={
+            <ProtectedRoute allowedRole="inquilino">
+              <ContratarPlanoPage />
             </ProtectedRoute>
           } />
 

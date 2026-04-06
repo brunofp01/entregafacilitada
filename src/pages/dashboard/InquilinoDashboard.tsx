@@ -75,19 +75,28 @@ const InquilinoDashboard = () => {
         if (!user?.email) return;
 
         const [{ data: inqRow }, { data: profileRow }] = await Promise.all([
-          supabase.from("inquilinos").select("id, nome, status_assinatura, aprovacao_ef, plano_nome, plano_mensalidade, plano_parcelas")
+          supabase.from("inquilinos").select("id, nome, status_assinatura, aprovacao_ef, plano_nome, plano_mensalidade, plano_parcelas, plano_id")
             .eq("email", user.email).order("created_at", { ascending: false }).limit(1).single(),
           supabase.from("profiles").select("full_name").eq("id", user.id).single(),
         ]);
 
-        if (inqRow) setInquilino(inqRow as InquilinoData);
+        if (inqRow) {
+          setInquilino(inqRow as InquilinoData);
+          // If no plan is selected yet, redirect to hiring page
+          if (!inqRow.plano_id) {
+            navigate("/inquilino/contratar");
+          }
+        } else {
+          // No inquilino record at all? Also redirect
+          navigate("/inquilino/contratar");
+        }
         if (profileRow) setProfile(profileRow as ProfileData);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return (
