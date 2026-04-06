@@ -46,8 +46,8 @@ export default async function handler(req, res) {
             mode: 'subscription',
             customer_email: customer_email,
             client_reference_id: inquilino_id,
-            success_url: `${req.headers.origin}/inquilino/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${req.headers.origin}/inquilino/pagamentos?canceled=true`,
+            success_url: `https://entregafacilitada.vercel.app/inquilino/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `https://entregafacilitada.vercel.app/inquilino/pagamentos?canceled=true`,
             metadata: {
                 inquilino_id: inquilino_id,
                 plan_name: plan_name

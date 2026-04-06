@@ -16,6 +16,7 @@ interface InquilinoData {
     status_assinatura: string;
     aprovacao_ef: string;
     email: string;
+    status_pagamento?: string;
 }
 
 // Simulated payment records — in a real app these would come from a payments table
@@ -33,6 +34,7 @@ const statusMap: Record<PaymentStatus, { label: string; className: string; Icon:
     vencido: { label: "Vencido", className: "bg-destructive/10 text-destructive", Icon: AlertCircle },
 };
 
+// Build Version: 2026-04-06 09:05
 const PagamentosPage = () => {
     const [loading, setLoading] = useState(true);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -46,7 +48,7 @@ const PagamentosPage = () => {
                 if (!user?.email) return;
                 const { data: row } = await supabase
                     .from("inquilinos")
-                    .select("id, plano_nome, plano_mensalidade, plano_parcelas, status_assinatura, aprovacao_ef, email")
+                    .select("id, plano_nome, plano_mensalidade, plano_parcelas, status_assinatura, aprovacao_ef, email, status_pagamento")
                     .eq("email", user.email)
                     .order("created_at", { ascending: false })
                     .limit(1)
@@ -60,7 +62,14 @@ const PagamentosPage = () => {
                         const venc = new Date(hoje.getFullYear(), hoje.getMonth() - (row.plano_parcelas - 1 - i), 10);
                         const isPast = venc < hoje;
                         const isCurrentMonth = venc.getMonth() === hoje.getMonth() && venc.getFullYear() === hoje.getFullYear();
-                        const status: PaymentStatus = isPast && !isCurrentMonth ? "pago" : isCurrentMonth ? "pendente" : "pendente";
+
+                        let status: PaymentStatus = isPast && !isCurrentMonth ? "pago" : "pendente";
+
+                        // Overwrite with real DB status for the current pending month if it was already marked as paid
+                        if (isCurrentMonth && row.status_pagamento === 'pago') {
+                            status = "pago";
+                        }
+
                         return {
                             ref: venc.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
                             vencimento: venc.toLocaleDateString("pt-BR"),
