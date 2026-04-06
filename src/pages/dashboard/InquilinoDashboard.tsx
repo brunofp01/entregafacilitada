@@ -7,7 +7,7 @@ import {
   CreditCard, Key, MessageSquare, ChevronRight, CheckCircle2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface InquilinoData {
@@ -64,6 +64,7 @@ const quickLinks = [
 ];
 
 const InquilinoDashboard = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [inquilino, setInquilino] = useState<InquilinoData | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);

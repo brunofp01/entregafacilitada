@@ -6,6 +6,7 @@ import { Check, Loader2, Sparkles, Shield, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const availablePlans = [
     {
