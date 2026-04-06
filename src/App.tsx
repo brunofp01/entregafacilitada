@@ -30,8 +30,6 @@ import PagamentosPage from "./pages/dashboard/inquilino/PagamentosPage.tsx";
 import SolicitacaoEntregaPage from "./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx";
 import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
 import PagamentoSucessoPage from "./pages/dashboard/inquilino/PagamentoSucessoPage.tsx";
-import VendasPage from "./pages/dashboard/SalesPage.tsx";
-import ContratarPlanoPage from "./pages/dashboard/inquilino/ContratarPlanoPage.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
