@@ -148,11 +148,6 @@ const App = () => (
             </ProtectedRoute>
           } />
 
-          <Route path="/admin/vendas" element={
-            <ProtectedRoute allowedRole={["admin", "imobiliaria", "integrante_imobiliaria"]}>
-              <VendasPage />
-            </ProtectedRoute>
-          } />
 
           <Route path="/inquilino/perfil" element={
             <ProtectedRoute allowedRole="inquilino">
@@ -173,8 +168,8 @@ const App = () => (
           } />
 
           <Route path="/inquilino/contratar" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <ContratarPlanoPage />
+            <ProtectedRoute allowedRole={["inquilino", "admin", "imobiliaria", "integrante_imobiliaria"]}>
+              <ContratacaoPage />
             </ProtectedRoute>
           } />
 
