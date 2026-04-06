@@ -11,12 +11,13 @@ export const config = {
     },
 };
 
-const buffer = async (readable) => {
+const buffer = async (req) => {
     const chunks = [];
-    for await (const chunk of readable) {
-        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-    }
-    return Buffer.concat(chunks);
+    return new Promise((resolve, reject) => {
+        req.on('data', (chunk) => chunks.push(chunk));
+        req.on('end', () => resolve(Buffer.concat(chunks)));
+        req.on('error', (err) => reject(err));
+    });
 };
 
 export default async function handler(req, res) {
@@ -39,34 +40,46 @@ export default async function handler(req, res) {
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-        const inquilinoId = session.client_reference_id || session.metadata.inquilino_id;
+    // Handle the events
+    const relevantEvents = ['checkout.session.completed', 'invoice.paid', 'invoice.payment_succeeded'];
 
-        console.log(`🔔 Payment successful! Session: ${session.id}, Inquilino: ${inquilinoId}`);
+    if (relevantEvents.includes(event.type)) {
+        const sessionOrInvoice = event.data.object;
 
-        if (inquilinoId && supabaseUrl && supabaseServiceKey) {
+        // Inquilino ID can be in client_reference_id (Session) or in metadata (Session/Invoice)
+        // Note: For subscriptions, metadata needs to be explicitly passed to the subscription
+        let inquilinoId = sessionOrInvoice.client_reference_id ||
+            (sessionOrInvoice.metadata && sessionOrInvoice.metadata.inquilino_id);
+
+        // If it's an invoice, we might need to find the inquilino by email if metadata is missing
+        const customerEmail = sessionOrInvoice.customer_email || sessionOrInvoice.billing_details?.email;
+
+        console.log(`🔔 Event ${event.type} received. InquilinoID: ${inquilinoId}, Email: ${customerEmail}`);
+
+        if (supabaseUrl && supabaseServiceKey) {
             const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-            // Update inquilino status
-            const { error } = await supabase
-                .from('inquilinos')
-                .update({
-                    aprovacao_ef: 'aprovado',
-                    status_pagamento: 'pago',
-                    stripe_subscription_id: session.subscription,
-                    stripe_customer_id: session.customer
-                })
-                .eq('id', inquilinoId);
+            let query = supabase.from('inquilinos').update({
+                status_pagamento: 'pago',
+                aprovacao_ef: 'aprovado'
+            });
+
+            if (inquilinoId) {
+                query = query.eq('id', inquilinoId);
+            } else if (customerEmail) {
+                query = query.eq('email', customerEmail);
+            } else {
+                console.error('❌ Could not identify inquilino by ID or Email');
+                return res.json({ received: true, error: 'identity_missing' });
+            }
+
+            const { error } = await query;
 
             if (error) {
-                console.error(`❌ Error updating inquilino ${inquilinoId}:`, error.message);
+                console.error(`❌ Error updating inquilino:`, error.message);
             } else {
-                console.log(`✅ Inquilino ${inquilinoId} updated successfully.`);
+                console.log(`✅ Inquilino updated successfully via ${event.type}.`);
             }
-        } else {
-            console.error('❌ Missing Supabase config or Inquilino ID in webhook');
         }
     }
 
