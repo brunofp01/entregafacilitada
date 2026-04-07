@@ -8,24 +8,28 @@ import {
 
 const faqs = [
     {
-        question: "E se a imobiliária reprovar o serviço na vistoria?",
-        answer: "Essa é a nossa garantia real. Se a imobiliária exigir qualquer retoque na pintura ou nos reparos que realizamos, nossa equipe volta ao imóvel em até 3 dias úteis e faz o ajuste sem nenhum custo adicional para você.",
+        question: "E se a imobiliária for rigorosa e reprovar a vistoria de saída?",
+        answer: "Essa é a nossa maior garantia para você. Se o fiscal da imobiliária exigir qualquer retoque na pintura ou nos pequenos reparos que realizamos, nossos parceiros homologados retornam ao imóvel e resolvem tudo em até 5 dias úteis. Você não paga 1 centavo a mais por isso e nós lidamos com o estresse da aprovação.",
     },
     {
-        question: "O Entrega Facilitada cobre porta quebrada ou vazamentos?",
-        answer: "Não. Nosso foco é a restauração estética (pintura completa, furos de quadro, espelhos de tomada e pequenos reparos de uso normal). Danos estruturais, hidráulicos, elétricos ou mau uso severo (como uma porta quebrada) não fazem parte da cobertura e devem ser resolvidos pelo inquilino ou via Seguro Incêndio.",
+        question: "Não sai mais barato contratar um pintor por conta própria na hora de mudar?",
+        answer: "Na ponta do lápis, não. O primeiro grande erro é esquecer a inflação: ao fechar seu plano hoje, você congela o preço atual da mão de obra e dos materiais. Daqui a 12 ou 24 meses, tudo estará mais caro. Além disso, o pintor particular cobra à vista bem no momento em que você já está gastando com frete e caução nova. Sem contar que, se a imobiliária reprovar o serviço, ele raramente volta de graça. Com a Entrega Facilitada, você blinda seu bolso contra o aumento de preços, dilui o custo e transfere todo o risco da aprovação para nós.",
     },
     {
-        question: "O que acontece se eu sair do imóvel antes de completar 12 ou 24 meses?",
-        answer: "Sem problemas! Para que possamos liberar a equipe de execução, basta realizar a quitação do saldo restante do seu plano de assinatura. Uma vez quitado, o serviço é agendado normalmente para a sua data de mudança.",
+        question: "Eu preciso comprar as tintas ou acompanhar a obra?",
+        answer: "Zero preocupação. O seu plano já cobre toda a mão de obra especializada e 100% do material necessário (tintas homologadas no padrão do seu laudo, massa corrida, lixas). Você literalmente nos entrega as chaves temporárias para a execução e foca apenas em curtir a casa nova.",
     },
     {
-        question: "Quanto tempo antes da mudança devo acionar vocês?",
-        answer: "O ideal é nos avisar com pelo menos 30 dias de antecedência. Isso garante que teremos a equipe reservada para o seu prazo de entrega de chaves.",
+        question: "A Entrega Facilitada cobre porta quebrada, vazamento ou elétrica?",
+        answer: "Para manter suas parcelas acessíveis, nosso escopo é 100% focado na restauração estética exigida em 99% das vistorias (pintura completa, furos de quadros, espelhos de tomada). Danos estruturais, hidráulicos ou quebras severas de mau uso ficam de fora — mas lembre-se: muitos desses imprevistos podem e devem ser cobertos pelo seu Seguro Incêndio obrigatório!",
     },
     {
-        question: "Preciso comprar as tintas ou material?",
-        answer: "Não se preocupe com nada. O valor da sua assinatura já inclui toda a mão de obra qualificada e o material necessário (tintas de qualidade, massa, lixas, etc) para deixar o imóvel idêntico ao laudo de vistoria inicial.",
+        question: "E se eu rescindir meu contrato de aluguel e mudar antes do prazo?",
+        answer: "Acontece, e o processo é sem burocracia. Basta realizar a quitação do saldo restante do seu plano de forma antecipada para liberar o agendamento do serviço. Uma vez quitado, a obra é agendada normalmente para a sua data de mudança, sem nenhuma \"taxa de cancelamento\" ou multa surpresa da nossa parte.",
+    },
+    {
+        question: "Quando e como eu devo avisar que estou me mudando?",
+        answer: "O ideal é nos avisar com cerca de 30 dias de antecedência. Assim, travamos a agenda da execução para a data exata da sua desocupação, garantindo que o imóvel fique pronto rápido para você não ter que pagar dias extras de aluguel para a imobiliária enquanto o imóvel está vazio.",
     },
 ];
 
