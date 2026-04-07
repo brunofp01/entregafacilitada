@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const CTASection = () => {
   return (
-    <section className="py-24 bg-background">
+    <section className="py-16 bg-background">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -24,7 +24,7 @@ const CTASection = () => {
             onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
             className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black px-10 py-7 text-lg shadow-[var(--shadow-accent)] uppercase tracking-tight"
           >
-            Simular minha parcela agora
+            Simular minha parcela Entrega Facilitada
             <ArrowRight className="ml-2 w-6 h-6" />
           </Button>
         </motion.div>

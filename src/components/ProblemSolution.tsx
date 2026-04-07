@@ -15,7 +15,7 @@ const solutions = [
 
 const ProblemSolution = () => {
   return (
-    <section className="py-24 bg-background" id="como-funciona">
+    <section className="py-16 bg-background" id="como-funciona">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

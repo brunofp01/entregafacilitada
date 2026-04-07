@@ -31,7 +31,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-24 bg-muted/50" id="como-funciona">
+    <section className="py-16 bg-muted/50" id="como-funciona">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -79,8 +79,8 @@ const HowItWorks = () => {
                   <div className="relative z-10 shrink-0">
                     <div
                       className={`flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl shadow-[var(--shadow-soft)] ${step.side === "entrega facilitada"
-                          ? "bg-secondary text-secondary-foreground"
-                          : "bg-primary text-primary-foreground"
+                        ? "bg-secondary text-secondary-foreground"
+                        : "bg-primary text-primary-foreground"
                         }`}
                     >
                       <step.icon className="w-5 h-5 md:w-6 md:h-6" />
