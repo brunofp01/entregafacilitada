@@ -4,13 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { FileUp, Home, User, Loader2, ShieldCheck, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { FileUp, Home, User, Loader2, ShieldCheck, Check, ArrowRight, ArrowLeft, Lock, Info, CheckCircle2, Zap, Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
 import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive } from "@/lib/pricingCalc";
-import { Info, CheckCircle2, Zap, Star } from "lucide-react";
 import {
     Select,
     SelectContent,
