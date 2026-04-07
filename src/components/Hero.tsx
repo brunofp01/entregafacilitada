@@ -5,9 +5,9 @@ import heroImage from "@/assets/hero-building.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center py-24 sm:py-32">
       {/* Background image with overlay */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <img src={heroImage} alt="Edifício moderno" className="w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(220 60% 10% / 0.88), hsl(220 50% 20% / 0.75))" }} />
       </div>
@@ -56,30 +56,30 @@ const Hero = () => {
               Como funciona
             </Button>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-6"
-          >
-            {[
-              { icon: Shield, label: "LAUDO GARANTIDO", value: "Entregamos a pintura exatamente como você recebeu o imóvel." },
-              { icon: Wallet, label: "NO SEU TEMPO", value: "Pague aos poucos em até 24x fixas. Zero sustos na saída." },
-              { icon: Clock, label: "RISCO ZERO", value: "A imobiliária reprovou algum detalhe? Nós voltamos e retocamos." },
-            ].map((item, i) => (
-              <div key={i} className="flex items-start gap-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 p-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/20">
-                  <item.icon className="w-5 h-5 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 uppercase tracking-wider">{item.label}</p>
-                  <p className="text-sm font-heading font-bold text-white">{item.value}</p>
-                </div>
-              </div>
-            ))}
-          </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl"
+        >
+          {[
+            { icon: Shield, label: "LAUDO GARANTIDO", value: "Entregamos a pintura exatamente como você recebeu o imóvel." },
+            { icon: Wallet, label: "NO SEU TEMPO", value: "Pague aos poucos em até 24x fixas. Zero sustos na saída." },
+            { icon: Clock, label: "RISCO ZERO", value: "A imobiliária reprovou algum detalhe? Nós voltamos e retocamos." },
+          ].map((item, i) => (
+            <div key={i} className="flex items-start gap-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/20">
+                <item.icon className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <p className="text-xs text-white/50 uppercase tracking-wider">{item.label}</p>
+                <p className="text-sm font-heading font-bold text-white">{item.value}</p>
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );

@@ -101,9 +101,9 @@ const PricingSimulator = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
+          className="max-w-5xl mx-auto"
         >
-          <div className="grid md:grid-cols-5 gap-8">
+          <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
             {/* Controls */}
             <div className="md:col-span-3 rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-soft)]">
               <div className="flex items-center gap-3 mb-8">
