@@ -22,10 +22,10 @@ const CTASection = () => {
           <Button
             size="lg"
             onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black px-10 py-7 text-lg shadow-[var(--shadow-accent)] uppercase tracking-tight"
+            className="w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black px-6 sm:px-10 py-5 sm:py-7 text-base sm:text-lg shadow-[var(--shadow-accent)] uppercase tracking-tight h-auto whitespace-normal leading-tight transition-all"
           >
             QUERO SIMULAR MEU VALOR
-            <ArrowRight className="ml-2 w-6 h-6" />
+            <ArrowRight className="ml-2 w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
           </Button>
         </motion.div>
       </div>
