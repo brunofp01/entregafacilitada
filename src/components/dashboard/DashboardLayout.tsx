@@ -80,6 +80,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: FileText, label: "Contrato Padrão", href: "/admin/contrato-padrao" },
       { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
       { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
+      { icon: MessageSquare, label: "Leads Simulador", href: "/admin/leads" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
       { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },
       { icon: User, label: "Meu Perfil", href: "/admin/perfil" },

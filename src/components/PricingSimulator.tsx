@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { calcPp, calcPc, sumActive, FormulaParam } from "@/lib/pricingCalc";
+import LeadCaptureModal from "./LeadCaptureModal";
 
 const PricingSimulator = () => {
   const [area, setArea] = useState(60);
@@ -14,6 +15,7 @@ const PricingSimulator = () => {
     plans: any[];
   } | null>(null);
   const [compositionItems, setCompositionItems] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -166,7 +168,10 @@ const PricingSimulator = () => {
                   Infinitamente mais barato que o orçamento de saída da imobiliária.
                 </p>
                 <div className="mt-8 w-full">
-                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-auto py-5 px-4 text-sm sm:text-base md:text-lg font-black uppercase tracking-tighter shadow-xl shadow-secondary/20 whitespace-normal leading-tight">
+                  <Button
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-auto py-5 px-4 text-sm sm:text-base md:text-lg font-black uppercase tracking-tighter shadow-xl shadow-secondary/20 whitespace-normal leading-tight"
+                  >
                     GARANTIR MINHA TRANQUILIDADE
                   </Button>
                 </div>
@@ -175,6 +180,13 @@ const PricingSimulator = () => {
           </div>
         </motion.div>
       </div>
+
+      <LeadCaptureModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        area={area}
+        monthlyValue={result.monthly}
+      />
     </section>
   );
 };

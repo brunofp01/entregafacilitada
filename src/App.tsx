@@ -32,6 +32,9 @@ import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
 import PagamentoSucessoPage from "./pages/dashboard/inquilino/PagamentoSucessoPage.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import PublicCheckoutPage from "./pages/PublicCheckoutPage.tsx";
+import SuccessPage from "./pages/SuccessPage.tsx";
+import LeadsAdminPage from "./pages/dashboard/admin/LeadsAdminPage.tsx";
 
 import { PwaHandler } from "./components/pwa/PwaHandler.tsx";
 
@@ -48,6 +51,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/contratar-publico" element={<PublicCheckoutPage />} />
+          <Route path="/sucesso" element={<SuccessPage />} />
 
           {/* Dashboard Routes with Protection */}
           <Route path="/admin/*" element={
@@ -98,6 +103,11 @@ const App = () => (
           <Route path="/admin/contrato-padrao" element={
             <ProtectedRoute allowedRole="admin">
               <ContratoPadraoPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/leads" element={
+            <ProtectedRoute allowedRole="admin">
+              <LeadsAdminPage />
             </ProtectedRoute>
           } />
 
