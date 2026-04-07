@@ -14,17 +14,17 @@ const CTASection = () => {
           style={{ background: "var(--gradient-hero)" }}
         >
           <h2 className="text-3xl md:text-5xl font-heading font-extrabold mb-4">
-            Pronto para sair sem dor de cabeça?
+            Sua única preocupação na mudança será fazer as malas.
           </h2>
-          <p className="text-primary-foreground/70 text-lg mb-8 max-w-lg mx-auto">
-            Simule sua parcela e descubra como garantir que sua próxima mudança seja 100% livre de ansiedade e burocracia.
+          <p className="text-primary-foreground/70 text-lg mb-8 max-w-2xl mx-auto">
+            Descubra em segundos o valor exato para garantir a sua vistoria aprovada. Deixe o trabalho pesado com a gente e mude de casa sem surpresas ou orçamentos abusivos.
           </p>
           <Button
             size="lg"
             onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
             className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black px-10 py-7 text-lg shadow-[var(--shadow-accent)] uppercase tracking-tight"
           >
-            Simular minha parcela Entrega Facilitada
+            QUERO SIMULAR MEU VALOR
             <ArrowRight className="ml-2 w-6 h-6" />
           </Button>
         </motion.div>
