@@ -31,7 +31,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-16 bg-muted/50" id="como-funciona">
+    <section className="py-16 bg-muted/50" id="passo-a-passo">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

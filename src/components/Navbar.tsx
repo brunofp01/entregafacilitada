@@ -58,7 +58,6 @@ const Navbar = () => {
   const links = [
     { label: "Como funciona", href: "#como-funciona" },
     { label: "Simulador", href: "#simulador" },
-    { label: "Perfis", href: "#perfis" },
   ];
 
   return (
