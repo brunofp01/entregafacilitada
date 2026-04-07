@@ -165,7 +165,7 @@ const PricingSimulator = () => {
                   24x fixas. Infinitamente mais barato que o orçamento de saída da imobiliária.
                 </p>
                 <div className="mt-8 w-full">
-                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-16 text-lg font-black uppercase tracking-tight shadow-xl shadow-secondary/20">
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-auto py-5 px-4 text-sm sm:text-base md:text-lg font-black uppercase tracking-tighter shadow-xl shadow-secondary/20 whitespace-normal leading-tight">
                     GARANTIR MINHA TRANQUILIDADE
                   </Button>
                 </div>
