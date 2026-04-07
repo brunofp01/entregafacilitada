@@ -29,7 +29,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed">
-              O fim do seu aluguel não precisa ser uma dor de cabeça. Por um valor que cabe no seu bolso sem surpresas nem letras miúdas.
+              O fim do seu aluguel não precisa ser uma dor de cabeça. Garantimos a pintura e os reparos da vistoria por um valor fixo, diluído durante a sua estadia.
             </p>
           </motion.div>
 
@@ -64,11 +64,11 @@ const Hero = () => {
             className="grid grid-cols-1 sm:grid-cols-3 gap-6"
           >
             {[
-              { icon: Shield, label: "Conformidade", value: "100% alinhado ao Laudo" },
-              { icon: Wallet, label: "Pagamento", value: "Parcelas em até 24x" },
-              { icon: Clock, label: "Zero Estresse", value: "Sem surpresas na saída" },
+              { icon: Shield, label: "LAUDO GARANTIDO", value: "Entregamos a pintura exatamente como você recebeu o imóvel." },
+              { icon: Wallet, label: "NO SEU TEMPO", value: "Pague aos poucos em até 24x fixas. Zero sustos na saída." },
+              { icon: Clock, label: "RISCO ZERO", value: "A imobiliária reprovou algum detalhe? Nós voltamos e retocamos." },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 p-4">
+              <div key={i} className="flex items-start gap-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 p-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/20">
                   <item.icon className="w-5 h-5 text-secondary" />
                 </div>
