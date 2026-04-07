@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { X, Check, AlertTriangle, TrendingDown, Scale } from "lucide-react";
+import { X, Check, AlertTriangle, TrendingDown, Scale, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const problems = [
   { icon: AlertTriangle, text: "Orçamentos abusivos de R$ 3.000 a R$ 8.000 na hora de sair do imóvel" },
@@ -9,7 +10,7 @@ const problems = [
 
 const solutions = [
   "Pintura completa e pequenos reparos diluídos em parcelas mensais",
-  "Equipe própria que assume a obra baseada no Laudo de Vistoria Inicial",
+  "Profissionais homologados que assumem a adequação do imóvel baseados no seu Laudo de Vistoria Inicial",
   "Garantia de aprovação: se a imobiliária exigir retoques, nós voltamos sem custo",
 ];
 
@@ -27,7 +28,7 @@ const ProblemSolution = () => {
             Do problema à <span className="text-secondary">solução</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Entenda por que milhares de inquilinos já estão migrando para o modelo de desocupação facilitada.
+            Entenda por que inquilinos inteligentes pararam de deixar os custos de saída para o último minuto.
           </p>
         </motion.div>
 
@@ -78,6 +79,23 @@ const ProblemSolution = () => {
             </div>
           </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-12 text-center"
+        >
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
+            className="border-secondary text-secondary hover:bg-secondary/10 font-bold px-8 py-6 rounded-full group transition-all"
+          >
+            Quero entregar as chaves sem estresse
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
