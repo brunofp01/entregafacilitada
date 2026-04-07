@@ -5,9 +5,9 @@ import heroImage from "@/assets/hero-building.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center py-24 sm:py-32">
+    <section className="relative pt-32 pb-20 overflow-hidden">
       {/* Background image with overlay */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0">
         <img src={heroImage} alt="Edifício moderno" className="w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, hsl(220 60% 10% / 0.88), hsl(220 50% 20% / 0.75))" }} />
       </div>
