@@ -200,12 +200,18 @@ const ContratacaoPage = () => {
 
             const pdfGenerator = await import('@react-pdf/renderer');
             const pdf = pdfGenerator.pdf;
+
+            const template = configData?.contract_template;
+            const sections = Array.isArray(template) ? template : template?.sections;
+            const title = Array.isArray(template) ? undefined : template?.title;
+
             const contratoBlob = await pdf(
                 <ContratoPDF
                     inquilino={inquilino}
                     imovel={imovel}
                     imobiliariaPerfil={imobiliariaPerfil}
-                    sections={configData?.contract_template}
+                    sections={sections}
+                    title={title}
                 />
             ).toBlob();
 

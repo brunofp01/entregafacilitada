@@ -64,6 +64,7 @@ const VARIABLES = [
 ];
 
 const ContratoPadraoPage = () => {
+    const [title, setTitle] = useState("CONTRATO DE PRESTAÇÃO DE SERVIÇOS - ENTREGA FACILITADA");
     const [sections, setSections] = useState<ContractSection[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -82,7 +83,13 @@ const ContratoPadraoPage = () => {
                 .single();
 
             if (data?.contract_template) {
-                setSections(data.contract_template);
+                // Suporte ao formato antigo (array) e novo (objeto com title e sections)
+                if (Array.isArray(data.contract_template)) {
+                    setSections(data.contract_template);
+                } else if (data.contract_template.sections) {
+                    setSections(data.contract_template.sections);
+                    if (data.contract_template.title) setTitle(data.contract_template.title);
+                }
             } else {
                 setSections(DEFAULT_TEMPLATE);
             }
@@ -97,11 +104,13 @@ const ContratoPadraoPage = () => {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            // Note: If contract_template column doesn't exist, this might fail unless added to schema first.
             const { error } = await supabase
                 .from('pricing_parameters_config')
                 .update({
-                    contract_template: sections,
+                    contract_template: {
+                        title: title,
+                        sections: sections
+                    },
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', 1);
@@ -110,7 +119,7 @@ const ContratoPadraoPage = () => {
             toast.success("Template de contrato salvo com sucesso!");
         } catch (error: any) {
             console.error(error);
-            toast.error("Erro ao salvar template. Verifique se a coluna 'contract_template' existe no banco.");
+            toast.error("Erro ao salvar template. Verifique a conexão com o banco.");
         } finally {
             setIsSaving(false);
         }
@@ -192,7 +201,7 @@ const ContratoPadraoPage = () => {
                 {previewMode ? (
                     <Card className="border-border/50 bg-card/60 backdrop-blur-sm max-w-3xl mx-auto shadow-2xl">
                         <CardHeader className="text-center border-b border-border/50 pb-8">
-                            <CardTitle className="text-2xl font-black uppercase text-secondary">Contrato de Prestação de Serviços</CardTitle>
+                            <CardTitle className="text-2xl font-black uppercase text-secondary">{title}</CardTitle>
                             <CardDescription>Visualização em tempo real (Exemplo)</CardDescription>
                         </CardHeader>
                         <CardContent className="pt-8 space-y-8 text-justify font-serif text-sm leading-relaxed px-12">
@@ -200,7 +209,6 @@ const ContratoPadraoPage = () => {
                                 <div key={section.id} className="space-y-3">
                                     <h3 className="font-bold text-base uppercase border-b border-border/30 pb-1">{section.title}</h3>
                                     <p className="whitespace-pre-wrap text-foreground/80">
-                                        {/* Simple replace for preview */}
                                         {section.content
                                             .replace(/\{\{inquilino_nome\}\}/g, "JOÃO DA SILVA EXEMPLO")
                                             .replace(/\{\{inquilino_cpf\}\}/g, "000.000.000-00")
@@ -219,6 +227,21 @@ const ContratoPadraoPage = () => {
                 ) : (
                     <div className="grid lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
+                            <Card className="border-secondary/30 bg-secondary/5">
+                                <CardHeader className="py-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <FileText className="w-4 h-4 text-secondary" />
+                                        <Label className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Título do Contrato</Label>
+                                    </div>
+                                    <Input
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value.toUpperCase())}
+                                        className="text-lg font-black uppercase tracking-tight bg-background/50 border-secondary/20 focus:border-secondary h-12"
+                                        placeholder="EX: CONTRATO DE PRESTAÇÃO DE SERVIÇOS"
+                                    />
+                                </CardHeader>
+                            </Card>
+
                             {sections.map((section, index) => (
                                 <Card key={section.id} className="border-border/50 bg-card/50 shadow-sm hover:shadow-md transition-shadow group">
                                     <CardHeader className="py-3 border-b border-border/30 bg-muted/30 flex flex-row items-center justify-between">

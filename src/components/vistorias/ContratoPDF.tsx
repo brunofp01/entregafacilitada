@@ -27,9 +27,10 @@ interface ContratoPDFProps {
     imovel: { rua: string; numero: string; complemento: string; bairro: string; cidade: string; estado: string; cep: string; };
     imobiliariaPerfil?: any;
     sections?: ContractSection[];
+    title?: string;
 }
 
-export const ContratoPDF = ({ inquilino, imovel, imobiliariaPerfil, sections }: ContratoPDFProps) => {
+export const ContratoPDF = ({ inquilino, imovel, imobiliariaPerfil, sections, title }: ContratoPDFProps) => {
     const dataAtual = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
     const enderecoCompleto = `${imovel.rua}, nº ${imovel.numero}${imovel.complemento ? ` - ${imovel.complemento}` : ''}, ${imovel.bairro}, ${imovel.cidade}/${imovel.estado} - CEP: ${imovel.cep}`;
 
@@ -52,7 +53,7 @@ export const ContratoPDF = ({ inquilino, imovel, imobiliariaPerfil, sections }: 
                     {imobiliariaPerfil?.logo_url && (
                         <Image src={imobiliariaPerfil.logo_url} style={styles.logo} />
                     )}
-                    <Text style={styles.title}>CONTRATO DE PRESTAÇÃO DE SERVIÇOS - ENTREGA FACILITADA</Text>
+                    <Text style={styles.title}>{title || 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS - ENTREGA FACILITADA'}</Text>
                 </View>
 
                 {sections && sections.length > 0 ? (
