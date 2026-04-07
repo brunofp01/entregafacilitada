@@ -3,40 +3,28 @@ import { FileText, CreditCard, CalendarCheck, ClipboardCheck, Paintbrush, Key } 
 
 const steps = [
   {
-    icon: FileText,
-    title: "Cadastro do contrato",
-    description: "Insira os dados do imóvel ou conecte-se pela imobiliária. Simulamos o valor do pacote em segundos.",
-    side: "você",
-  },
-  {
     icon: CreditCard,
-    title: "Ativação do pacote",
-    description: "Escolha o plano ideal e comece a pagar uma parcela mensal fixa, integrada ao aluguel. Sem surpresas.",
+    title: "Assine e Dilua",
+    description: "Simule pela metragem e pague em 12x ou 24x durante a locação. Preço fixo, sem letras miúdas.",
     side: "você",
   },
   {
     icon: CalendarCheck,
-    title: "Solicite a desocupação",
-    description: "Ao final do contrato, acione o app e agende a vistoria de saída de forma 100% digital.",
+    title: "Alerte a Saída",
+    description: "Avise a Entrega Facilitada com 30 dias de antecedência da sua mudança pelo nosso app.",
     side: "você",
   },
   {
-    icon: ClipboardCheck,
-    title: "Vistoria e diagnóstico",
-    description: "Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.",
+    icon: Paintbrush,
+    title: "Deixe com a gente",
+    description: "Em 5 a 10 dias úteis, nossa equipe entrega a pintura e pequenos reparos idênticos ao Laudo Inicial.",
     side: "entrega facilitada",
     divider: true,
   },
   {
-    icon: Paintbrush,
-    title: "Execução dos reparos",
-    description: "Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.",
-    side: "entrega facilitada",
-  },
-  {
     icon: Key,
-    title: "Chaves entregues, Nada Consta emitido",
-    description: "Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.",
+    title: "Chave Entregue",
+    description: "Vistoria aprovada de primeira. Se a imobiliária exigir algum ajuste, nós voltamos e retocamos sem custo.",
     side: "entrega facilitada",
   },
 ];
@@ -90,11 +78,10 @@ const HowItWorks = () => {
                   {/* Icon node */}
                   <div className="relative z-10 shrink-0">
                     <div
-                      className={`flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl shadow-[var(--shadow-soft)] ${
-                        step.side === "entrega facilitada"
+                      className={`flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl shadow-[var(--shadow-soft)] ${step.side === "entrega facilitada"
                           ? "bg-secondary text-secondary-foreground"
                           : "bg-primary text-primary-foreground"
-                      }`}
+                        }`}
                     >
                       <step.icon className="w-5 h-5 md:w-6 md:h-6" />
                     </div>

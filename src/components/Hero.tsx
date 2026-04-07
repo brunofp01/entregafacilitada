@@ -21,16 +21,15 @@ const Hero = () => {
           >
             <span className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-sm font-medium text-secondary mb-6">
               <Shield className="w-4 h-4" />
-              Sem surpresas na desocupação
+              100% alinhado ao Laudo de Vistoria
             </span>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] tracking-tight text-white mb-6">
-              Entregue o imóvel alugado{" "}
-              <span className="text-secondary">sem dor de cabeça.</span>
+              Mude de casa <span className="text-secondary">sem surpresas</span> e sem brigar com a imobiliária.
             </h1>
 
             <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed">
-              Transformamos os custos imprevisíveis de desocupação em uma assinatura mensal fixa e acessível. Pintura, reparos e manutenção — tudo coberto.
+              Pintura e pequenos reparos garantidos na rescisão por uma assinatura mensal que cabe no seu bolso.
             </p>
           </motion.div>
 
@@ -40,13 +39,18 @@ const Hero = () => {
             transition={{ duration: 0.7, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 mb-16"
           >
-            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-semibold px-8 py-6 shadow-[var(--shadow-accent)] transition-all">
-              Simular meu pacote
+            <Button
+              size="lg"
+              onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-bold px-8 py-6 shadow-[var(--shadow-accent)] transition-all"
+            >
+              Simular minha parcela agora
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
               className="border-white text-white bg-transparent hover:bg-white hover:text-primary-foreground text-base px-8 py-6 transition-all"
             >
               Como funciona
@@ -60,17 +64,17 @@ const Hero = () => {
             className="grid grid-cols-1 sm:grid-cols-3 gap-6"
           >
             {[
-              { icon: Wallet, label: "A partir de", value: "R$ 89/mês" },
-              { icon: Clock, label: "Desocupação em", value: "até 48h" },
-              { icon: Shield, label: "Cobertura", value: "100% garantida" },
+              { icon: Shield, label: "Conformidade", value: "100% alinhado ao Laudo" },
+              { icon: Wallet, label: "Pagamento", value: "Parcelas em até 24x" },
+              { icon: Clock, label: "Zero Estresse", value: "Sem surpresas na saída" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-xl bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10 p-4">
+              <div key={i} className="flex items-center gap-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 p-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary/20">
                   <item.icon className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
-                  <p className="text-xs text-primary-foreground/50 uppercase tracking-wider">{item.label}</p>
-                  <p className="text-lg font-heading font-bold text-primary-foreground">{item.value}</p>
+                  <p className="text-xs text-white/50 uppercase tracking-wider">{item.label}</p>
+                  <p className="text-sm font-heading font-bold text-white">{item.value}</p>
                 </div>
               </div>
             ))}

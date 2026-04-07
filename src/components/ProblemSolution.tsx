@@ -2,15 +2,15 @@ import { motion } from "framer-motion";
 import { X, Check, AlertTriangle, TrendingDown, Scale } from "lucide-react";
 
 const problems = [
-  { icon: AlertTriangle, text: "Cobranças inesperadas de R$ 3.000 a R$ 10.000 na saída" },
-  { icon: TrendingDown, text: "Descapitalização no momento de maior gasto (mudança)" },
-  { icon: Scale, text: "Disputas judiciais e atrito com imobiliárias" },
+  { icon: AlertTriangle, text: "Orçamentos abusivos de R$ 3.000 a R$ 8.000 na hora de sair do imóvel" },
+  { icon: TrendingDown, text: "Descapitalização total: frete, novo caução e ainda ter que pagar a pintura" },
+  { icon: Scale, text: "Ansiedade e atritos com a imobiliária por causa de detalhes da vistoria" },
 ];
 
 const solutions = [
-  "Parcelas fixas a partir de R$ 89/mês — sem surpresas",
-  "Pintura, reparos e manutenção final inclusos",
-  "Certificado de quitação automático ao sair",
+  "Pintura completa e pequenos reparos diluídos em parcelas mensais",
+  "Equipe própria que assume a obra baseada no Laudo de Vistoria Inicial",
+  "Garantia de aprovação: se a imobiliária exigir retoques, nós voltamos sem custo",
 ];
 
 const ProblemSolution = () => {
