@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calculator } from "lucide-react";
+import { Calculator, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -108,7 +108,7 @@ const PricingSimulator = () => {
             <div className="md:col-span-3 rounded-2xl border border-border bg-card p-8 shadow-[var(--shadow-soft)]">
               <div className="flex items-center gap-3 mb-8">
                 <Calculator className="w-5 h-5 text-secondary" />
-                <h3 className="font-heading font-bold text-lg text-foreground">Configuração da Assinatura</h3>
+                <h3 className="font-heading font-bold text-lg text-foreground">Simule o fim da sua dor de cabeça.</h3>
               </div>
 
               <div className="space-y-8">
@@ -131,10 +131,22 @@ const PricingSimulator = () => {
                   </div>
                 </div>
 
-                <div className="p-4 bg-muted/50 rounded-xl border border-border/40">
-                  <p className="text-sm font-medium text-foreground uppercase tracking-widest mb-1">Plano Selecionado</p>
-                  <p className="text-lg font-black text-secondary">Plano Básico</p>
-                  <p className="text-xs text-muted-foreground mt-1">Inclui pintura completa de saída e pequenos reparos estéticos.</p>
+                <div className="p-5 bg-muted/50 rounded-xl border border-border/40">
+                  <p className="text-sm font-bold text-foreground uppercase tracking-widest mb-3">O que está 100% garantido neste valor:</p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                      <span>Pintura completa nos padrões do laudo inicial</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                      <span>Retoque sem custo extra se a imobiliária reprovar</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                      <span>Nada Consta agilizado e sem atrito</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -142,19 +154,19 @@ const PricingSimulator = () => {
             {/* Result */}
             <div className="md:col-span-2 flex flex-col">
               <div className="rounded-2xl p-8 text-primary-foreground flex-1 flex flex-col items-center justify-center text-center shadow-xl transform transition-transform hover:scale-[1.02]" style={{ background: "var(--gradient-hero)" }}>
-                <p className="text-primary-foreground/60 text-sm uppercase tracking-widest mb-4">Sua parcela mensal</p>
+                <p className="text-primary-foreground/60 text-sm uppercase font-black tracking-widest mb-4">PREVISIBILIDADE TOTAL:</p>
                 <div className="flex items-baseline gap-1 mb-2">
                   <span className="text-2xl font-bold opacity-70">R$</span>
                   <span className="text-6xl md:text-7xl font-heading font-black">
                     {result.monthly.toFixed(0)}
                   </span>
                 </div>
-                <p className="text-primary-foreground/80 font-medium text-sm border-t border-white/10 pt-4 w-full">
-                  Pagamento recorrente em 24x no cartão
+                <p className="text-primary-foreground/90 font-medium text-sm border-t border-white/10 pt-6 mt-4 w-full">
+                  24x fixas. Infinitamente mais barato que o orçamento de saída da imobiliária.
                 </p>
                 <div className="mt-8 w-full">
-                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 text-lg font-black uppercase tracking-tight shadow-lg shadow-secondary/20">
-                    Contratar agora
+                  <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-16 text-lg font-black uppercase tracking-tight shadow-xl shadow-secondary/20">
+                    GARANTIR MINHA TRANQUILIDADE
                   </Button>
                 </div>
               </div>
