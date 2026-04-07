@@ -190,9 +190,24 @@ const ContratacaoPage = () => {
 
             // 2. Geração do Contrato Padrão em memória
             toast.loading("Confeccionando contrato padrão Entrega Facilitada...", { id: toastId });
+
+            // Buscar Template do Banco
+            const { data: configData } = await supabase
+                .from('pricing_parameters_config')
+                .select('contract_template')
+                .eq('id', 1)
+                .single();
+
             const pdfGenerator = await import('@react-pdf/renderer');
             const pdf = pdfGenerator.pdf;
-            const contratoBlob = await pdf(<ContratoPDF inquilino={inquilino} imovel={imovel} imobiliariaPerfil={imobiliariaPerfil} />).toBlob();
+            const contratoBlob = await pdf(
+                <ContratoPDF
+                    inquilino={inquilino}
+                    imovel={imovel}
+                    imobiliariaPerfil={imobiliariaPerfil}
+                    sections={configData?.contract_template}
+                />
+            ).toBlob();
 
             const servicoContractId = crypto.randomUUID();
             await supabase.storage.from("vistorias").upload(`contratos_servico/${servicoContractId}.pdf`, contratoBlob);

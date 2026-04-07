@@ -77,6 +77,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: ShoppingCart, label: "Contratar EF", href: "/imobiliaria/contratar" },
       { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
       { icon: Package, label: "Gestão de Planos", href: "/admin/planos" },
+      { icon: FileText, label: "Contrato Padrão", href: "/admin/contrato-padrao" },
       { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
       { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
