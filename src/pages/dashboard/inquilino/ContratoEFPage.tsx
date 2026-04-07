@@ -408,7 +408,7 @@ const ContratoEFPage = () => {
                                             className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-black shadow-xl shadow-secondary/20 h-12 px-8 uppercase"
                                         >
                                             {checkoutLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CreditCard className="w-5 h-5 mr-2" />}
-                                            Ativar Minha Proteção Agora
+                                            Pagar 1ª Parcela Entrega Facilitada
                                         </Button>
                                     ) : (
                                         <div className="flex flex-wrap gap-2">
@@ -417,7 +417,7 @@ const ContratoEFPage = () => {
                                                     onClick={() => window.open(pendingInvoice.invoiceUrl, '_blank')}
                                                     className="bg-amber-600 hover:bg-amber-700 text-white font-black shadow-lg shadow-amber-600/20"
                                                 >
-                                                    Pagar Boleto Pendente
+                                                    Pagar Parcela Entrega Facilitada
                                                 </Button>
                                             )}
                                             <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 h-10 px-4 flex items-center gap-2 font-bold select-none">

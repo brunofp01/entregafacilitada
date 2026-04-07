@@ -87,6 +87,26 @@ export default async function handler(req, res) {
                 console.error(`❌ Error updating inquilino:`, error.message);
             } else {
                 console.log(`✅ Inquilino updated successfully via ${event.type}.`);
+
+                // --- NEW: Fix Subscription Term (cancel_at) ---
+                if (event.type === 'checkout.session.completed' && sessionOrInvoice.mode === 'subscription' && sessionOrInvoice.subscription) {
+                    try {
+                        const months = Number(sessionOrInvoice.metadata?.plano_parcelas) || 12;
+                        const endDate = new Date();
+                        endDate.setMonth(endDate.getMonth() + months);
+                        const cancelAtSeconds = Math.floor(endDate.getTime() / 1000);
+
+                        console.log(`📅 Setting cancel_at to ${new Date(cancelAtSeconds * 1000).toLocaleDateString()} for sub: ${sessionOrInvoice.subscription}`);
+
+                        await stripe.subscriptions.update(sessionOrInvoice.subscription, {
+                            cancel_at: cancelAtSeconds,
+                        });
+                        console.log(`✅ Subscription ${sessionOrInvoice.subscription} updated with cancel_at.`);
+                    } catch (subErr) {
+                        console.error(`❌ Error updating subscription term:`, subErr.message);
+                    }
+                }
+                // ----------------------------------------------
             }
         }
     }
