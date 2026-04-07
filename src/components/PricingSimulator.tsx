@@ -12,17 +12,20 @@ const PricingSimulator = () => {
     ms_params: FormulaParam[];
     co_params: FormulaParam[];
     plans: any[];
-    base_area?: number;
   } | null>(null);
+  const [compositionItems, setCompositionItems] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadParams = async () => {
-      const { data } = await supabase.from("pricing_parameters_config").select("*").eq("id", 1).single();
-      if (data) {
-        setConfig(data);
-      }
+    const loadData = async () => {
+      // 1. Load Global Config
+      const { data: configData } = await supabase.from("pricing_parameters_config").select("*").eq("id", 1).single();
+      if (configData) setConfig(configData);
+
+      // 2. Load Composition Items for real-time recalculation
+      const { data: itemsData } = await supabase.from("cost_composition_items").select("*");
+      if (itemsData) setCompositionItems(itemsData);
     };
-    loadParams();
+    loadData();
   }, []);
 
   const result = useMemo(() => {
@@ -32,21 +35,50 @@ const PricingSimulator = () => {
     const basicPlan = config.plans.find(p => p.id === "basico");
     if (!basicPlan) return { monthly: 0 };
 
-    const baseArea = config.base_area || 60;
-    const scaleFactor = area / baseArea;
+    // Calculate dynamic composition costs like the admin does
+    let dynamicBasicoMat = 0;
+    let dynamicBasicoLabor = 0;
+
+    compositionItems.forEach(item => {
+      if (item.in_basico) {
+        const indice = item.indice_sinapi || 0;
+        const prob = item.probabilidade || 0;
+        const rend = item.rendimento || 1;
+        const ref = item.valor_referencia || 0;
+
+        const totalServico = area * indice;
+        const execucaoPrevista = totalServico * (prob / 100);
+
+        let mo = rend > 0 ? (execucaoPrevista / rend) * ref * 0.57 : 0;
+        let mat = rend > 0 ? (execucaoPrevista / rend) * ref * 0.43 : 0;
+
+        if (item.tem_valor_minimo) {
+          const minV = item.valor_minimo || 0;
+          if ((mo + mat) < minV) {
+            mo = minV * 0.57;
+            mat = minV * 0.43;
+          }
+        }
+        dynamicBasicoMat += mat;
+        dynamicBasicoLabor += mo;
+      }
+    });
+
+    // Update the basic plan params with our recalculated values
+    const updatedParams = basicPlan.params.map((p: any) => {
+      if (p.id === "pb1") return { ...p, value: dynamicBasicoMat.toString() };
+      if (p.id === "pb2") return { ...p, value: dynamicBasicoLabor.toString() };
+      return p;
+    });
 
     const totalMs = sumActive(config.ms_params);
     const totalCo = sumActive(config.co_params);
-
-    // Calculate the base premium at the admin's reference area, then scale it
-    const ppAtBase = calcPp(basicPlan.params, baseArea);
-    const ppScaled = ppAtBase * scaleFactor;
-
-    const pc = calcPc(ppScaled, totalMs, totalCo);
+    const pp = calcPp(updatedParams, area);
+    const pc = calcPc(pp, totalMs, totalCo);
     const monthly = pc / 24; // Always 24x as requested
 
     return { monthly };
-  }, [area, config]);
+  }, [area, config, compositionItems]);
 
   return (
     <section className="py-24 bg-background" id="simulador">
