@@ -35,15 +35,6 @@ const quickLinks = [
     iconColor: "text-secondary",
   },
   {
-    href: "/inquilino/pagamentos",
-    Icon: CreditCard,
-    label: "Pagamentos",
-    desc: "Histórico e status de faturas",
-    color: "from-emerald-500/10 to-emerald-500/5",
-    iconBg: "bg-emerald-500/10",
-    iconColor: "text-emerald-500",
-  },
-  {
     href: "/inquilino/solicitacao",
     Icon: Key,
     label: "Solicitar Entrega",

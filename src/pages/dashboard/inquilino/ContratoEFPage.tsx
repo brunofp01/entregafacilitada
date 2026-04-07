@@ -359,7 +359,7 @@ const ContratoEFPage = () => {
                             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
                                 <CardHeader className="border-b border-border/50 bg-secondary/5 pb-4">
                                     <CardTitle className="text-base flex items-center gap-2">
-                                        <Home className="w-4 h-4 text-secondary" /> Imóvel Protegido
+                                        <Home className="w-4 h-4 text-secondary" /> Imóvel com Entrega Facilitada
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-6">
@@ -374,12 +374,6 @@ const ContratoEFPage = () => {
                                     </div>
 
                                     <div className="mt-6 space-y-3">
-                                        {data.contrato_locacao_url && (
-                                            <Button variant="outline" className="w-full justify-start gap-3 h-12 border-border/50 hover:bg-secondary/5 font-bold hover:text-secondary group"
-                                                onClick={() => window.open(data.contrato_locacao_url, "_blank")}>
-                                                <FileUp className="w-4 h-4 text-secondary" /> Contrato Assinado
-                                            </Button>
-                                        )}
                                         {data.vistoria_upload_url && (
                                             <Button variant="outline" className="w-full justify-start gap-3 h-12 border-border/50 hover:bg-emerald-500/5 font-bold hover:text-emerald-500 group"
                                                 onClick={() => window.open(data.vistoria_upload_url, "_blank")}>

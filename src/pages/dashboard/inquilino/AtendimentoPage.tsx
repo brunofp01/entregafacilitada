@@ -55,7 +55,7 @@ const AtendimentoPage = () => {
                             </div>
                             <Button
                                 className="w-full bg-[#25D366] text-white hover:bg-[#20bd5a] font-bold"
-                                onClick={() => window.open("https://wa.me/5511999999999?text=Olá!%20Sou%20cliente%20da%20Entrega%20Facilitada%20e%20preciso%20de%20ajuda.", "_blank")}
+                                onClick={() => window.open("https://wa.me/5531973362545?text=Olá!%20Sou%20cliente%20da%20Entrega%20Facilitada%20e%20preciso%20de%20ajuda.", "_blank")}
                             >
                                 Iniciar Conversa
                             </Button>
@@ -75,7 +75,7 @@ const AtendimentoPage = () => {
                             <Button
                                 variant="outline"
                                 className="w-full font-bold border-border/50 hover:text-secondary hover:bg-secondary/5"
-                                onClick={() => window.open("mailto:contato@entregafacilitada.com.br?subject=Suporte%20-%20Cliente%20EF", "_blank")}
+                                onClick={() => window.open("mailto:contato.entregafacilitada@gmail.com?subject=Suporte%20-%20Cliente%20EF", "_blank")}
                             >
                                 Enviar E-mail
                             </Button>
@@ -96,10 +96,7 @@ const AtendimentoPage = () => {
                                     <p>Dom e feriados: fechado</p>
                                 </div>
                             </div>
-                            <Button variant="ghost" className="w-full font-bold text-muted-foreground" disabled>
-                                <Phone className="w-4 h-4 mr-2" />
-                                Telefone em breve
-                            </Button>
+                            {/* Telefone em breve removido conforme solicitado */}
                         </CardContent>
                     </Card>
                 </div>
