@@ -9,7 +9,10 @@ export default async function handler(req, res) {
         return res.status(405).send('Method Not Allowed');
     }
 
-    const { nome, email, cpf, rg, telefone, imobiliaria_id, plano_id, plano_nome, plano_mensalidade, plano_parcelas } = req.body;
+    const {
+        nome, email, cpf, rg, telefone, imobiliaria_id,
+        imovel_data, contract_data
+    } = req.body;
 
     if (!email || !nome) {
         return res.status(400).json({ error: 'Nome e E-mail são obrigatórios' });
@@ -18,6 +21,23 @@ export default async function handler(req, res) {
     try {
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+        // 0. Ensure imobiliaria_id exists (find first admin if null)
+        let finalImobiliariaId = imobiliaria_id;
+        if (!finalImobiliariaId) {
+            const { data: adminData } = await supabase.from('profiles').select('id').eq('role', 'admin').limit(1).single();
+            finalImobiliariaId = adminData?.id;
+
+            // Fallback to any imobiliaria if still null
+            if (!finalImobiliariaId) {
+                const { data: imobData } = await supabase.from('profiles').select('id').eq('role', 'imobiliaria').limit(1).single();
+                finalImobiliariaId = imobData?.id;
+            }
+        }
+
+        if (!finalImobiliariaId) {
+            throw new Error("Nenhuma imobiliária master encontrada para processar a venda.");
+        }
+
         // 1. Create Auth User
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: email,
@@ -25,33 +45,53 @@ export default async function handler(req, res) {
             email_confirm: true
         });
 
-        if (authError) {
-            // If user already exists, we might just update their profile/inquilino
-            if (authError.message.includes('already registered')) {
-                console.log('User already exists, proceeding with update...');
-            } else {
-                throw authError;
-            }
+        if (authError && !authError.message.includes('already registered')) {
+            throw authError;
         }
 
         const userId = authData?.user?.id;
 
         // 2. Create/Update Profile
         if (userId) {
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .upsert({
-                    id: userId,
-                    full_name: nome,
-                    email: email,
-                    role: 'inquilino',
-                    imobiliaria_id: imobiliaria_id || null
-                });
-
-            if (profileError) throw profileError;
+            await supabase.from('profiles').upsert({
+                id: userId,
+                full_name: nome,
+                email: email,
+                role: 'inquilino',
+                imobiliaria_id: finalImobiliariaId
+            });
         }
 
-        // 3. (REMOVED: Inquilino record creation will be handled by the frontend)
+        // 3. Create Inquilino Record (Bypassing RLS via Service Role)
+        if (imovel_data && contract_data) {
+            const { error: inquilinoError } = await supabase.from("inquilinos").insert({
+                imobiliaria_id: finalImobiliariaId,
+                nome: nome,
+                email: email,
+                cpf: cpf,
+                rg: rg,
+                telefone: telefone,
+                endereco_cep: imovel_data.cep,
+                endereco_rua: imovel_data.rua,
+                endereco_numero: imovel_data.numero,
+                endereco_complemento: imovel_data.complemento,
+                endereco_bairro: imovel_data.bairro,
+                endereco_cidade: imovel_data.cidade,
+                endereco_estado: imovel_data.estado,
+                contrato_locacao_url: contract_data.contrato_locacao_url,
+                vistoria_upload_url: contract_data.vistoria_upload_url,
+                autentique_document_id: contract_data.autentique_document_id,
+                status_assinatura: 'pendente',
+                imovel_area: parseFloat(imovel_data.area) || 0,
+                plano_id: contract_data.plano_id,
+                plano_nome: contract_data.plano_nome,
+                plano_valor_pc: contract_data.plano_valor_pc,
+                plano_parcelas: contract_data.plano_parcelas,
+                plano_mensalidade: contract_data.plano_mensalidade
+            });
+
+            if (inquilinoError) throw inquilinoError;
+        }
 
         // 4. Send Personalized Email via Resend
         const firstName = nome.split(' ')[0];
@@ -91,7 +131,7 @@ export default async function handler(req, res) {
                     <div class="content">
                         <h2 class="welcome-title">Olá, ${firstName}!</h2>
                         <p>Boas-vindas à <span class="highlight-blue"><strong>Entrega Facilitada</strong></span>!</p>
-                        <p>Sua contratação foi realizada com sucesso através da sua imobiliária. Agora você conta com a proteção líder em devolução de chaves.</p>
+                        <p>Sua contratação foi realizada com sucesso através da nossa plataforma. Agora você conta com a proteção líder em devolução de chaves.</p>
                         
                         <div class="credentials-box">
                             <div class="credentials-title">Seus Dados de Acesso:</div>
@@ -110,38 +150,36 @@ export default async function handler(req, res) {
                             <div class="step">
                                 <div class="step-icon" style="background: #1e293b; color: white; border-color: #1e293b;">📅</div>
                                 <div class="step-text">
-                                    <span class="step-label">ETAPA 3</span>
-                                    <span class="step-title">Solicite a desocupação</span>
-                                    <span class="step-desc">Ao final do contrato, acione o app e agende a vistoria de saída de forma 100% digital.</span>
+                                    <span class="step-label">ETAPA 1</span>
+                                    <span class="step-title">Aguarde o encerramento do seu contrato</span>
+                                    <span class="step-desc">Seu plano está ativo e garantirá que sua saída seja tranquila.</span>
                                 </div>
                             </div>
-
-                            <p style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; margin: 10px 0 25px 60px; letter-spacing: 1px;">DAQUI EM DIANTE É COM A ENTREGA FACILITADA "</p>
 
                             <div class="step">
                                 <div class="step-icon" style="background: #f59e0b; color: white; border-color: #f59e0b;">📋</div>
                                 <div class="step-text">
-                                    <span class="step-label">ETAPA 4</span>
-                                    <span class="step-title">Vistoria e diagnóstico</span>
-                                    <span class="step-desc">Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.</span>
+                                    <span class="step-label">ETAPA 2</span>
+                                    <span class="step-title">Acione a Entrega Facilitada</span>
+                                    <span class="step-desc">30 dias antes de mudar, nos avise pelo app ou WhatsApp.</span>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-icon" style="background: #f59e0b; color: white; border-color: #f59e0b;">🔨</div>
                                 <div class="step-text">
-                                    <span class="step-label">ETAPA 5</span>
-                                    <span class="step-title">Execução dos reparos</span>
-                                    <span class="step-desc">Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.</span>
+                                    <span class="step-label">ETAPA 3</span>
+                                    <span class="step-title">Restauração e Reparos</span>
+                                    <span class="step-desc">Assumimos a pintura e adequação total do imóvel conforme o laudo inicial.</span>
                                 </div>
                             </div>
 
                             <div class="step">
                                 <div class="step-icon" style="background: #f59e0b; color: white; border-color: #f59e0b;">🔑</div>
                                 <div class="step-text">
-                                    <span class="step-label">ETAPA 6</span>
-                                    <span class="step-title">Chaves entregues, Nada Consta emitido</span>
-                                    <span class="step-desc">Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.</span>
+                                    <span class="step-label">ETAPA 4</span>
+                                    <span class="step-title">Chaves entregues com aprovação</span>
+                                    <span class="step-desc">Garantimos a vistoria aprovada pela imobiliária. Sem estresse.</span>
                                 </div>
                             </div>
                         </div>
@@ -168,20 +206,17 @@ export default async function handler(req, res) {
                 await transporter.sendMail({
                     from: `"Entrega Facilitada" <${gmailUser}>`,
                     to: email,
-                    subject: `Bem-vindo à Entrega Facilitada, ${firstName}!`,
+                    subject: `Contratação Confirmada - Bem-vindo à Entrega Facilitada, ${firstName}!`,
                     html: emailHtml,
                 });
-                console.log(`[NODEMAILER] E-mail enviado com sucesso para ${email}`);
             } catch (emailError) {
                 console.error('[NODEMAILER ERROR] Falha ao enviar e-mail:', emailError.message);
             }
-        } else {
-            console.warn('[NODEMAILER WARNING] Credenciais do Gmail não encontradas.');
         }
 
         return res.status(200).json({ success: true, user_id: userId });
     } catch (error) {
-        console.error('Erro ao criar usuário:', error.message);
+        console.error('Erro ao processar venda:', error.message);
         return res.status(500).json({ error: error.message });
     }
 }

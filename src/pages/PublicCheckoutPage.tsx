@@ -161,23 +161,6 @@ const PublicCheckoutPage = () => {
         const toastId = toast.loading("Processando e gerando contrato de prestação de serviços...");
 
         try {
-            // 0. Ensure user account exists (Master session)
-            const imobiliariaId = imobiliariaPerfil?.id;
-            if (!imobiliariaId) throw new Error("Sistema temporariamente indisponível para contratação pública.");
-
-            await fetch('/api/create-sale', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nome: inquilino.nome,
-                    email: inquilino.email,
-                    telefone: inquilino.telefone,
-                    cpf: inquilino.cpf,
-                    rg: inquilino.rg,
-                    imobiliaria_id: imobiliariaId
-                })
-            });
-
             // 1. Upload files
             const locacaoId = crypto.randomUUID();
             const { error: errContrato } = await supabase.storage.from("vistorias").upload(`documentos_locacao/${locacaoId}.pdf`, contratoFile);
@@ -189,7 +172,7 @@ const PublicCheckoutPage = () => {
             if (errVist) throw new Error("Falha ao anexar PDF de vistoria");
             const vistoriaUploadUrl = supabase.storage.from("vistorias").getPublicUrl(`documentos_locacao/${vistUplId}.pdf`).data.publicUrl;
 
-            // 2. Generate PDF and Autentique (Mock or Real depending on env)
+            // 2. Generate PDF and Autentique
             const pdfGenerator = await import('@react-pdf/renderer');
             const pdf = pdfGenerator.pdf;
 
@@ -237,7 +220,7 @@ const PublicCheckoutPage = () => {
                     planoObj = plan;
                     const areaN = parseFloat(imovel.area) || 0;
 
-                    // RECALCULATE with dynamic composition like the admin does
+                    // RECALCULATE with dynamic composition
                     let dynamicMat = 0;
                     let dynamicLabor = 0;
                     compositionItems.forEach(item => {
@@ -272,34 +255,38 @@ const PublicCheckoutPage = () => {
                 }
             }
 
-            // 5. Create record
-            const { error: dbError } = await supabase.from("inquilinos").insert({
-                imobiliaria_id: imobiliariaId,
-                nome: inquilino.nome,
-                email: inquilino.email,
-                cpf: inquilino.cpf,
-                rg: inquilino.rg,
-                telefone: inquilino.telefone,
-                endereco_cep: imovel.cep,
-                endereco_rua: imovel.rua,
-                endereco_numero: imovel.numero,
-                endereco_complemento: imovel.complemento,
-                endereco_bairro: imovel.bairro,
-                endereco_cidade: imovel.cidade,
-                endereco_estado: imovel.estado,
-                contrato_locacao_url: contratoLocacaoUrl,
-                vistoria_upload_url: vistoriaUploadUrl,
-                autentique_document_id: autentiqueDocId,
-                status_assinatura: 'pendente',
-                imovel_area: parseFloat(imovel.area) || 0,
-                plano_id: planoObj?.id || null,
-                plano_nome: planoObj?.label || null,
-                plano_valor_pc: finalPc || 0,
-                plano_parcelas: parcelas,
-                plano_mensalidade: finalPc > 0 ? (finalPc / parcelas) : 0
+            // 5. Final Step: Call API to handle User Creation AND Inquilino Record (Bypasses RLS via server-side)
+            const response = await fetch('/api/create-sale', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: inquilino.nome,
+                    email: inquilino.email,
+                    telefone: inquilino.telefone,
+                    cpf: inquilino.cpf,
+                    rg: inquilino.rg,
+                    imobiliaria_id: imobiliariaPerfil?.id || null,
+                    imovel_data: {
+                        ...imovel,
+                        area: imovel.area
+                    },
+                    contract_data: {
+                        contrato_locacao_url: contratoLocacaoUrl,
+                        vistoria_upload_url: vistoriaUploadUrl,
+                        autentique_document_id: autentiqueDocId,
+                        plano_id: planoObj?.id || null,
+                        plano_nome: planoObj?.label || null,
+                        plano_valor_pc: finalPc || 0,
+                        plano_parcelas: parcelas,
+                        plano_mensalidade: finalPc > 0 ? (finalPc / parcelas) : 0
+                    }
+                })
             });
 
-            if (dbError) throw dbError;
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Erro ao processar contratação no servidor.");
+            }
 
             // Store email for SuccessPage
             sessionStorage.setItem("pending_lead_email", inquilino.email);
