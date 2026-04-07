@@ -176,6 +176,7 @@ const PricingParametersPage = () => {
             co_params: coParams,
             plans: plans,
             installments: installments,
+            base_area: simArea,
             updated_at: new Date().toISOString()
         });
         setIsSaving(false);

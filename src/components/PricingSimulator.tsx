@@ -12,6 +12,7 @@ const PricingSimulator = () => {
     ms_params: FormulaParam[];
     co_params: FormulaParam[];
     plans: any[];
+    base_area?: number;
   } | null>(null);
 
   useEffect(() => {
@@ -31,10 +32,17 @@ const PricingSimulator = () => {
     const basicPlan = config.plans.find(p => p.id === "basico");
     if (!basicPlan) return { monthly: 0 };
 
+    const baseArea = config.base_area || 60;
+    const scaleFactor = area / baseArea;
+
     const totalMs = sumActive(config.ms_params);
     const totalCo = sumActive(config.co_params);
-    const pp = calcPp(basicPlan.params, area);
-    const pc = calcPc(pp, totalMs, totalCo);
+
+    // Calculate the base premium at the admin's reference area, then scale it
+    const ppAtBase = calcPp(basicPlan.params, baseArea);
+    const ppScaled = ppAtBase * scaleFactor;
+
+    const pc = calcPc(ppScaled, totalMs, totalCo);
     const monthly = pc / 24; // Always 24x as requested
 
     return { monthly };
