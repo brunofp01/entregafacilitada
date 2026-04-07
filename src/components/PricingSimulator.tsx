@@ -3,41 +3,42 @@ import { motion } from "framer-motion";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { calcPp, calcPc, sumActive, FormulaParam } from "@/lib/pricingCalc";
 
 const PricingSimulator = () => {
   const [area, setArea] = useState(60);
-  const [standard, setStandard] = useState<"normal" | "alto">("normal");
-  const [months, setMonths] = useState<12 | 24>(12);
-  const [params, setParams] = useState<Record<string, number>>({
-    multiplier_ms: 0.15,
-    coefficient_co: 0.08,
-    sqm_cost_normal: 45,
-    sqm_cost_alto: 90,
-  });
+  const [config, setConfig] = useState<{
+    ms_params: FormulaParam[];
+    co_params: FormulaParam[];
+    plans: any[];
+  } | null>(null);
 
   useEffect(() => {
     const loadParams = async () => {
-      const { data } = await supabase.from("pricing_parameters").select("key, value");
+      const { data } = await supabase.from("pricing_parameters_config").select("*").eq("id", 1).single();
       if (data) {
-        const p: Record<string, number> = {};
-        data.forEach(item => p[item.key] = item.value);
-        setParams(prev => ({ ...prev, ...p }));
+        setConfig(data);
       }
     };
     loadParams();
   }, []);
 
   const result = useMemo(() => {
-    const costKey = `sqm_cost_${standard === "normal" ? "medio" : "alto"}`;
-    const costPerSqm = params[costKey] || (standard === "normal" ? 55 : 90);
+    if (!config) return { monthly: 0 };
 
-    const Pp = area * costPerSqm;
-    const Pc = (Pp * (1 + params.multiplier_ms)) / (1 - params.coefficient_co);
-    const monthly = Pc / months;
+    // Use the basic plan as requested by the user
+    const basicPlan = config.plans.find(p => p.id === "basico");
+    if (!basicPlan) return { monthly: 0 };
+
+    const totalMs = sumActive(config.ms_params);
+    const totalCo = sumActive(config.co_params);
+    const pp = calcPp(basicPlan.params, area);
+    const pc = calcPc(pp, totalMs, totalCo);
+    const monthly = pc / 24; // Always 24x as requested
+
     return { monthly };
-  }, [area, standard, months, params]);
+  }, [area, config]);
 
   return (
     <section className="py-24 bg-background" id="simulador">
@@ -52,7 +53,7 @@ const PricingSimulator = () => {
             Simular minha <span className="text-secondary">Entrega Facilitada</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Mude de casa sem sustos. Escolha o tamanho do imóvel e o padrão de acabamento.
+            Mude de casa sem sustos. Simule seu plano de desocupação facilitada em segundos.
           </p>
         </motion.div>
 
@@ -90,36 +91,10 @@ const PricingSimulator = () => {
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-3 block uppercase tracking-wider">Padrão do Imóvel</label>
-                    <Select value={standard} onValueChange={(v) => setStandard(v as typeof standard)}>
-                      <SelectTrigger className="h-12 border-border/60">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="normal">Padrão Normal</SelectItem>
-                        <SelectItem value="alto">Alto Padrão</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-3 block uppercase tracking-wider">Prazo de Pagamento</label>
-                    <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-lg h-12">
-                      <button
-                        onClick={() => setMonths(12)}
-                        className={`text-sm font-bold rounded-md transition-all ${months === 12 ? 'bg-white shadow-sm text-secondary' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
-                        12 Meses
-                      </button>
-                      <button
-                        onClick={() => setMonths(24)}
-                        className={`text-sm font-bold rounded-md transition-all ${months === 24 ? 'bg-white shadow-sm text-secondary' : 'text-muted-foreground hover:text-foreground'}`}
-                      >
-                        24 Meses
-                      </button>
-                    </div>
-                  </div>
+                <div className="p-4 bg-muted/50 rounded-xl border border-border/40">
+                  <p className="text-sm font-medium text-foreground uppercase tracking-widest mb-1">Plano Selecionado</p>
+                  <p className="text-lg font-black text-secondary">Plano Básico</p>
+                  <p className="text-xs text-muted-foreground mt-1">Inclui pintura completa de saída e pequenos reparos estéticos.</p>
                 </div>
               </div>
             </div>
@@ -135,7 +110,7 @@ const PricingSimulator = () => {
                   </span>
                 </div>
                 <p className="text-primary-foreground/80 font-medium text-sm border-t border-white/10 pt-4 w-full">
-                  Pagamento recorrente em {months}x no cartão
+                  Pagamento recorrente em 24x no cartão
                 </p>
                 <div className="mt-8 w-full">
                   <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-14 text-lg font-black uppercase tracking-tight shadow-lg shadow-secondary/20">
