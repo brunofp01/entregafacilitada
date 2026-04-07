@@ -4,27 +4,27 @@ import { FileText, CreditCard, CalendarCheck, ClipboardCheck, Paintbrush, Key } 
 const steps = [
   {
     icon: CreditCard,
-    title: "Assine e Dilua",
-    description: "Simule pela metragem e pague em 12x ou 24x durante a locação. Preço fixo, sem letras miúdas.",
+    title: "Simule e Planeje",
+    description: "Descubra o valor exato para o seu imóvel e pague aos poucos, mês a mês. Você mora com a tranquilidade de saber que a entrega será facilitada.",
     side: "você",
   },
   {
     icon: CalendarCheck,
-    title: "Alerte a Saída",
-    description: "Avise a Entrega Facilitada com 30 dias de antecedência da sua mudança pelo nosso app.",
+    title: "Agende sua desocupação",
+    description: "Faltando 30 dias para devolver o imóvel, basta nos avisar. Você foca na sua mudança e em curtir a casa nova, enquanto nós assumimos o trabalho de deixar o imóvel pronto para a vistoria.",
     side: "você",
   },
   {
     icon: Paintbrush,
-    title: "Deixe com a gente",
-    description: "Em 5 a 10 dias úteis, nossa equipe entrega a pintura e pequenos reparos idênticos ao Laudo Inicial.",
+    title: "Restauração Completa",
+    description: "Em 5 a 10 dias úteis, profissionais homologados deixam o imóvel idêntico ao seu Laudo de Vistoria Inicial. Você nem precisa pisar lá para acompanhar obra.",
     side: "entrega facilitada",
     divider: true,
   },
   {
     icon: Key,
-    title: "Chave Entregue",
-    description: "Vistoria aprovada de primeira. Se a imobiliária exigir algum ajuste, nós voltamos e retocamos sem custo.",
+    title: "Chave Entregue (Nada Consta)",
+    description: "Vistoria da imobiliária aprovada. E se o fiscal for rigoroso e exigir qualquer retoque do que foi contratado, nós voltamos e resolvemos rápido. Sem te cobrar nada a mais.",
     side: "entrega facilitada",
   },
 ];
