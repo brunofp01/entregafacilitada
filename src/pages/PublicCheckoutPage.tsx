@@ -60,13 +60,23 @@ const PublicCheckoutPage = () => {
         const fetchConfigs = async () => {
             try {
                 // Fetch a master imobiliaria (admin) for signatures and ownership
-                const { data: adminData } = await supabase.from('profiles').select('*').eq('role', 'admin').limit(1).single();
-                if (adminData) setImobiliariaPerfil(adminData);
+                // Using .limit(1) instead of .single() to avoid 406 error if not found
+                const { data: adminData } = await supabase.from('profiles').select('*').eq('role', 'admin').limit(1);
 
-                const { data: configData } = await supabase.from('pricing_parameters_config').select('*').eq('id', 1).single();
-                if (configData) {
-                    setParametrosGlobais(configData);
-                    if (configData.installments) setParcelas(configData.installments);
+                if (adminData && adminData.length > 0) {
+                    setImobiliariaPerfil(adminData[0]);
+                } else {
+                    // Fallback to any imobiliaria if no admin is defined yet
+                    const { data: anyImobiliaria } = await supabase.from('profiles').select('*').eq('role', 'imobiliaria').limit(1);
+                    if (anyImobiliaria && anyImobiliaria.length > 0) {
+                        setImobiliariaPerfil(anyImobiliaria[0]);
+                    }
+                }
+
+                const { data: configData } = await supabase.from('pricing_parameters_config').select('*').order('id', { ascending: true }).limit(1);
+                if (configData && configData.length > 0) {
+                    setParametrosGlobais(configData[0]);
+                    if (configData[0].installments) setParcelas(configData[0].installments);
                 }
 
                 const { data: compData } = await supabase.from('cost_composition_items').select('*').order('created_at', { ascending: true });
@@ -184,8 +194,8 @@ const PublicCheckoutPage = () => {
             const pdf = pdfGenerator.pdf;
 
             // Get template
-            const { data: configData } = await supabase.from('pricing_parameters_config').select('contract_template').eq('id', 1).single();
-            const template = configData?.contract_template;
+            const { data: configDataArray } = await supabase.from('pricing_parameters_config').select('contract_template').order('id', { ascending: true }).limit(1);
+            const template = configDataArray?.[0]?.contract_template;
             const sections = Array.isArray(template) ? template : template?.sections;
             const title = Array.isArray(template) ? undefined : template?.title;
 
