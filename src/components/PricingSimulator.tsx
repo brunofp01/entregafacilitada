@@ -49,7 +49,7 @@ const PricingSimulator = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-heading font-extrabold text-foreground mb-4">
-            Simular minha <span className="text-secondary">parcela agora</span>
+            Simular minha <span className="text-secondary">Entrega Facilitada</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
             Mude de casa sem sustos. Escolha o tamanho do imóvel e o padrão de acabamento.

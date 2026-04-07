@@ -24,7 +24,7 @@ const ProblemSolution = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-heading font-extrabold text-foreground mb-4">
-            De problema a <span className="text-secondary">solução</span>
+            Do problema à <span className="text-secondary">solução</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Entenda por que milhares de inquilinos já estão migrando para o modelo de desocupação facilitada.

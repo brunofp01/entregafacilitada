@@ -25,11 +25,11 @@ const Hero = () => {
             </span>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] tracking-tight text-white mb-6">
-              Mude de casa <span className="text-secondary">sem surpresas</span> e sem brigar com a imobiliária.
+              Mude <span className="text-secondary">sem surpresas</span> e sem brigar com a imobiliária.
             </h1>
 
             <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed">
-              Pintura e pequenos reparos garantidos na rescisão por uma assinatura mensal que cabe no seu bolso.
+              O fim do seu aluguel não precisa ser uma dor de cabeça. Por um valor que cabe no seu bolso sem surpresas nem letras miúdas.
             </p>
           </motion.div>
 
@@ -44,7 +44,7 @@ const Hero = () => {
               onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
               className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-bold px-8 py-6 shadow-[var(--shadow-accent)] transition-all"
             >
-              Simular minha parcela agora
+              Simular minha Entrega Facilitada
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
             <Button
