@@ -160,17 +160,28 @@ const PublicCheckoutPage = () => {
         setLoading(true);
         const toastId = toast.loading("Processando e gerando contrato de prestação de serviços...");
 
+        const uploadFileSecurely = async (file: File | Blob, path: string) => {
+            const res = await fetch("/api/get-upload-url", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ path })
+            });
+            if (!res.ok) throw new Error("Erro ao preparar upload seguro.");
+            const { token } = await res.json();
+
+            const { error } = await supabase.storage.from("vistorias").uploadToSignedUrl(path, token, file);
+            if (error) throw error;
+
+            return supabase.storage.from("vistorias").getPublicUrl(path).data.publicUrl;
+        };
+
         try {
-            // 1. Upload files
+            // 1. Upload files securely
             const locacaoId = crypto.randomUUID();
-            const { error: errContrato } = await supabase.storage.from("vistorias").upload(`documentos_locacao/${locacaoId}.pdf`, contratoFile);
-            if (errContrato) throw new Error("Falha ao anexar contrato de locação");
-            const contratoLocacaoUrl = supabase.storage.from("vistorias").getPublicUrl(`documentos_locacao/${locacaoId}.pdf`).data.publicUrl;
+            const contratoLocacaoUrl = await uploadFileSecurely(contratoFile, `documentos_locacao/${locacaoId}.pdf`);
 
             const vistUplId = crypto.randomUUID();
-            const { error: errVist } = await supabase.storage.from("vistorias").upload(`documentos_locacao/${vistUplId}.pdf`, vistoriaFile);
-            if (errVist) throw new Error("Falha ao anexar PDF de vistoria");
-            const vistoriaUploadUrl = supabase.storage.from("vistorias").getPublicUrl(`documentos_locacao/${vistUplId}.pdf`).data.publicUrl;
+            const vistoriaUploadUrl = await uploadFileSecurely(vistoriaFile, `documentos_locacao/${vistUplId}.pdf`);
 
             // 2. Generate PDF and Autentique
             const pdfGenerator = await import('@react-pdf/renderer');
@@ -193,8 +204,7 @@ const PublicCheckoutPage = () => {
             ).toBlob();
 
             const servicoContractId = crypto.randomUUID();
-            await supabase.storage.from("vistorias").upload(`contratos_servico/${servicoContractId}.pdf`, contratoBlob);
-            const contratoServicoUrl = supabase.storage.from("vistorias").getPublicUrl(`contratos_servico/${servicoContractId}.pdf`).data.publicUrl;
+            const contratoServicoUrl = await uploadFileSecurely(contratoBlob, `contratos_servico/${servicoContractId}.pdf`);
 
             // 3. Autentique
             const apiRes = await fetch("/api/autentique", {
