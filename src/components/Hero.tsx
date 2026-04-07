@@ -5,7 +5,7 @@ import heroImage from "@/assets/hero-building.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative pt-24 pb-20 overflow-hidden">
+    <section className="relative pt-24 pb-10 overflow-hidden">
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img src={heroImage} alt="Edifício moderno" className="w-full h-full object-cover" />
