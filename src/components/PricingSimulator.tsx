@@ -93,7 +93,7 @@ const PricingSimulator = () => {
             Simular minha <span className="text-secondary">Entrega Facilitada</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Mude de casa sem sustos. Simule seu plano de desocupação facilitada em segundos.
+            Mude de casa sem sustos. Descubra em segundos o valor exato para blindar seu bolso na rescisão.
           </p>
         </motion.div>
 
@@ -160,9 +160,10 @@ const PricingSimulator = () => {
                   <span className="text-6xl md:text-7xl font-heading font-black">
                     {result.monthly.toFixed(0)}
                   </span>
+                  <span className="text-2xl font-bold opacity-70">/mês</span>
                 </div>
                 <p className="text-primary-foreground/90 font-medium text-sm border-t border-white/10 pt-6 mt-4 w-full">
-                  24x fixas. Infinitamente mais barato que o orçamento de saída da imobiliária.
+                  Infinitamente mais barato que o orçamento de saída da imobiliária.
                 </p>
                 <div className="mt-8 w-full">
                   <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-auto py-5 px-4 text-sm sm:text-base md:text-lg font-black uppercase tracking-tighter shadow-xl shadow-secondary/20 whitespace-normal leading-tight">
