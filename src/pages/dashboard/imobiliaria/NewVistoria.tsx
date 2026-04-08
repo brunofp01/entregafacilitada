@@ -670,29 +670,32 @@ const NewVistoria = () => {
 
                     {!isViewOnly ? (
                       <div className="space-y-2">
-                        <div className="relative w-full h-24 overflow-hidden">
-                          <div className={`w-full h-full border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}>
-                            {(medidores as any)[m.key].foto ? (
-                              <div className="relative w-full h-full flex items-center justify-center">
-                                <img src={(medidores as any)[m.key].foto} className="h-full object-contain rounded" />
-                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                  <Camera className="w-5 h-5 text-white" />
-                                </div>
+                        <div
+                          className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 cursor-pointer ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}
+                          onClick={() => document.getElementById(`meter-input-${m.key}`)?.click()}
+                        >
+                          {(medidores as any)[m.key].foto ? (
+                            <div className="relative w-full h-full flex items-center justify-center">
+                              <img src={(medidores as any)[m.key].foto} className="h-full object-contain rounded" />
+                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                <Camera className="w-5 h-5 text-white" />
                               </div>
-                            ) : (
-                              <>
-                                <Camera className="w-5 h-5 text-muted-foreground mr-2" />
-                                <span className="text-xs font-bold text-muted-foreground">Foto do Relógio</span>
-                              </>
-                            )}
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
-                            onChange={e => handleMeterUpload(m.key as any, e)}
-                          />
+                            </div>
+                          ) : (
+                            <>
+                              <Camera className="w-5 h-5 text-muted-foreground mr-2" />
+                              <span className="text-xs font-bold text-muted-foreground">Foto do Relógio</span>
+                            </>
+                          )}
                         </div>
+                        <input
+                          id={`meter-input-${m.key}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          style={{ display: 'none' }}
+                          onChange={e => handleMeterUpload(m.key as any, e)}
+                        />
                       </div>
                     ) : (
                       (medidores as any)[m.key].foto && (
@@ -1065,15 +1068,20 @@ const NewVistoria = () => {
                                       </Label>
                                       <div className="flex gap-3 flex-wrap py-2 px-1">
                                         {!isViewOnly && (
-                                          <div className="relative shrink-0 w-24 h-24 overflow-hidden">
-                                            <div className="w-full h-full border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all group active:scale-95">
+                                          <div className="shrink-0 w-24 h-24">
+                                            <div
+                                              className="w-full h-full border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all group active:scale-95 cursor-pointer"
+                                              onClick={() => document.getElementById(`file-upload-${item.id}`)?.click()}
+                                            >
                                               <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
                                               <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
                                             </div>
                                             <input
+                                              id={`file-upload-${item.id}`}
                                               type="file"
                                               accept="image/*"
-                                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                                              className="hidden"
+                                              style={{ display: 'none' }}
                                               onChange={e => handleFileUpload(activeAmbienteId, item.id, e)}
                                             />
                                           </div>

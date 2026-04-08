@@ -148,12 +148,17 @@ const PerfilPage = () => {
                 ) : (
                   <Building2 className="w-12 h-12 text-muted-foreground" />
                 )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity z-10">
+                <div
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity z-10"
+                  onClick={() => document.getElementById('logo-upload')?.click()}
+                >
                   <Upload className="text-white w-6 h-6" />
                   <input
+                    id="logo-upload"
                     type="file"
                     accept="image/*"
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                    className="hidden"
+                    style={{ display: 'none' }}
                     onChange={handleLogoUpload}
                   />
                 </div>

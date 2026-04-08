@@ -151,12 +151,17 @@ const PerfilInquilinoPage = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="absolute inset-0 rounded-full bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10">
+                                <div
+                                    className="absolute inset-0 rounded-full bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
+                                    onClick={() => document.getElementById('avatar-upload')?.click()}
+                                >
                                     <Upload className="w-5 h-5 text-white mb-1" />
                                     <span className="text-[10px] font-bold text-white uppercase tracking-wider">Alterar</span>
                                     <input
+                                        id="avatar-upload"
                                         type="file"
-                                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                                        className="hidden"
+                                        style={{ display: 'none' }}
                                         accept="image/*"
                                         onChange={handleAvatarChange}
                                     />
