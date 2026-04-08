@@ -3,7 +3,7 @@ import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/
 // Mocking fonts like in VistoriaPDF, using standard Courier or Helvetica if no fonts registered
 // In a real scenario we'd use registered fonts. We will use basic Arial/Helvetica lookalike.
 const styles = StyleSheet.create({
-    page: { padding: 40, fontFamily: 'Helvetica', fontSize: 11, color: '#333', lineHeight: 1.5 },
+    page: { padding: 40, paddingBottom: 75, fontFamily: 'Helvetica', fontSize: 11, color: '#333', lineHeight: 1.5 },
     header: { flexContent: 'center', alignItems: 'center', marginBottom: 30, borderBottom: '2px solid #142542', paddingBottom: 10 },
     logo: { width: 120, marginBottom: 10 },
     title: { fontSize: 18, fontFamily: 'Helvetica-Bold', textAlign: 'center', color: '#142542', textTransform: 'uppercase' },
@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     signatureBlock: { marginTop: 50, flexContent: 'center', alignItems: 'center' },
     signatureLine: { width: '60%', borderTop: '1px solid #000', marginTop: 40, marginBottom: 5 },
     signatureText: { fontSize: 10, textAlign: 'center' },
-    footer: { position: 'absolute', bottom: 30, left: 40, right: 40, textAlign: 'center', fontSize: 8, color: '#888', borderTop: '1px solid #ccc', paddingTop: 10 }
+    footer: { position: 'absolute', bottom: 25, left: 40, right: 40, textAlign: 'center', fontSize: 8, color: '#888', borderTop: '1px solid #ccc', paddingTop: 10 }
 });
 
 interface ContractSection {
