@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
 import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive, calculateCompositionTotals } from "@/lib/pricingCalc";
+import { PLAN_ITEMS } from "@/constants/planItems";
 import {
     Select,
     SelectContent,
@@ -493,10 +494,10 @@ const PublicCheckoutPage = () => {
                                                 <p className="text-xs text-muted-foreground font-bold mb-8 italic">Proteção garantida em 24 parcelas mensais</p>
 
                                                 <div className="space-y-3 text-left">
-                                                    {(compositionItems || []).filter(item => item.in_basico).map(item => (
-                                                        <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
+                                                    {PLAN_ITEMS.map((item, index) => (
+                                                        <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
                                                             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                                                            <span className="text-xs font-bold text-foreground/80">{item.nome}</span>
+                                                            <span className="text-xs font-bold text-foreground/80">{item}</span>
                                                         </div>
                                                     ))}
                                                 </div>

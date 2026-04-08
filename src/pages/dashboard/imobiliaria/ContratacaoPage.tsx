@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
 import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive, calculateCompositionTotals } from "@/lib/pricingCalc";
+import { PLAN_ITEMS } from "@/constants/planItems";
 import { Zap, Star, ShieldCheck, Check } from "lucide-react";
 
 interface VistoriaPlataforma {
@@ -632,10 +633,10 @@ const ContratacaoPage = () => {
                                                 </div>
 
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                                                    {(compositionItems || []).filter(item => item.in_basico).map(item => (
-                                                        <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
+                                                    {PLAN_ITEMS.map((item, index) => (
+                                                        <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
                                                             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                                                            <span className="text-xs font-bold text-foreground/80 leading-tight">{item.nome}</span>
+                                                            <span className="text-xs font-bold text-foreground/80 leading-tight">{item}</span>
                                                         </div>
                                                     ))}
                                                 </div>

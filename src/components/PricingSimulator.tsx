@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { calcPp, calcPc, sumActive, FormulaParam, calculateCompositionTotals } from "@/lib/pricingCalc";
+import { PLAN_ITEMS } from "@/constants/planItems";
 import LeadCaptureModal from "./LeadCaptureModal";
 
 const PricingSimulator = () => {
@@ -110,18 +111,12 @@ const PricingSimulator = () => {
                 <div className="p-5 bg-muted/50 rounded-xl border border-border/40">
                   <p className="text-sm font-bold text-foreground uppercase tracking-widest mb-3">O que está 100% garantido neste valor:</p>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                      <span>Pintura completa nos padrões do laudo inicial</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                      <span>Retoque sem custo extra se a imobiliária reprovar</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                      <span>Nada Consta agilizado e sem atrito</span>
-                    </li>
+                    {PLAN_ITEMS.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
