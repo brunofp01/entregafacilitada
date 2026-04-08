@@ -67,7 +67,13 @@ const EquipePage = () => {
 
       console.log("[EquipePage] Team RPC result:", team, "Error:", teamError);
 
-      if (team) setMembers(team);
+      if (team) {
+        // Filtra para mostrar apenas integrantes da equipe, removendo inquilinos que possam estar vinculados à mesma imobiliária
+        const filteredTeam = team.filter((member: TeamMember) =>
+          member.role === 'imobiliaria' || member.role === 'integrante_imobiliaria'
+        );
+        setMembers(filteredTeam);
+      }
     } catch (error) {
       console.error("[EquipePage] Unexpected error:", error);
     } finally {
