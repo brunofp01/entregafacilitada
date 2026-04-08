@@ -490,7 +490,7 @@ const PublicCheckoutPage = () => {
                                                     <span className="text-5xl font-heading font-black text-secondary">{mensal.toFixed(0)}</span>
                                                     <span className="text-muted-foreground text-sm font-bold">/mês</span>
                                                 </div>
-                                                <p className="text-xs text-muted-foreground font-bold mb-8 italic">Proteção garantida em 24 parcelas recorrentes</p>
+                                                <p className="text-xs text-muted-foreground font-bold mb-8 italic">Proteção garantida em 24 parcelas mensais</p>
 
                                                 <div className="space-y-3 text-left">
                                                     {(compositionItems || []).filter(item => item.in_basico).map(item => (
@@ -555,9 +555,6 @@ const PublicCheckoutPage = () => {
                         >
                             {loading ? <Loader2 className="w-6 h-6 animate-spin mr-2" /> : "Concluir e Ir para Assinatura ➔"}
                         </Button>
-                        <p className="text-xs text-muted-foreground font-bold flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4" /> Pagamento 100% seguro via cobrança recorrente. Sem juros.
-                        </p>
                     </div>
                 </form>
             </div >

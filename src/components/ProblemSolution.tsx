@@ -90,10 +90,10 @@ const ProblemSolution = () => {
             variant="outline"
             size="lg"
             onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
-            className="border-secondary text-secondary hover:bg-secondary/10 font-bold px-8 py-6 rounded-full group transition-all"
+            className="border-secondary text-secondary hover:bg-secondary/10 font-bold px-4 py-4 md:px-8 md:py-6 rounded-full group transition-all h-auto whitespace-normal max-w-[90vw] md:max-w-none"
           >
-            Quero entregar as chaves sem estresse
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <span className="text-sm md:text-base">Quero entregar as chaves sem estresse</span>
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
           </Button>
         </motion.div>
       </div>
