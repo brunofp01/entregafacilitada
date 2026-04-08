@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { CostCompositionSubpage } from "./CostCompositionSubpage";
 import { supabase } from "@/lib/supabaseClient";
-import { FormulaParam, PlanConfig, calcPp, calcPc, sumActive, isPerSqm } from "@/lib/pricingCalc";
+import { FormulaParam, PlanConfig, calcPp, calcPc, sumActive, isPerSqm, calculateCompositionTotals } from "@/lib/pricingCalc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2, 8);
@@ -131,6 +131,7 @@ const PricingParametersPage = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [simPlan, setSimPlan] = useState("basico");
     const [simArea, setSimArea] = useState(60);
+    const [compositionItems, setCompositionItems] = useState<any[]>([]);
 
     useEffect(() => {
         const loadGlobals = async () => {
@@ -150,6 +151,9 @@ const PricingParametersPage = () => {
                 }
                 if (data.installments) setInstallments(data.installments);
             }
+
+            const { data: compData } = await supabase.from('cost_composition_items').select('*').order('created_at', { ascending: true });
+            if (compData) setCompositionItems(compData);
         };
         loadGlobals();
     }, []);
@@ -218,7 +222,16 @@ const PricingParametersPage = () => {
     const totalMs = sumActive(msParams || []);
     const totalCo = sumActive(coParams || []);
     const planPcs = (plans || []).map(pl => {
-        const pp = calcPp(pl.params || [], simArea);
+        // Match dynamic composition items if this is the basic or complete plan
+        const { material, labor } = calculateCompositionTotals(compositionItems, simArea, pl.id);
+
+        const updatedParams = pl.params.map(p => {
+            if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: material.toFixed(2) };
+            if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: labor.toFixed(2) };
+            return p;
+        });
+
+        const pp = calcPp(updatedParams, simArea);
         const pc = calcPc(pp, totalMs, totalCo);
         const monthly = installments > 0 ? pc / installments : 0;
         return { ...pl, pp, pc, monthly };

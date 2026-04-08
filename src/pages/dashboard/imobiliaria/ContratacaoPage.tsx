@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
-import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive } from "@/lib/pricingCalc";
+import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive, calculateCompositionTotals } from "@/lib/pricingCalc";
 import { Zap, Star, ShieldCheck, Check } from "lucide-react";
 
 interface VistoriaPlataforma {
@@ -250,7 +250,16 @@ const ContratacaoPage = () => {
                 if (plan) {
                     planoObj = plan;
                     const areaN = parseFloat(imovel.area) || 0;
-                    const pp = calcPp(plan.params || [], areaN);
+                    // RECALCULATE with dynamic composition using centralized logic
+                    const { material, labor } = calculateCompositionTotals(compositionItems, areaN, plan.id);
+
+                    const updatedParams = (plan.params || []).map((p: any) => {
+                        if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: material.toFixed(2) };
+                        if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: labor.toFixed(2) };
+                        return p;
+                    });
+
+                    const pp = calcPp(updatedParams, areaN);
                     const ms = sumActive(parametrosGlobais.ms_params || []);
                     const co = sumActive(parametrosGlobais.co_params || []);
                     finalPc = calcPc(pp, ms, co);
@@ -585,9 +594,21 @@ const ContratacaoPage = () => {
                                                 <div className="mb-6">
                                                     <div className="text-sm font-black uppercase tracking-widest text-secondary mb-2">Plano Entrega Facilitada</div>
                                                     <div className="text-4xl md:text-5xl font-extrabold tracking-tighter text-foreground flex items-baseline justify-center gap-1">
-                                                        <span className="text-xl font-bold">{parcelas}x</span>
-                                                        <span className="text-xl font-bold ml-1">R$</span>
-                                                        {(finalPc / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        {(() => {
+                                                            const { material, labor } = calculateCompositionTotals(compositionItems, areaNumber, plan.id);
+                                                            const uParams = (plan.params || []).map((p: any) => {
+                                                                if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: material.toFixed(2) };
+                                                                if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: labor.toFixed(2) };
+                                                                return p;
+                                                            });
+                                                            const pc = calcPc(calcPp(uParams, areaNumber), sumActive(parametrosGlobais.ms_params), sumActive(parametrosGlobais.co_params));
+                                                            const valorParcela = pc / parcelas;
+                                                            return <>
+                                                                <span className="text-xl font-bold">{parcelas}x</span>
+                                                                <span className="text-xl font-bold ml-1">R$</span>
+                                                                {valorParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            </>;
+                                                        })()}
                                                     </div>
                                                 </div>
 

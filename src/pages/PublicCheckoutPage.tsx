@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { ContratoPDF } from "@/components/vistorias/ContratoPDF";
-import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive } from "@/lib/pricingCalc";
+import { FormulaParam, PlanConfig, calcPc, calcPp, sumActive, calculateCompositionTotals } from "@/lib/pricingCalc";
 import {
     Select,
     SelectContent,
@@ -230,31 +230,12 @@ const PublicCheckoutPage = () => {
                     planoObj = plan;
                     const areaN = parseFloat(imovel.area) || 0;
 
-                    // RECALCULATE with dynamic composition
-                    let dynamicMat = 0;
-                    let dynamicLabor = 0;
-                    compositionItems.forEach(item => {
-                        const isInPlan = plan.id === 'basico' ? item.in_basico : item.in_completo;
-                        if (isInPlan) {
-                            const indice = item.indice_sinapi || 0;
-                            const prob = item.probabilidade || 0;
-                            const rend = item.rendimento || 1;
-                            const ref = item.valor_referencia || 0;
-                            const totalServico = areaN * indice;
-                            const execucaoPrevista = totalServico * (prob / 100);
-                            let mo = rend > 0 ? (execucaoPrevista / rend) * ref * 0.57 : 0;
-                            let mat = rend > 0 ? (execucaoPrevista / rend) * ref * 0.43 : 0;
-                            if (item.tem_valor_minimo) {
-                                const minV = item.valor_minimo || 0;
-                                if ((mo + mat) < minV) { mo = minV * 0.57; mat = minV * 0.43; }
-                            }
-                            dynamicMat += mat; dynamicLabor += mo;
-                        }
-                    });
+                    // RECALCULATE with dynamic composition using centralized logic
+                    const { material, labor } = calculateCompositionTotals(compositionItems, areaN, plan.id);
 
                     const updatedParams = (plan.params || []).map((p: any) => {
-                        if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: dynamicMat.toString() };
-                        if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: dynamicLabor.toString() };
+                        if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: material.toFixed(2) };
+                        if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: labor.toFixed(2) };
                         return p;
                     });
 
@@ -480,24 +461,16 @@ const PublicCheckoutPage = () => {
                             ) : (
                                 <div className="max-w-md mx-auto">
                                     {parametrosGlobais.plans?.filter((p: any) => p.id === 'basico').map((plan: any) => {
-                                        // FORMULA SYNC
+                                        // FORMULA SYNC via centralized logic
                                         const areaNumber = parseFloat(imovel.area) || 0;
-                                        let dMat = 0; let dLabor = 0;
-                                        compositionItems.forEach(item => {
-                                            if (item.in_basico) {
-                                                const totalServico = areaNumber * (item.indice_sinapi || 0);
-                                                const exec = totalServico * ((item.probabilidade || 0) / 100);
-                                                let mo = (item.rendimento || 1) > 0 ? (exec / item.rendimento) * (item.valor_referencia || 0) * 0.57 : 0;
-                                                let mat = (item.rendimento || 1) > 0 ? (exec / item.rendimento) * (item.valor_referencia || 0) * 0.43 : 0;
-                                                if (item.tem_valor_minimo && (mo + mat) < (item.valor_minimo || 0)) { mo = (item.valor_minimo || 0) * 0.57; mat = (item.valor_minimo || 0) * 0.43; }
-                                                dMat += mat; dLabor += mo;
-                                            }
-                                        });
+                                        const { material, labor } = calculateCompositionTotals(compositionItems, areaNumber, plan.id);
+
                                         const uParams = (plan.params || []).map((p: any) => {
-                                            if (p.id === 'pb1') return { ...p, value: dMat.toString() };
-                                            if (p.id === 'pb2') return { ...p, value: dLabor.toString() };
+                                            if (p.id === 'pb1') return { ...p, value: material.toFixed(2) };
+                                            if (p.id === 'pb2') return { ...p, value: labor.toFixed(2) };
                                             return p;
                                         });
+
                                         const pc = calcPc(calcPp(uParams, areaNumber), sumActive(parametrosGlobais.ms_params), sumActive(parametrosGlobais.co_params));
                                         const mensal = pc / (parametrosGlobais.installments || 24);
 

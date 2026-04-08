@@ -21,6 +21,39 @@ export interface PlanConfig {
 
 export const isPerSqm = (label: string) => label.toLowerCase().includes("m²");
 
+export const calculateCompositionTotals = (items: any[], area: number, planId: string) => {
+    let material = 0;
+    let labor = 0;
+
+    items.forEach(item => {
+        const isInPlan = planId === 'basico' ? item.in_basico : item.in_completo;
+        if (isInPlan) {
+            const indice = parseFloat(item.indice_sinapi) || 0;
+            const prob = parseFloat(item.probabilidade) || 0;
+            const rend = parseFloat(item.rendimento) || 1;
+            const ref = parseFloat(item.valor_referencia) || 0;
+
+            const totalServico = area * indice;
+            const execucaoPrevista = totalServico * (prob / 100);
+
+            let mo = rend > 0 ? (execucaoPrevista / rend) * ref * 0.57 : 0;
+            let mat = rend > 0 ? (execucaoPrevista / rend) * ref * 0.43 : 0;
+
+            if (item.tem_valor_minimo) {
+                const minV = parseFloat(item.valor_minimo) || 0;
+                if ((mo + mat) < minV) {
+                    mo = minV * 0.57;
+                    mat = minV * 0.43;
+                }
+            }
+            material += mat;
+            labor += mo;
+        }
+    });
+
+    return { material, labor };
+};
+
 export const calcPp = (params: FormulaParam[], area: number) => {
     if (!params || !Array.isArray(params)) return 0;
     let base = 0; let pct = 0;
