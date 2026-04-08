@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { LogIn, UserPlus, Loader2, ArrowLeft } from "lucide-react";
+import { LogIn, Loader2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Auth = () => {
@@ -121,99 +120,54 @@ const Auth = () => {
         </div>
 
         <Card className="border-border/50 shadow-2xl backdrop-blur-sm bg-card/80">
-          <Tabs defaultValue="login" className="w-full">
-            <CardHeader>
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground font-semibold">
-                  Entrar
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground font-semibold">
-                  Cadastrar
-                </TabsTrigger>
-              </TabsList>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold italic text-foreground">Acesse sua Conta</CardTitle>
+            <CardDescription>Insira suas credenciais para gerenciar suas entregas.</CardDescription>
+          </CardHeader>
 
-              <TabsContent value="login" className="mt-0">
-                <CardTitle className="text-2xl font-bold">Bem-vindo de volta</CardTitle>
-                <CardDescription>Insira suas credenciais para acessar a plataforma.</CardDescription>
-              </TabsContent>
-
-              <TabsContent value="signup" className="mt-0">
-                <CardTitle className="text-2xl font-bold">Criar conta</CardTitle>
-                <CardDescription>Comece hoje mesmo a facilitar suas entregas.</CardDescription>
-              </TabsContent>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">Senha</Label>
-                  <Button variant="link" className="text-xs p-0 h-auto text-secondary hover:text-secondary/80">
-                    Esqueceu a senha?
-                  </Button>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-background/50"
-                />
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-4">
-              <TabsContent value="login" className="mt-0 w-full">
-                <Button
-                  className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
-                  onClick={() => handleAuth("login")}
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5 mr-2" />}
-                  Entrar
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="signup" className="mt-0 w-full">
-                <Button
-                  className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
-                  onClick={() => handleAuth("signup")}
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserPlus className="w-5 h-5 mr-2" />}
-                  Cadastrar
-                </Button>
-              </TabsContent>
-
-              <div className="relative w-full py-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <Button variant="outline" className="border-border/50 hover:bg-secondary/5 transition-colors">
-                  Google
-                </Button>
-                <Button variant="outline" className="border-border/50 hover:bg-secondary/5 transition-colors">
-                  GitHub
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-background/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password">Senha</Label>
+                <Button variant="link" className="text-xs p-0 h-auto text-secondary hover:text-secondary/80">
+                  Esqueceu a senha?
                 </Button>
               </div>
-            </CardFooter>
-          </Tabs>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-background/50"
+              />
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-4 pb-8">
+            <Button
+              className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg h-12 shadow-lg shadow-secondary/20 transition-all hover:scale-[1.02]"
+              onClick={() => handleAuth("login")}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5 mr-2" />}
+              Entrar
+            </Button>
+
+            <div className="text-center text-xs text-muted-foreground mt-2 italic px-4">
+              Não tem acesso? Solicite à sua imobiliária ou ao administrador master.
+            </div>
+          </CardFooter>
         </Card>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
@@ -222,7 +176,7 @@ const Auth = () => {
           <a href="#" className="underline hover:text-foreground">Política de Privacidade</a>.
         </p>
       </motion.div>
-    </div>
+    </div >
   );
 };
 
