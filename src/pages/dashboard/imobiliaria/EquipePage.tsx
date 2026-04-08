@@ -166,8 +166,23 @@ const EquipePage = () => {
         }
       }
 
+      // Enviar e-mail de boas-vindas
+      try {
+        await fetch('/api/welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: newMemberName.split(' ')[0],
+            email: newMemberEmail,
+            tempPassword: '123456'
+          })
+        });
+      } catch (e) {
+        console.error("Erro ao disparar e-mail de boas-vindas:", e);
+      }
+
       toast.dismiss();
-      toast.success("Funcionário adicionado com sucesso! Senha padrão: 123456");
+      toast.success("Colaborador cadastrado e e-mail de acesso enviado!");
 
       setNewMemberEmail("");
       setNewMemberName("");

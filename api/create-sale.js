@@ -101,87 +101,54 @@ export default async function handler(req, res) {
             <head>
                 <meta charset="utf-8">
                 <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-                    .container { max-width: 600px; margin: 20px auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-                    .header { background: #f8fafc; padding: 30px; text-align: center; border-bottom: 1px solid #e0e0e0; }
-                    .content { padding: 30px; background: #ffffff; }
-                    .footer { background: #f8fafc; padding: 30px; border-top: 1px solid #e0e0e0; }
-                    .welcome-title { color: #1e293b; font-size: 24px; font-weight: 800; margin-bottom: 16px; }
-                    .credentials-box { background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 24px 0; border: 1px solid #cbd5e1; }
-                    .credentials-title { font-weight: 700; color: #475569; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-                    .cred-item { margin: 5px 0; font-size: 15px; }
-                    .button { display: inline-block; background: #2563eb; color: #ffffff !important; padding: 14px 28px; border-radius: 6px; text-decoration: none; font-weight: 700; margin-top: 20px; text-align: center; }
-                    
-                    .how-it-works { margin-top: 40px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; }
-                    .step { display: flex; margin-bottom: 24px; align-items: flex-start; }
-                    .step-icon { width: 44px; height: 44px; background: #f8fafc; border-radius: 10px; display: inline-block; text-align: center; line-height: 44px; margin-right: 15px; font-size: 20px; flex-shrink: 0; border: 1px solid #e2e8f0; }
-                    .step-text { flex-grow: 1; }
-                    .step-label { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
-                    .step-title { font-weight: 800; color: #1e293b; font-size: 16px; display: block; }
-                    .step-desc { font-size: 13px; color: #64748b; margin-top: 4px; display: block; }
-                    .how-title { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 25px; text-align: center; }
-                    .highlight-blue { color: #2563eb; }
+                    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; margin: 0; padding: 0; background-color: #f8fafc; }
+                    .wrapper { background-color: #f8fafc; padding: 40px 20px; }
+                    .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+                    .header { background: #142542; padding: 32px; text-align: center; }
+                    .content { padding: 40px; }
+                    .footer { padding: 32px; text-align: center; color: #64748b; font-size: 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+                    h1 { color: #1e293b; font-size: 24px; font-weight: 800; margin-bottom: 24px; text-align: left; }
+                    p { margin-bottom: 16px; font-size: 16px; color: #475569; }
+                    .credentials-box { background: #f1f5f9; padding: 24px; border-radius: 12px; margin: 32px 0; border: 1px solid #e2e8f0; }
+                    .cred-item { margin: 8px 0; font-size: 15px; }
+                    .cred-label { font-weight: 700; color: #64748b; margin-right: 8px; }
+                    .cred-value { font-weight: 700; color: #1e293b; font-family: 'JetBrains Mono', 'Courier New', Courier, monospace; }
+                    .button-container { text-align: center; margin-top: 32px; }
+                    .button { display: inline-block; background: #ff7e1d; color: #ffffff !important; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; transition: background 0.2s; }
+                    .alert-box { background: #fffbeb; border: 1px solid #fef3c7; padding: 16px; border-radius: 8px; margin-top: 24px; font-size: 13px; color: #92400e; display: flex; align-items: flex-start; }
+                    .highlight { color: #ff7e1d; font-weight: 700; }
                 </style>
             </head>
             <body>
-                <div class="container">
-                    <div class="header">
-                        <img src="https://entregafacilitada.vercel.app/logo.png" alt="Entrega Facilitada" style="height: 40px; margin-bottom: 10px;">
-                    </div>
-                    <div class="content">
-                        <h2 class="welcome-title">Olá, ${firstName}!</h2>
-                        <p>Boas-vindas à <span class="highlight-blue"><strong>Entrega Facilitada</strong></span>!</p>
-                        <p>Sua contratação foi realizada com sucesso através da nossa plataforma. Agora você conta com a proteção líder em devolução de chaves.</p>
-                        
-                        <div class="credentials-box">
-                            <div class="credentials-title">Seus Dados de Acesso:</div>
-                            <div class="cred-item"><strong>E-mail:</strong> ${email}</div>
-                            <div class="cred-item"><strong>Senha Padrão:</strong> 123456</div>
-                            <p style="font-size: 12px; color: #64748b; margin-top: 10px;">* Recomendamos alterar sua senha no primeiro acesso.</p>
+                <div class="wrapper">
+                    <div class="container">
+                        <div class="header">
+                            <img src="https://entregafacilitada.vercel.app/logo.png" alt="Entrega Facilitada" style="height: 36px;">
                         </div>
-                        
-                        <center>
-                            <a href="https://entregafacilitada.vercel.app/auth" class="button">Acessar Minha Proteção</a>
-                        </center>
-
-                        <div class="how-it-works">
-                            <h3 class="how-title">Veja como funciona com a <span class="highlight-blue">Entrega Facilitada</span>:</h3>
+                        <div class="content">
+                            <h1>Olá, ${firstName}!</h1>
+                            <p>Boas-vindas à <span class="highlight">Entrega Facilitada</span>.</p>
+                            <p>O seu perfil de usuário foi criado com sucesso em nossa plataforma. A partir de agora, você já pode acessar o sistema para gerenciar suas atividades e informações.</p>
                             
-                            <div class="step">
-                                <div class="step-icon" style="background: #1e293b; color: white; border-color: #1e293b;">📅</div>
-                                <div class="step-text">
-                                    <span class="step-label">ETAPA 1</span>
-                                    <span class="step-title">Aguarde o encerramento do seu contrato</span>
-                                    <span class="step-desc">Seu plano está ativo e garantirá que sua saída seja tranquila.</span>
-                                </div>
+                            <div class="credentials-box">
+                                <p style="margin-top: 0; font-weight: 800; font-size: 14px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">🔐 SEUS DADOS DE ACESSO:</p>
+                                <div class="cred-item"><span class="cred-label">E-mail:</span> <span class="cred-value">${email}</span></div>
+                                <div class="cred-item"><span class="cred-label">Senha Temporária:</span> <span class="cred-value">123456</span></div>
                             </div>
 
-                            <div class="step">
-                                <div class="step-icon" style="background: #f59e0b; color: white; border-color: #f59e0b;">📋</div>
-                                <div class="step-text">
-                                    <span class="step-label">ETAPA 2</span>
-                                    <span class="step-title">Acione a Entrega Facilitada</span>
-                                    <span class="step-desc">30 dias antes de mudar, nos avise pelo app ou WhatsApp.</span>
-                                </div>
+                            <div class="alert-box">
+                                <span>⚠️ <strong>Dica de Segurança:</strong> Por questões de segurança, recomendamos que você altere sua senha logo no primeiro login através da página "Meu Perfil".</span>
+                            </div>
+                            
+                            <div class="button-container">
+                                <a href="https://entregafacilitada.vercel.app/auth" class="button">Acessar a Plataforma</a>
                             </div>
 
-                            <div class="step">
-                                <div class="step-icon" style="background: #f59e0b; color: white; border-color: #f59e0b;">🔨</div>
-                                <div class="step-text">
-                                    <span class="step-label">ETAPA 3</span>
-                                    <span class="step-title">Restauração e Reparos</span>
-                                    <span class="step-desc">Assumimos a pintura e adequação total do imóvel conforme o laudo inicial.</span>
-                                </div>
-                            </div>
-
-                            <div class="step">
-                                <div class="step-icon" style="background: #f59e0b; color: white; border-color: #f59e0b;">🔑</div>
-                                <div class="step-text">
-                                    <span class="step-label">ETAPA 4</span>
-                                    <span class="step-title">Chaves entregues com aprovação</span>
-                                    <span class="step-desc">Garantimos a vistoria aprovada pela imobiliária. Sem estresse.</span>
-                                </div>
-                            </div>
+                            <p style="margin-top: 40px; font-size: 15px;">Se você tiver qualquer dúvida ou dificuldade no primeiro acesso, nossa equipe está à disposição.</p>
+                            <p style="margin-bottom: 0;">Um abraço,<br><strong>Equipe Entrega Facilitada</strong></p>
+                        </div>
+                        <div class="footer">
+                            © ${new Date().getFullYear()} Entrega Facilitada. Todos os direitos reservados.
                         </div>
                     </div>
                 </div>
@@ -206,8 +173,9 @@ export default async function handler(req, res) {
                 await transporter.sendMail({
                     from: `"Entrega Facilitada" <${gmailUser}>`,
                     to: email,
-                    subject: `Contratação Confirmada - Bem-vindo à Entrega Facilitada, ${firstName}!`,
+                    subject: `Seu acesso à plataforma Entrega Facilitada foi criado 🚀`,
                     html: emailHtml,
+                    text: `Olá ${firstName}, seu acesso à Entrega Facilitada foi criado. E-mail: ${email} | Senha: 123456. Acesse em: https://entregafacilitada.vercel.app/auth`,
                 });
             } catch (emailError) {
                 console.error('[NODEMAILER ERROR] Falha ao enviar e-mail:', emailError.message);

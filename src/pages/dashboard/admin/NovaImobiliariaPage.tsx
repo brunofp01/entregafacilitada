@@ -37,6 +37,21 @@ const NovaImobiliariaPage = () => {
 
             if (error) throw error;
 
+            // Enviar e-mail de boas-vindas
+            try {
+                await fetch('/api/welcome-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        firstName: formData.nome?.split(' ')[0] || formData.nome,
+                        email: formData.email,
+                        tempPassword: formData.password
+                    })
+                });
+            } catch (e) {
+                console.error("Erro ao disparar e-mail de boas-vindas:", e);
+            }
+
             toast.success("Imobiliária cadastrada com sucesso!");
             navigate("/admin/imobiliarias");
         } catch (error: any) {
