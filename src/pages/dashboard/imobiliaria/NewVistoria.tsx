@@ -28,6 +28,12 @@ import { pdf } from '@react-pdf/renderer';
 import { VistoriaPDF } from "@/components/vistorias/VistoriaPDF";
 import { motion, AnimatePresence } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Item {
   id: string;
@@ -670,30 +676,49 @@ const NewVistoria = () => {
 
                     {!isViewOnly ? (
                       <div className="space-y-2">
-                        <div
-                          className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 cursor-pointer ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}
-                          onClick={() => document.getElementById(`meter-input-${m.key}`)?.click()}
-                        >
-                          {(medidores as any)[m.key].foto ? (
-                            <div className="relative w-full h-full flex items-center justify-center">
-                              <img src={(medidores as any)[m.key].foto} className="h-full object-contain rounded" />
-                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                <Camera className="w-5 h-5 text-white" />
-                              </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <div
+                              className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 cursor-pointer ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}
+                            >
+                              {(medidores as any)[m.key].foto ? (
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                  <img src={(medidores as any)[m.key].foto} className="h-full object-contain rounded" />
+                                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                    <Camera className="w-5 h-5 text-white" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <Camera className="w-5 h-5 text-muted-foreground mr-2" />
+                                  <span className="text-xs font-bold text-muted-foreground">Foto do Relógio</span>
+                                </>
+                              )}
                             </div>
-                          ) : (
-                            <>
-                              <Camera className="w-5 h-5 text-muted-foreground mr-2" />
-                              <span className="text-xs font-bold text-muted-foreground">Foto do Relógio</span>
-                            </>
-                          )}
-                        </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="center" className="w-[200px]">
+                            <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`meter-input-cam-${m.key}`)?.click()}>
+                              <Camera className="w-4 h-4 mr-2" /> Tirar Foto (Câmera)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`meter-input-gal-${m.key}`)?.click()}>
+                              <Plus className="w-4 h-4 mr-2" /> Escolher da Galeria
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
                         <input
-                          id={`meter-input-${m.key}`}
+                          id={`meter-input-cam-${m.key}`}
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          className="hidden"
+                          onChange={e => handleMeterUpload(m.key as any, e)}
+                        />
+                        <input
+                          id={`meter-input-gal-${m.key}`}
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          style={{ display: 'none' }}
                           onChange={e => handleMeterUpload(m.key as any, e)}
                         />
                       </div>
@@ -1069,19 +1094,39 @@ const NewVistoria = () => {
                                       <div className="flex gap-3 flex-wrap py-2 px-1">
                                         {!isViewOnly && (
                                           <div className="shrink-0 w-24 h-24">
-                                            <div
-                                              className="w-full h-full border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all group active:scale-95 cursor-pointer"
-                                              onClick={() => document.getElementById(`file-upload-${item.id}`)?.click()}
-                                            >
-                                              <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
-                                              <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                            </div>
+                                            <DropdownMenu>
+                                              <DropdownMenuTrigger asChild>
+                                                <div
+                                                  className="w-full h-full border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all group active:scale-95 cursor-pointer"
+                                                >
+                                                  <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                                  <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
+                                                </div>
+                                              </DropdownMenuTrigger>
+                                              <DropdownMenuContent align="start" className="w-[200px]">
+                                                <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`file-upload-cam-${item.id}`)?.click()}>
+                                                  <Camera className="w-4 h-4 mr-2" /> Tirar Foto (Câmera)
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`file-upload-gal-${item.id}`)?.click()}>
+                                                  <Plus className="w-4 h-4 mr-2" /> Escolher da Galeria
+                                                </DropdownMenuItem>
+                                              </DropdownMenuContent>
+                                            </DropdownMenu>
+
                                             <input
-                                              id={`file-upload-${item.id}`}
+                                              id={`file-upload-cam-${item.id}`}
                                               type="file"
                                               accept="image/*"
+                                              capture="environment"
                                               className="hidden"
-                                              style={{ display: 'none' }}
+                                              onChange={e => handleFileUpload(activeAmbienteId, item.id, e)}
+                                            />
+                                            <input
+                                              id={`file-upload-gal-${item.id}`}
+                                              type="file"
+                                              accept="image/*"
+                                              multiple
+                                              className="hidden"
                                               onChange={e => handleFileUpload(activeAmbienteId, item.id, e)}
                                             />
                                           </div>
