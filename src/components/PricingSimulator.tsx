@@ -66,7 +66,7 @@ const PricingSimulator = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-heading font-extrabold text-foreground mb-4">
-            Assinar <span className="text-secondary">Entrega Facilitada</span>
+            Garantir minha <span className="text-secondary">Entrega Facilitada</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
             Mude de casa sem sustos. Descubra em segundos o valor exato para blindar seu bolso na rescisão.

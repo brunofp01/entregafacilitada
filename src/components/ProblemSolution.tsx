@@ -9,7 +9,7 @@ const problems = [
 ];
 
 const solutions = [
-  "Pintura completa e pequenos reparos diluídos em parcelas mensais",
+  "Cobertura total para a pintura e pequenos reparos do laudo, por um valor fixo e previsível.",
   "Profissionais homologados que assumem a adequação do imóvel baseados no seu Laudo de Vistoria Inicial",
   "Garantia de aprovação: se a imobiliária exigir retoques, nós voltamos sem custo",
 ];
