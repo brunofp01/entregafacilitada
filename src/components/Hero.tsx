@@ -29,7 +29,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-lg md:text-xl text-white/70 max-w-2xl mb-10 leading-relaxed">
-              O fim do seu aluguel não precisa ser uma dor de cabeça. Contrate o plano de Entrega Garantida hoje e deixe as exigências da vistoria final por nossa conta.
+              O fim do seu aluguel não precisa ser uma dor de cabeça. Contrate o plano de Entrega Facilitada hoje e deixe as exigências da vistoria final por nossa conta.
             </p>
           </motion.div>
 
