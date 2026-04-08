@@ -34,6 +34,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 interface Item {
   id: string;
@@ -676,8 +686,8 @@ const NewVistoria = () => {
 
                     {!isViewOnly ? (
                       <div className="space-y-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                        <Drawer>
+                          <DrawerTrigger asChild>
                             <div
                               className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 cursor-pointer ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}
                             >
@@ -695,16 +705,33 @@ const NewVistoria = () => {
                                 </>
                               )}
                             </div>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="center" className="w-[200px]">
-                            <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`meter-input-cam-${m.key}`)?.click()}>
-                              <Camera className="w-4 h-4 mr-2" /> Tirar Foto (Câmera)
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`meter-input-gal-${m.key}`)?.click()}>
-                              <Plus className="w-4 h-4 mr-2" /> Escolher da Galeria
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </DrawerTrigger>
+                          <DrawerContent>
+                            <DrawerHeader>
+                              <DrawerTitle>Adicionar Foto</DrawerTitle>
+                              <DrawerDescription>Escolha como deseja adicionar a foto do medidor de {m.label}.</DrawerDescription>
+                            </DrawerHeader>
+                            <div className="p-4 grid grid-cols-2 gap-4">
+                              <DrawerClose asChild>
+                                <Button variant="outline" className="h-24 flex flex-col gap-2 font-bold bg-secondary/5 border-secondary/20 text-secondary hover:bg-secondary/10" onClick={() => document.getElementById(`meter-input-cam-${m.key}`)?.click()}>
+                                  <Camera className="w-8 h-8" />
+                                  Tirar Foto
+                                </Button>
+                              </DrawerClose>
+                              <DrawerClose asChild>
+                                <Button variant="outline" className="h-24 flex flex-col gap-2 font-bold" onClick={() => document.getElementById(`meter-input-gal-${m.key}`)?.click()}>
+                                  <Plus className="w-8 h-8" />
+                                  Galeria
+                                </Button>
+                              </DrawerClose>
+                            </div>
+                            <DrawerFooter>
+                              <DrawerClose asChild>
+                                <Button variant="ghost">Cancelar</Button>
+                              </DrawerClose>
+                            </DrawerFooter>
+                          </DrawerContent>
+                        </Drawer>
 
                         <input
                           id={`meter-input-cam-${m.key}`}
@@ -1094,24 +1121,41 @@ const NewVistoria = () => {
                                       <div className="flex gap-3 flex-wrap py-2 px-1">
                                         {!isViewOnly && (
                                           <div className="shrink-0 w-24 h-24">
-                                            <DropdownMenu>
-                                              <DropdownMenuTrigger asChild>
+                                            <Drawer>
+                                              <DrawerTrigger asChild>
                                                 <div
                                                   className="w-full h-full border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all group active:scale-95 cursor-pointer"
                                                 >
                                                   <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
                                                   <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
                                                 </div>
-                                              </DropdownMenuTrigger>
-                                              <DropdownMenuContent align="start" className="w-[200px]">
-                                                <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`file-upload-cam-${item.id}`)?.click()}>
-                                                  <Camera className="w-4 h-4 mr-2" /> Tirar Foto (Câmera)
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="py-3 cursor-pointer" onClick={() => document.getElementById(`file-upload-gal-${item.id}`)?.click()}>
-                                                  <Plus className="w-4 h-4 mr-2" /> Escolher da Galeria
-                                                </DropdownMenuItem>
-                                              </DropdownMenuContent>
-                                            </DropdownMenu>
+                                              </DrawerTrigger>
+                                              <DrawerContent>
+                                                <DrawerHeader>
+                                                  <DrawerTitle>Registro Fotográfico</DrawerTitle>
+                                                  <DrawerDescription>Ambiente: {ambientes.find(a => a.id === activeAmbienteId)?.nome} - {item.nome}</DrawerDescription>
+                                                </DrawerHeader>
+                                                <div className="p-4 grid grid-cols-2 gap-4">
+                                                  <DrawerClose asChild>
+                                                    <Button variant="outline" className="h-32 flex flex-col gap-3 font-bold bg-secondary/5 border-secondary/20 text-secondary hover:bg-secondary/10" onClick={() => document.getElementById(`file-upload-cam-${item.id}`)?.click()}>
+                                                      <Camera className="w-10 h-10" />
+                                                      Tirar Foto
+                                                    </Button>
+                                                  </DrawerClose>
+                                                  <DrawerClose asChild>
+                                                    <Button variant="outline" className="h-32 flex flex-col gap-3 font-bold" onClick={() => document.getElementById(`file-upload-gal-${item.id}`)?.click()}>
+                                                      <Plus className="w-10 h-10" />
+                                                      Galeria
+                                                    </Button>
+                                                  </DrawerClose>
+                                                </div>
+                                                <DrawerFooter>
+                                                  <DrawerClose asChild>
+                                                    <Button variant="ghost">Cancelar</Button>
+                                                  </DrawerClose>
+                                                </DrawerFooter>
+                                              </DrawerContent>
+                                            </Drawer>
 
                                             <input
                                               id={`file-upload-cam-${item.id}`}
