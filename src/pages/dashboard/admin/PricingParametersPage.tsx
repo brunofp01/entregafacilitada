@@ -45,10 +45,7 @@ const initialCo: FormulaParam[] = [
     { id: "co4", label: "Custo de Plataforma / Adm", value: "3", unit: "percent", active: true },
 ];
 
-interface PlanConfig {
-    id: string; label: string; color: string; bgColor: string; borderColor: string;
-    icon: any; badge: string; params: FormulaParam[];
-}
+// Removed local PlanConfig interface to use imported one from pricingCalc.ts
 
 const initialPlans: PlanConfig[] = [
     {
@@ -146,7 +143,7 @@ const PricingParametersPage = () => {
                         const orig = initialPlans.find(p => p.id === dbPlan.id);
                         return {
                             ...dbPlan,
-                            icon: orig?.icon // Restaura os componentes React que o JSON ignorou
+                            icon: orig?.icon || Settings2 // Fallback for missing icon component
                         };
                     });
                     setPlans(restoredPlans);
@@ -218,10 +215,10 @@ const PricingParametersPage = () => {
     };
 
     // ── Totals ───────────────────────────────────────────────────────────────
-    const totalMs = sumActive(msParams);
-    const totalCo = sumActive(coParams);
-    const planPcs = plans.map(pl => {
-        const pp = calcPp(pl.params, simArea);
+    const totalMs = sumActive(msParams || []);
+    const totalCo = sumActive(coParams || []);
+    const planPcs = (plans || []).map(pl => {
+        const pp = calcPp(pl.params || [], simArea);
         const pc = calcPc(pp, totalMs, totalCo);
         const monthly = installments > 0 ? pc / installments : 0;
         return { ...pl, pp, pc, monthly };
@@ -471,9 +468,9 @@ const PricingParametersPage = () => {
                         <h2 className="text-lg font-bold text-foreground">Prêmio Puro por Plano — Pp</h2>
                     </div>
                     <div className="grid md:grid-cols-2 gap-6">
-                        {plans.map(plan => {
+                        {(plans || []).map(plan => {
                             const PlanIcon = plan.icon;
-                            const pp = calcPp(plan.params, simArea);
+                            const pp = calcPp(plan.params || [], simArea);
                             const pc = calcPc(pp, totalMs, totalCo);
                             const monthly = installments > 0 ? pc / installments : 0;
                             return (
@@ -481,7 +478,7 @@ const PricingParametersPage = () => {
                                     <CardHeader className={`pb-3 border-b border-border/30 ${plan.bgColor}`}>
                                         <div className="flex items-center justify-between mb-2">
                                             <div className={`flex items-center gap-2 ${plan.color}`}>
-                                                <PlanIcon className="w-5 h-5" />
+                                                {PlanIcon && <PlanIcon className="w-5 h-5" />}
                                                 <CardTitle className="text-base">{plan.label}</CardTitle>
                                             </div>
                                             <Badge className={`text-[10px] font-bold ${plan.bgColor} ${plan.color} ${plan.borderColor}`}>{plan.badge}</Badge>
@@ -498,7 +495,7 @@ const PricingParametersPage = () => {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="pt-2">
-                                        {plan.params.map(p => (
+                                        {(plan.params || []).map(p => (
                                             <ParamRow key={p.id} param={p}
                                                 onUpdate={(id, field, v) => updatePlan(plan.id, id, field, v)}
                                                 onToggle={(id) => togglePlan(plan.id, id)}

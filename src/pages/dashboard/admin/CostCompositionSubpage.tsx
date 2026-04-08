@@ -49,16 +49,16 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                 toast.error("Erro ao carregar insumos do banco de dados.");
                 console.error(error);
             } else if (data) {
-                setItems(data.map(d => ({
+                setItems((data || []).map(d => ({
                     id: d.id,
-                    nome: d.nome,
-                    indiceSinapi: d.indice_sinapi?.toString() || "",
-                    probabilidade: d.probabilidade?.toString() || "",
-                    rendimento: d.rendimento?.toString() || "",
-                    valorReferencia: d.valor_referencia?.toString() || "",
+                    nome: d.nome || "Item sem nome",
+                    indiceSinapi: d.indice_sinapi?.toString() || "0",
+                    probabilidade: d.probabilidade?.toString() || "0",
+                    rendimento: d.rendimento?.toString() || "1",
+                    valorReferencia: d.valor_referencia?.toString() || "0",
                     temValorMinimo: d.tem_valor_minimo || false,
-                    valorMinimo: d.valor_minimo?.toString() || "",
-                    inBasico: d.in_basico
+                    valorMinimo: d.valor_minimo?.toString() || "0",
+                    inBasico: d.in_basico || false
                 })));
             }
             setIsLoading(false);
@@ -175,7 +175,7 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         const newValue = !item[plan];
         setItems(prev => prev.map(i => i.id === id ? { ...i, [plan]: newValue } : i));
 
-        const dbField = "in__basico"; // Mapping kept as in_basico
+        const dbField = "in_basico"; // Fixed typo in local variable name for clarity
         const { error } = await supabase.from('cost_composition_items').update({ in_basico: newValue }).eq('id', id);
         if (error) {
             toast.error("Erro ao sincronizar com o banco.");
@@ -188,9 +188,9 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
     const totals = useMemo(() => {
         let basicoMat = 0, basicoLabor = 0;
 
-        items.forEach(item => {
+        (items || []).forEach(item => {
             const { mo, mat } = calculateItemValues(item);
-            if (item.inBasico) {
+            if (item && item.inBasico) {
                 basicoMat += mat;
                 basicoLabor += mo;
             }
@@ -441,15 +441,15 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                             </CardHeader>
                             <CardContent className="pt-3 space-y-2">
                                 {items.length === 0 && <span className="text-xs text-muted-foreground">Adicione itens para compor este plano.</span>}
-                                {items.map(item => (
-                                    <label key={item.id} className={`flex items-start gap-2 p-2 rounded border cursor-pointer transition-colors ${item.inBasico ? "border-blue-500/50 bg-blue-500/10" : "border-transparent hover:bg-black/5 dark:hover:bg-white/5"}`}>
+                                {(items || []).map(item => (
+                                    <label key={item?.id} className={`flex items-start gap-2 p-2 rounded border cursor-pointer transition-colors ${item?.inBasico ? "border-blue-500/50 bg-blue-500/10" : "border-transparent hover:bg-black/5 dark:hover:bg-white/5"}`}>
                                         <Checkbox
-                                            checked={item.inBasico}
-                                            onCheckedChange={() => togglePlan(item.id, "inBasico")}
+                                            checked={item?.inBasico}
+                                            onCheckedChange={() => togglePlan(item?.id, "inBasico")}
                                             className="mt-0.5"
                                         />
                                         <div className="text-sm leading-tight select-none">
-                                            <span className={item.inBasico ? "font-semibold" : "text-muted-foreground"}>{item.nome}</span>
+                                            <span className={item?.inBasico ? "font-semibold" : "text-muted-foreground"}>{item?.nome}</span>
                                         </div>
                                     </label>
                                 ))}
