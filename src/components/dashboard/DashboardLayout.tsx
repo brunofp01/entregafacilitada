@@ -29,7 +29,7 @@ import { MobileMenuDrawer } from "./MobileMenuDrawer";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria";
+  role: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria" | "admin_master" | "equipe_ef";
 }
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
@@ -85,6 +85,29 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },
       { icon: User, label: "Meu Perfil", href: "/admin/perfil" },
       { icon: Settings, label: "Configurações", href: "/admin/configuracoes" },
+    ],
+    admin_master: [
+      { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
+      { icon: Building2, label: "Cadastrar Imobiliária", href: "/admin/imobiliarias/nova" },
+      { icon: ShoppingCart, label: "Contratar EF", href: "/imobiliaria/contratar" },
+      { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
+      { icon: Package, label: "Gestão de Planos", href: "/admin/planos" },
+      { icon: FileText, label: "Contrato Padrão", href: "/admin/contrato-padrao" },
+      { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
+      { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
+      { icon: MessageSquare, label: "Leads Simulador", href: "/admin/leads" },
+      { icon: Users, label: "Usuários", href: "/admin/usuarios" },
+      { icon: FileText, label: "Relatórios", href: "/admin/relatorios" },
+      { icon: User, label: "Meu Perfil", href: "/admin/perfil" },
+      { icon: Settings, label: "Configurações", href: "/admin/configuracoes" },
+    ],
+    equipe_ef: [
+      { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
+      { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
+      { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
+      { icon: MessageSquare, label: "Leads Simulador", href: "/admin/leads" },
+      { icon: Users, label: "Usuários", href: "/admin/usuarios" },
+      { icon: User, label: "Meu Perfil", href: "/admin/perfil" },
     ],
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
@@ -197,13 +220,13 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
             </Button>
 
             <Link
-              to={activeRole === 'admin' ? '/admin/perfil' : activeRole === 'inquilino' ? '/inquilino/perfil' : '/imobiliaria/meu-perfil'}
+              to={['admin', 'admin_master', 'equipe_ef'].includes(activeRole) ? '/admin/perfil' : activeRole === 'inquilino' ? '/inquilino/perfil' : '/imobiliaria/meu-perfil'}
               className="flex items-center gap-3 pl-4 border-l border-border text-sm hover:opacity-80 transition-opacity"
             >
               <div className="text-right hidden sm:block">
                 <p className="font-bold text-foreground truncate max-w-[150px]">{userName}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
-                  {activeRole === 'inquilino' ? 'Cliente EF' : activeRole === 'integrante_imobiliaria' ? 'Integrante' : activeRole}
+                  {activeRole === 'inquilino' ? 'Cliente EF' : activeRole === 'integrante_imobiliaria' ? 'Integrante' : activeRole.replace('_', ' ')}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold border border-secondary/20 shadow-inner">

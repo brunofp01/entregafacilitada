@@ -3,7 +3,7 @@ import { LayoutDashboard, Users, Plus, Menu, User, FileText, CreditCard } from "
 import { cn } from "@/lib/utils";
 
 interface MobileBottomNavProps {
-  role: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria";
+  role: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria" | "admin_master" | "equipe_ef";
   onMenuOpen: () => void;
 }
 
@@ -14,6 +14,15 @@ export const MobileBottomNav = ({ role, onMenuOpen }: MobileBottomNavProps) => {
     admin: [
       { icon: LayoutDashboard, label: "Home", href: "/admin" },
       { icon: Building2, label: "Imobs", href: "/admin/imobiliarias" },
+      { icon: Users, label: "Users", href: "/admin/usuarios" },
+    ],
+    admin_master: [
+      { icon: LayoutDashboard, label: "Home", href: "/admin" },
+      { icon: Building2, label: "Nova Imob", href: "/admin/imobiliarias/nova" },
+      { icon: Building2, label: "Imobs", href: "/admin/imobiliarias" },
+    ],
+    equipe_ef: [
+      { icon: LayoutDashboard, label: "Home", href: "/admin" },
       { icon: Users, label: "Users", href: "/admin/usuarios" },
     ],
     imobiliaria: [

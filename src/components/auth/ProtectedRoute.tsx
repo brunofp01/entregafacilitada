@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRole?: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria" | Array<"admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria">;
+  allowedRole?: "admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria" | "admin_master" | "equipe_ef" | Array<"admin" | "imobiliaria" | "inquilino" | "integrante_imobiliaria" | "admin_master" | "equipe_ef">;
 }
 
 const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
@@ -42,7 +42,9 @@ const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
 
           if (!allowed) {
             const dashboardMap: Record<string, string> = {
+              admin_master: "/admin",
               admin: "/admin",
+              equipe_ef: "/admin",
               imobiliaria: "/imobiliaria",
               integrante_imobiliaria: "/imobiliaria",
               inquilino: "/inquilino",

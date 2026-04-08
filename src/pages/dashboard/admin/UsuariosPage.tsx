@@ -44,7 +44,17 @@ interface UserProfile {
     email: string | null;
     role: string;
     updated_at: string;
+    created_at: string;
 }
+
+const ROLE_ORDER: Record<string, number> = {
+    admin_master: 0,
+    admin: 1,
+    equipe_ef: 2,
+    imobiliaria: 3,
+    integrante_imobiliaria: 4,
+    inquilino: 5
+};
 
 const UsuariosPage = () => {
     const [usuarios, setUsuarios] = useState<UserProfile[]>([]);
@@ -81,10 +91,25 @@ const UsuariosPage = () => {
                 query = query.eq("role", roleFilter);
             }
 
-            const { data, error } = await query.order("updated_at", { ascending: false });
+            const { data, error } = await query;
 
             if (error) throw error;
-            setUsuarios(data || []);
+
+            // Ordenação manual: Role (definida pelo ROLE_ORDER) e depois created_at
+            const sortedData = (data || []).sort((a, b) => {
+                const orderA = ROLE_ORDER[a.role] ?? 99;
+                const orderB = ROLE_ORDER[b.role] ?? 99;
+
+                if (orderA !== orderB) {
+                    return orderA - orderB;
+                }
+
+                // Ordenação secundária: criado mais recentemente primeiro
+                return new Date(b.created_at || b.updated_at || 0).getTime() -
+                    new Date(a.created_at || a.updated_at || 0).getTime();
+            });
+
+            setUsuarios(sortedData);
         } catch (error: any) {
             toast.error("Erro ao carregar usuários");
         } finally {
@@ -103,12 +128,16 @@ const UsuariosPage = () => {
 
     const getRoleBadge = (role: string) => {
         switch (role) {
+            case "admin_master":
+                return <Badge className="bg-amber-500 text-white gap-1 hover:bg-amber-600 shadow-sm border-none"><Shield className="w-3 h-3" /> Master</Badge>;
             case "admin":
-                return <Badge className="bg-secondary text-secondary-foreground gap-1"><Shield className="w-3 h-3" /> Master</Badge>;
+                return <Badge className="bg-secondary text-secondary-foreground gap-1"><Shield className="w-3 h-3" /> Admin</Badge>;
+            case "equipe_ef":
+                return <Badge className="bg-blue-600 text-white gap-1 hover:bg-blue-700 border-none">Equipe EF</Badge>;
             case "imobiliaria":
                 return <Badge variant="outline" className="border-secondary text-secondary gap-1 transition-colors hover:bg-secondary/10"><CheckCircle2 className="w-3 h-3" /> Imobiliária</Badge>;
             case "integrante_imobiliaria":
-                return <Badge variant="secondary" className="gap-1 opacity-80 transition-opacity hover:opacity-100">Equipe</Badge>;
+                return <Badge variant="secondary" className="gap-1 opacity-80 transition-opacity hover:opacity-100">Equipe Imob.</Badge>;
             case "inquilino":
                 return <Badge variant="outline" className="gap-1 shadow-sm transition-shadow hover:shadow-md italic">Inquilino</Badge>;
             default:
@@ -148,7 +177,9 @@ const UsuariosPage = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Todos os Perfis</SelectItem>
+                                    <SelectItem value="admin_master">Admin Master</SelectItem>
                                     <SelectItem value="admin">Administradores</SelectItem>
+                                    <SelectItem value="equipe_ef">Equipe EF</SelectItem>
                                     <SelectItem value="imobiliaria">Imobiliárias</SelectItem>
                                     <SelectItem value="integrante_imobiliaria">Equipe Imobiliária</SelectItem>
                                     <SelectItem value="inquilino">Inquilinos</SelectItem>
@@ -205,7 +236,7 @@ const UsuariosPage = () => {
                                                     {getRoleBadge(user.role)}
                                                 </td>
                                                 <td className="px-6 py-4 hidden md:table-cell text-muted-foreground text-xs italic">
-                                                    {new Date(user.updated_at).toLocaleString()}
+                                                    {user.created_at || user.updated_at ? new Date(user.created_at || user.updated_at).toLocaleString('pt-BR') : "Sem data"}
                                                 </td>
                                                 <td className="px-3 md:px-6 py-4 text-right">
                                                     <DropdownMenu>

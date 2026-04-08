@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound.tsx";
 import PublicCheckoutPage from "./pages/PublicCheckoutPage.tsx";
 import SuccessPage from "./pages/SuccessPage.tsx";
 import LeadsAdminPage from "./pages/dashboard/admin/LeadsAdminPage.tsx";
+import NovaImobiliariaPage from "./pages/dashboard/admin/NovaImobiliariaPage.tsx";
 
 import { PwaHandler } from "./components/pwa/PwaHandler.tsx";
 
@@ -56,57 +57,62 @@ const App = () => (
 
           {/* Dashboard Routes with Protection */}
           <Route path="/admin/*" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <AdminDashboard />
             </ProtectedRoute>
           } />
           <Route path="/admin/parametros" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <PricingParametersPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/imobiliarias" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <ImobiliariasPage />
             </ProtectedRoute>
           } />
+          <Route path="/admin/imobiliarias/nova" element={
+            <ProtectedRoute allowedRole="admin_master">
+              <NovaImobiliariaPage />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/usuarios" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <UsuariosPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/relatorios" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <RelatoriosPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/configuracoes" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <ConfiguracoesPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/perfil" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <AdminPerfilPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/planos" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <PlanoGestaoPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/aprovacoes" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <AprovacaoPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/contrato-padrao" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <ContratoPadraoPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/leads" element={
-            <ProtectedRoute allowedRole="admin">
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
               <LeadsAdminPage />
             </ProtectedRoute>
           } />
