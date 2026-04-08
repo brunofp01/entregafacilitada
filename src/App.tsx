@@ -128,7 +128,7 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/imobiliaria/contratar" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria", "admin", "admin_master", "equipe_ef"]}>
               <ContratacaoPage />
             </ProtectedRoute>
           } />
