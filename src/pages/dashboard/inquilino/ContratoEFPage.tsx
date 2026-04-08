@@ -261,7 +261,7 @@ const ContratoEFPage = () => {
                             <div>
                                 <p className="font-black text-amber-700 text-lg">⚠️ Pagamento Pendente!</p>
                                 <p className="text-amber-800/70 text-sm font-semibold">
-                                    Sua fatura de **R$ {pendingInvoice.amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}** com vencimento em **{pendingInvoice.dueDate}** está disponível.
+                                    Sua fatura de **R$ {pendingInvoice.amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}** com vencimento em **{pendingInvoice.dueDate}** está disponível.
                                 </p>
                             </div>
                         </div>
@@ -335,7 +335,7 @@ const ContratoEFPage = () => {
                                         <p className="text-2xl font-black">
                                             {data.plano_parcelas}x{" "}
                                             <span className="text-muted-foreground font-bold text-lg">R$</span>{" "}
-                                            {data.plano_mensalidade?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                            {data.plano_mensalidade?.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </p>
                                     </div>
                                     <div>
@@ -439,7 +439,7 @@ const ContratoEFPage = () => {
                                                             <td className="px-6 py-4 font-medium capitalize">{p.ref}</td>
                                                             <td className="px-6 py-4 text-muted-foreground">{p.vencimento}</td>
                                                             <td className="px-6 py-4 font-mono font-bold text-foreground">
-                                                                R$ {p.valor?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                                                R$ {p.valor?.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </td>
                                                             <td className="px-6 py-4 text-right">
                                                                 <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase", st.className)}>

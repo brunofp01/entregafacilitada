@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ShieldCheck, Clock, AlertTriangle, Loader2, FileText,
-  CreditCard, Key, MessageSquare, ChevronRight, CheckCircle2,
+  CreditCard, Key, MessageSquare, ChevronRight, CheckCircle2, User,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
@@ -30,27 +30,36 @@ const quickLinks = [
     Icon: FileText,
     label: "Meu Contrato",
     desc: "Plano, imóvel e documentos EF",
-    color: "from-secondary/10 to-secondary/5",
-    iconBg: "bg-secondary/10",
-    iconColor: "text-secondary",
+    color: "from-blue-600/10 to-blue-600/5",
+    iconBg: "bg-blue-600/10",
+    iconColor: "text-blue-600",
   },
   {
     href: "/inquilino/solicitacao",
     Icon: Key,
     label: "Solicitar Entrega",
     desc: "Inicie a entrega do imóvel",
-    color: "from-orange-500/10 to-orange-500/5",
-    iconBg: "bg-orange-500/10",
-    iconColor: "text-orange-500",
+    color: "from-emerald-600/10 to-emerald-600/5",
+    iconBg: "bg-emerald-600/10",
+    iconColor: "text-emerald-600",
   },
   {
     href: "/inquilino/atendimento",
     Icon: MessageSquare,
     label: "Atendimento",
-    desc: "Fale com nossa equipe e FAQ",
-    color: "from-violet-500/10 to-violet-500/5",
-    iconBg: "bg-violet-500/10",
-    iconColor: "text-violet-500",
+    desc: "Suporte e Central de Ajuda",
+    color: "from-violet-600/10 to-violet-600/5",
+    iconBg: "bg-violet-600/10",
+    iconColor: "text-violet-600",
+  },
+  {
+    href: "/inquilino/perfil",
+    Icon: User,
+    label: "Meu Perfil",
+    desc: "Dados pessoais e senha",
+    color: "from-amber-600/10 to-amber-600/5",
+    iconBg: "bg-amber-600/10",
+    iconColor: "text-amber-600",
   },
 ];
 
@@ -153,7 +162,7 @@ const InquilinoDashboard = () => {
                   Plano: <span className="text-secondary uppercase">{inquilino.plano_nome}</span>
                 </span>
                 <span className="text-sm font-bold text-foreground/80">
-                  {inquilino.plano_parcelas}x R$ {inquilino.plano_mensalidade?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  {inquilino.plano_parcelas}x R$ {inquilino.plano_mensalidade?.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
             )}
