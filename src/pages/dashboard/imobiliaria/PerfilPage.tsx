@@ -148,15 +148,15 @@ const PerfilPage = () => {
                 ) : (
                   <Building2 className="w-12 h-12 text-muted-foreground" />
                 )}
-                <Label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity z-10">
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity z-10">
                   <Upload className="text-white w-6 h-6" />
                   <input
                     type="file"
                     accept="image/*"
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
                     onChange={handleLogoUpload}
                   />
-                </Label>
+                </div>
               </div>
               <p className="text-xs text-center text-muted-foreground italic">Clique para alterar a logo</p>
             </CardContent>
