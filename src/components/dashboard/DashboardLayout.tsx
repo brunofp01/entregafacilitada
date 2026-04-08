@@ -131,9 +131,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
       >
         <div className="h-16 flex items-center px-6 border-b border-border">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center text-secondary-foreground font-bold">
-              EF
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
             {isSidebarOpen && (
               <span className="font-heading font-bold text-lg text-foreground truncate">
                 Entrega <span className="text-secondary">Facilitada</span>
@@ -187,7 +185,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
               {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             <div className="md:hidden flex items-center gap-2">
-              <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center text-secondary-foreground font-bold">EF</div>
+              <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
               <span className="font-bold text-foreground">Entrega Facilitada</span>
             </div>
           </div>
