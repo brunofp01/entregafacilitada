@@ -38,7 +38,7 @@ const ContratacaoPage = () => {
     const [imovel, setImovel] = useState({ cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "", area: "" });
     const [parametrosGlobais, setParametrosGlobais] = useState<any>(null);
     const [compositionItems, setCompositionItems] = useState<any[]>([]);
-    const [selectedPlanId, setSelectedPlanId] = useState<string>("completo");
+    const [selectedPlanId, setSelectedPlanId] = useState<string>("basico");
     const [parcelas, setParcelas] = useState<number>(24);
     const [contratoFile, setContratoFile] = useState<File | null>(null);
     const [vistoriaTipo, setVistoriaTipo] = useState<"plataforma" | "upload">("upload");
@@ -546,7 +546,7 @@ const ContratacaoPage = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Sessão 3: Planos de Proteção */}
+                    {/* Sessão 3: Plano Entrega Facilitada */}
                     <Card className={`border-secondary/30 bg-secondary/5 backdrop-blur-sm transition-all duration-500 shadow-xl ${!imovel.area || parseFloat(imovel.area) <= 0 ? 'opacity-60 saturate-50' : 'scale-[1.01]'}`}>
                         <CardHeader className="pb-4 border-b border-secondary/20">
                             <div className="flex items-center gap-3">
@@ -554,24 +554,21 @@ const ContratacaoPage = () => {
                                     <ShieldCheck className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                    <CardTitle>Selecione o Plano Ideal</CardTitle>
-                                    <CardDescription>O valor do plano é ajustado automaticamente de acordo com o M² do imóvel fornecido acima.</CardDescription>
+                                    <CardTitle>Plano Entrega Facilitada</CardTitle>
+                                    <CardDescription>O valor do plano é ajustado automaticamente baseado na metragem do imóvel.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6">
                             {!imovel.area || parseFloat(imovel.area) <= 0 ? (
                                 <div className="text-center py-6">
-                                    <p className="text-muted-foreground font-semibold">Insira primeiramente a <span className="text-secondary uppercase">Metragem (m²)</span> do imóvel acima para gerar as propostas atuarial precisas.</p>
+                                    <p className="text-muted-foreground font-semibold">Insira primeiramente a <span className="text-secondary uppercase">Metragem (m²)</span> do imóvel acima para gerar o valor da proteção.</p>
                                 </div>
                             ) : !parametrosGlobais ? (
                                 <div className="flex items-center justify-center py-6 text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Calculando cotação em tempo real...</div>
                             ) : (
-                                <div className="grid md:grid-cols-2 gap-4 or gap-6">
-                                    {parametrosGlobais.plans?.map((plan: any) => {
-                                        const isBasico = plan.id === 'basico';
-                                        const activeBg = selectedPlanId === plan.id ? (isBasico ? 'ring-2 ring-offset-2 ring-blue-500' : 'ring-2 ring-offset-2 ring-amber-500') : 'opacity-70 hover:opacity-100 border-border shadow-none scale-[0.98]';
-
+                                <div className="max-w-2xl mx-auto">
+                                    {parametrosGlobais.plans?.filter((p: any) => p.id === 'basico').map((plan: any) => {
                                         // Formules
                                         const areaNumber = parseFloat(imovel.area) || 0;
                                         const pp = calcPp(plan.params, areaNumber);
@@ -580,60 +577,44 @@ const ContratacaoPage = () => {
                                         const finalPc = calcPc(pp, ms, co);
 
                                         return (
-                                            <div
-                                                key={plan.id}
-                                                onClick={() => setSelectedPlanId(plan.id)}
-                                                className={`relative cursor-pointer rounded-2xl border ${isBasico ? 'border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10' : 'border-amber-500/20 bg-amber-50/50 dark:bg-amber-900/10'} p-5 transition-all duration-300 shadow-lg ${activeBg}`}
-                                            >
-                                                {/* Badge Selection */}
-                                                {selectedPlanId === plan.id && (
-                                                    <div className={`absolute top-0 right-0 ${isBasico ? 'bg-blue-500' : 'bg-amber-500'} text-white px-3 py-1 text-xs font-bold rounded-bl-xl shadow-md z-10 flex items-center gap-1.5`}>
-                                                        <ShieldCheck className="w-3.5 h-3.5" /> Selecionado
-                                                    </div>
-                                                )}
-
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className={`font-black text-lg md:text-xl uppercase tracking-wide ${isBasico ? 'text-blue-500' : 'text-amber-500'}`}>
-                                                        {plan.label}
-                                                    </div>
+                                            <div key={plan.id} className="relative rounded-2xl border-2 border-secondary bg-white p-8 transition-all duration-300 shadow-lg text-center">
+                                                <div className="absolute top-0 right-0 bg-secondary text-white px-4 py-1 text-xs font-bold rounded-bl-xl shadow-md">
+                                                    Plano de Proteção Ativo
                                                 </div>
 
-                                                {/* Installment Highlight */}
-                                                <div className="mb-6 flex flex-col items-center justify-center p-5 bg-background/80 rounded-xl border border-border/50 shadow-sm relative overflow-hidden">
-                                                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Mensalidade Fixa</div>
-                                                    <div className={`text-4xl md:text-5xl font-extrabold tracking-tighter ${isBasico ? 'text-blue-600 dark:text-blue-400' : 'text-amber-500'} flex items-baseline gap-1`}>
+                                                <div className="mb-6">
+                                                    <div className="text-sm font-black uppercase tracking-widest text-secondary mb-2">Plano Entrega Facilitada</div>
+                                                    <div className="text-4xl md:text-5xl font-extrabold tracking-tighter text-foreground flex items-baseline justify-center gap-1">
                                                         <span className="text-xl font-bold">{parcelas}x</span>
                                                         <span className="text-xl font-bold ml-1">R$</span>
                                                         {(finalPc / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </div>
-                                                    <div className="flex gap-2 mt-5">
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => { e.stopPropagation(); setParcelas(12); }}
-                                                            className={`px-4 py-1.5 text-xs font-black uppercase rounded-full transition-colors ${parcelas === 12 ? (isBasico ? 'bg-blue-600 text-white shadow-md' : 'bg-amber-500 text-white shadow-md') : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
-                                                        >
-                                                            12 Meses
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => { e.stopPropagation(); setParcelas(24); }}
-                                                            className={`px-4 py-1.5 text-xs font-black uppercase rounded-full transition-colors ${parcelas === 24 ? (isBasico ? 'bg-blue-600 text-white shadow-md' : 'bg-amber-500 text-white shadow-md') : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
-                                                        >
-                                                            24 Meses
-                                                        </button>
-                                                    </div>
                                                 </div>
 
-                                                {/* Composition Items */}
-                                                <div className="space-y-2.5">
-                                                    {compositionItems.filter(item => isBasico ? item.in_basico : item.in_completo).map(item => (
-                                                        <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg border ${isBasico ? 'bg-blue-500/10 border-blue-500/20' : 'bg-amber-500/10 border-amber-500/30'}`}>
-                                                            <div className={`shrink-0 rounded-full w-5 h-5 flex items-center justify-center text-white ${isBasico ? 'bg-slate-800 dark:bg-blue-500' : 'bg-amber-500'}`}>
-                                                                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                                            </div>
-                                                            <span className="text-sm font-bold text-foreground/80 leading-tight">
-                                                                {item.nome}
-                                                            </span>
+                                                <div className="flex justify-center gap-3 mb-8">
+                                                    <Button
+                                                        type="button"
+                                                        variant={parcelas === 12 ? "default" : "outline"}
+                                                        onClick={() => setParcelas(12)}
+                                                        className={`h-10 px-6 rounded-full font-bold ${parcelas === 12 ? 'bg-secondary text-secondary-foreground' : ''}`}
+                                                    >
+                                                        12 Meses
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant={parcelas === 24 ? "default" : "outline"}
+                                                        onClick={() => setParcelas(24)}
+                                                        className={`h-10 px-6 rounded-full font-bold ${parcelas === 24 ? 'bg-secondary text-secondary-foreground' : ''}`}
+                                                    >
+                                                        24 Meses
+                                                    </Button>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                                                    {compositionItems.filter(item => item.in_basico).map(item => (
+                                                        <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
+                                                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                                            <span className="text-xs font-bold text-foreground/80 leading-tight">{item.nome}</span>
                                                         </div>
                                                     ))}
                                                 </div>

@@ -18,7 +18,6 @@ export interface CompositionItem {
     temValorMinimo: boolean;
     valorMinimo: string;
     inBasico: boolean;
-    inCompleto: boolean;
 }
 
 interface CostCompositionSubpageProps {
@@ -26,7 +25,7 @@ interface CostCompositionSubpageProps {
     onTotalsChange: (basicoMat: number, basicoLabor: number, completoMat: number, completoLabor: number) => void;
 }
 
-const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
+const emptyItem: Omit<CompositionItem, "id" | "inBasico"> = {
     nome: "",
     indiceSinapi: "",
     probabilidade: "",
@@ -39,7 +38,7 @@ const emptyItem: Omit<CompositionItem, "id" | "inBasico" | "inCompleto"> = {
 export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ area, onTotalsChange }) => {
     const [items, setItems] = useState<CompositionItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [formItem, setFormItem] = useState<Omit<CompositionItem, "id" | "inBasico" | "inCompleto">>(emptyItem);
+    const [formItem, setFormItem] = useState<Omit<CompositionItem, "id" | "inBasico">>(emptyItem);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -59,8 +58,7 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                     valorReferencia: d.valor_referencia?.toString() || "",
                     temValorMinimo: d.tem_valor_minimo || false,
                     valorMinimo: d.valor_minimo?.toString() || "",
-                    inBasico: d.in_basico,
-                    inCompleto: d.in_completo
+                    inBasico: d.in_basico
                 })));
             }
             setIsLoading(false);
@@ -69,7 +67,7 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
     }, []);
 
     // Calc helper
-    const calculateItemValues = (item: Omit<CompositionItem, "id" | "inBasico" | "inCompleto">) => {
+    const calculateItemValues = (item: Omit<CompositionItem, "id" | "inBasico">) => {
         const indice = parseFloat(item.indiceSinapi) || 0;
         const prob = parseFloat(item.probabilidade) || 0;
         const rend = parseFloat(item.rendimento) || 1; // prevent div by zero safely
@@ -123,8 +121,7 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         } else {
             const { data, error } = await supabase.from('cost_composition_items').insert([{
                 ...dbPayload,
-                in_basico: false,
-                in_completo: false
+                in_basico: false
             }]).select();
 
             if (error || !data) {
@@ -134,8 +131,7 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                 setItems(prev => [...prev, {
                     ...formItem,
                     id: inserted.id,
-                    inBasico: inserted.in_basico,
-                    inCompleto: inserted.in_completo
+                    inBasico: inserted.in_basico
                 }]);
                 toast.success("Item cadastrado!");
                 setFormItem(emptyItem);
@@ -172,15 +168,15 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
         }
     };
 
-    const togglePlan = async (id: string, plan: "inBasico" | "inCompleto") => {
+    const togglePlan = async (id: string, plan: "inBasico") => {
         const item = items.find(i => i.id === id);
         if (!item) return;
 
         const newValue = !item[plan];
         setItems(prev => prev.map(i => i.id === id ? { ...i, [plan]: newValue } : i));
 
-        const dbField = plan === "inBasico" ? "in_basico" : "in_completo";
-        const { error } = await supabase.from('cost_composition_items').update({ [dbField]: newValue }).eq('id', id);
+        const dbField = "in__basico"; // Mapping kept as in_basico
+        const { error } = await supabase.from('cost_composition_items').update({ in_basico: newValue }).eq('id', id);
         if (error) {
             toast.error("Erro ao sincronizar com o banco.");
             // Reverter em caso de erro
@@ -191,7 +187,6 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
     // Calculate plan totals
     const totals = useMemo(() => {
         let basicoMat = 0, basicoLabor = 0;
-        let completoMat = 0, completoLabor = 0;
 
         items.forEach(item => {
             const { mo, mat } = calculateItemValues(item);
@@ -199,18 +194,14 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                 basicoMat += mat;
                 basicoLabor += mo;
             }
-            if (item.inCompleto) {
-                completoMat += mat;
-                completoLabor += mo;
-            }
         });
 
-        return { basicoMat, basicoLabor, completoMat, completoLabor };
+        return { basicoMat, basicoLabor };
     }, [items, area]);
 
     useEffect(() => {
-        onTotalsChange(totals.basicoMat, totals.basicoLabor, totals.completoMat, totals.completoLabor);
-    }, [totals.basicoMat, totals.basicoLabor, totals.completoMat, totals.completoLabor, onTotalsChange]);
+        onTotalsChange(totals.basicoMat, totals.basicoLabor, 0, 0);
+    }, [totals.basicoMat, totals.basicoLabor, onTotalsChange]);
 
     const { totalServico, execucaoPrevista, mo: moPreview, mat: matPreview } = calculateItemValues(formItem);
 
@@ -437,12 +428,12 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                     </Card>
 
                     {/* Checklists por Plano */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        {/* PLANO BÁSICO */}
+                    <div className="grid grid-cols-1 gap-4">
+                        {/* PLANO ENTREGA FACILITADA */}
                         <Card className="border-blue-500/30 bg-blue-500/5">
                             <CardHeader className="pb-2 border-b border-blue-500/10">
                                 <CardTitle className="text-sm font-extrabold text-blue-500 flex justify-between items-center">
-                                    PLANO BÁSICO
+                                    PLANO ENTREGA FACILITADA
                                     <span className="font-mono text-xs text-foreground bg-background px-2 py-0.5 rounded shadow-sm border">
                                         R$ {(totals.basicoMat + totals.basicoLabor).toFixed(2)}
                                     </span>
@@ -459,33 +450,6 @@ export const CostCompositionSubpage: React.FC<CostCompositionSubpageProps> = ({ 
                                         />
                                         <div className="text-sm leading-tight select-none">
                                             <span className={item.inBasico ? "font-semibold" : "text-muted-foreground"}>{item.nome}</span>
-                                        </div>
-                                    </label>
-                                ))}
-                            </CardContent>
-                        </Card>
-
-                        {/* PLANO COMPLETO */}
-                        <Card className="border-secondary/30 bg-secondary/5">
-                            <CardHeader className="pb-2 border-b border-secondary/10">
-                                <CardTitle className="text-sm font-extrabold text-secondary flex justify-between items-center">
-                                    PLANO COMPLETO
-                                    <span className="font-mono text-xs text-foreground bg-background px-2 py-0.5 rounded shadow-sm border">
-                                        R$ {(totals.completoMat + totals.completoLabor).toFixed(2)}
-                                    </span>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-3 space-y-2">
-                                {items.length === 0 && <span className="text-xs text-muted-foreground">Adicione itens para compor este plano.</span>}
-                                {items.map(item => (
-                                    <label key={item.id} className={`flex items-start gap-2 p-2 rounded border cursor-pointer transition-colors ${item.inCompleto ? "border-secondary/50 bg-secondary/10" : "border-transparent hover:bg-black/5 dark:hover:bg-white/5"}`}>
-                                        <Checkbox
-                                            checked={item.inCompleto}
-                                            onCheckedChange={() => togglePlan(item.id, "inCompleto")}
-                                            className="mt-0.5 data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
-                                        />
-                                        <div className="text-sm leading-tight select-none">
-                                            <span className={item.inCompleto ? "font-semibold" : "text-muted-foreground"}>{item.nome}</span>
                                         </div>
                                     </label>
                                 ))}

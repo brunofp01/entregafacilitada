@@ -29,7 +29,7 @@ const PublicCheckoutPage = () => {
     const [loading, setLoading] = useState(false);
     const [parametrosGlobais, setParametrosGlobais] = useState<any>(null);
     const [compositionItems, setCompositionItems] = useState<any[]>([]);
-    const [selectedPlanId, setSelectedPlanId] = useState<string>("completo");
+    const [selectedPlanId, setSelectedPlanId] = useState<string>("basico");
     const [parcelas, setParcelas] = useState<number>(24);
 
     // Formulário State pre-filled from lead capture
@@ -457,7 +457,7 @@ const PublicCheckoutPage = () => {
                         </div>
                     </div>
 
-                    {/* Step 3: Plano */}
+                    {/* Step 3: Plano Único */}
                     <Card className="border-secondary/30 bg-secondary/5 shadow-xl scale-[1.01] transition-all">
                         <CardHeader className="pb-4 border-b border-secondary/20 bg-secondary/10">
                             <div className="flex items-center gap-3">
@@ -465,31 +465,26 @@ const PublicCheckoutPage = () => {
                                     <Zap className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                    <CardTitle>Selecione o Plano de Proteção</CardTitle>
-                                    <CardDescription>O valor é ajustado automaticamente baseado na metragem informada.</CardDescription>
+                                    <CardTitle>Plano Entrega Facilitada</CardTitle>
+                                    <CardDescription>Proteção completa para a sua vistoria de saída.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6">
                             {!imovel.area || parseFloat(imovel.area) <= 0 ? (
                                 <div className="text-center py-6">
-                                    <p className="text-muted-foreground font-semibold">Insira a <span className="text-secondary uppercase">Metragem</span> acima para visualizar as propostas.</p>
+                                    <p className="text-muted-foreground font-semibold">Insira a <span className="text-secondary uppercase">Metragem</span> acima para visualizar sua proposta.</p>
                                 </div>
                             ) : !parametrosGlobais ? (
                                 <div className="flex items-center justify-center py-6 text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin mr-2" /> Calculando cotação...</div>
                             ) : (
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    {parametrosGlobais.plans?.map((plan: any) => {
-                                        const isBasico = plan.id === 'basico';
-                                        const activeBg = selectedPlanId === plan.id
-                                            ? (isBasico ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/50' : 'ring-2 ring-secondary border-secondary bg-secondary/10')
-                                            : 'opacity-70 hover:opacity-100 border-border bg-white shadow-none scale-[0.98]';
-
+                                <div className="max-w-md mx-auto">
+                                    {parametrosGlobais.plans?.filter((p: any) => p.id === 'basico').map((plan: any) => {
                                         // FORMULA SYNC
                                         const areaNumber = parseFloat(imovel.area) || 0;
                                         let dMat = 0; let dLabor = 0;
                                         compositionItems.forEach(item => {
-                                            if (plan.id === 'basico' ? item.in_basico : item.in_completo) {
+                                            if (item.in_basico) {
                                                 const totalServico = areaNumber * (item.indice_sinapi || 0);
                                                 const exec = totalServico * ((item.probabilidade || 0) / 100);
                                                 let mo = (item.rendimento || 1) > 0 ? (exec / item.rendimento) * (item.valor_referencia || 0) * 0.57 : 0;
@@ -499,40 +494,39 @@ const PublicCheckoutPage = () => {
                                             }
                                         });
                                         const uParams = plan.params.map((p: any) => {
-                                            if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: dMat.toString() };
-                                            if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: dLabor.toString() };
+                                            if (p.id === 'pb1') return { ...p, value: dMat.toString() };
+                                            if (p.id === 'pb2') return { ...p, value: dLabor.toString() };
                                             return p;
                                         });
                                         const pc = calcPc(calcPp(uParams, areaNumber), sumActive(parametrosGlobais.ms_params), sumActive(parametrosGlobais.co_params));
                                         const mensal = pc / (parametrosGlobais.installments || 24);
 
                                         return (
-                                            <div
-                                                key={plan.id}
-                                                onClick={() => setSelectedPlanId(plan.id)}
-                                                className={`relative cursor-pointer rounded-2xl border p-6 transition-all duration-300 shadow-lg ${activeBg}`}
-                                            >
-                                                {selectedPlanId === plan.id && (
-                                                    <div className={`absolute -top-3 -right-3 ${isBasico ? 'bg-blue-500' : 'bg-secondary'} text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg z-10 animate-in zoom-in-50 duration-300`}>
-                                                        <CheckCircle2 className="w-5 h-5" />
-                                                    </div>
-                                                )}
+                                            <div key={plan.id} className="rounded-2xl border-2 border-secondary bg-white p-8 text-center shadow-xl relative overflow-hidden">
+                                                <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground px-4 py-1 text-[10px] font-black uppercase tracking-widest">Recomendado</div>
 
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className={`p-2 rounded-lg ${isBasico ? 'bg-blue-100 text-blue-600' : 'bg-secondary/20 text-secondary'}`}>
-                                                        {isBasico ? <Zap className="w-5 h-5" /> : <Star className="w-5 h-5" />}
+                                                <div className="flex flex-col items-center mb-6">
+                                                    <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
+                                                        <ShieldCheck className="w-8 h-8 text-secondary" />
                                                     </div>
-                                                    <div className={`font-black uppercase tracking-tight ${isBasico ? 'text-blue-600' : 'text-secondary'}`}>
-                                                        {plan.label}
-                                                    </div>
+                                                    <h4 className="text-2xl font-heading font-black text-foreground uppercase tracking-tighter">Plano Entrega Facilitada</h4>
                                                 </div>
 
-                                                <div className="flex items-baseline gap-1 mb-1">
-                                                    <span className="text-muted-foreground text-xs font-bold">R$</span>
-                                                    <span className="text-3xl font-heading font-black">{mensal.toFixed(0)}</span>
-                                                    <span className="text-muted-foreground text-xs font-bold">/mês</span>
+                                                <div className="flex items-baseline justify-center gap-1 mb-2">
+                                                    <span className="text-muted-foreground text-sm font-bold uppercase">R$</span>
+                                                    <span className="text-5xl font-heading font-black text-secondary">{mensal.toFixed(0)}</span>
+                                                    <span className="text-muted-foreground text-sm font-bold">/mês</span>
                                                 </div>
-                                                <p className="text-[10px] text-muted-foreground font-medium italic">Proteção em 24 parcelas recorrentes</p>
+                                                <p className="text-xs text-muted-foreground font-bold mb-8 italic">Proteção garantida em 24 parcelas recorrentes</p>
+
+                                                <div className="space-y-3 text-left">
+                                                    {compositionItems.filter(item => item.in_basico).map(item => (
+                                                        <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
+                                                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                                            <span className="text-xs font-bold text-foreground/80">{item.nome}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         );
                                     })}

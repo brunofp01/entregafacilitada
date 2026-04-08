@@ -71,15 +71,11 @@ const statusBadge = (item: ClienteContrato) => {
 };
 
 const planIcon = (planoId?: string) => {
-    if (planoId === "completo") return <Star className="w-4 h-4 text-secondary" />;
-    if (planoId === "basico") return <Zap className="w-4 h-4 text-blue-500" />;
-    return <Package className="w-4 h-4 text-muted-foreground" />;
+    return <Zap className="w-4 h-4 text-blue-500" />;
 };
 
 const planColor = (planoId?: string) => {
-    if (planoId === "completo") return "text-secondary";
-    if (planoId === "basico") return "text-blue-500";
-    return "text-muted-foreground";
+    return "text-blue-500";
 };
 
 const fmtMoney = (v?: number) => v != null ? `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "—";
@@ -365,10 +361,10 @@ const PlanoGestaoPage = () => {
 
                 {/* ── Plan Breakdown ── */}
                 {Object.keys(kpis.byPlan).length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                         {Object.entries(kpis.byPlan).map(([nome, count]) => (
                             <div key={nome} className="flex items-center gap-3 p-3 bg-card/50 border border-border/40 rounded-xl">
-                                {nome.toLowerCase().includes("completo") ? <Star className="w-5 h-5 text-secondary shrink-0" /> : <Zap className="w-5 h-5 text-blue-500 shrink-0" />}
+                                <Zap className="w-5 h-5 text-blue-500 shrink-0" />
                                 <div>
                                     <p className="text-xs font-bold text-muted-foreground">{nome}</p>
                                     <p className="text-xl font-extrabold font-mono">{count} <span className="text-xs font-normal text-muted-foreground">cliente{count !== 1 ? 's' : ''}</span></p>
@@ -409,8 +405,7 @@ const PlanoGestaoPage = () => {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="todos">Todos os Planos</SelectItem>
-                            <SelectItem value="basico">Plano Básico</SelectItem>
-                            <SelectItem value="completo">Plano Completo</SelectItem>
+                            <SelectItem value="basico">Plano Entrega Facilitada</SelectItem>
                             <SelectItem value="sem">Sem Plano</SelectItem>
                         </SelectContent>
                     </Select>

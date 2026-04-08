@@ -32,12 +32,6 @@ const ppBasico: FormulaParam[] = [
     { id: "pb3", label: "Projeção INCC Acumulado", value: "8", unit: "percent", active: true },
 ];
 
-const ppCompleto: FormulaParam[] = [
-    { id: "pm1", label: "Custo de Material (Composição)", value: "0", unit: "currency", active: true, readonly: true },
-    { id: "pm2", label: "Custo de Mão de Obra (Composição)", value: "0", unit: "currency", active: true, readonly: true },
-    { id: "pm3", label: "Projeção INCC Acumulado", value: "10", unit: "percent", active: true },
-];
-
 const initialMs: FormulaParam[] = [
     { id: "ms1", label: "Margem de Lucro Esperado", value: "15", unit: "percent", active: true },
     { id: "ms2", label: "Fator de Risco Moral", value: "5", unit: "percent", active: true },
@@ -58,14 +52,9 @@ interface PlanConfig {
 
 const initialPlans: PlanConfig[] = [
     {
-        id: "basico", label: "Plano Básico", color: "text-blue-500",
+        id: "basico", label: "Plano Entrega Facilitada", color: "text-blue-500",
         bgColor: "bg-blue-500/10", borderColor: "border-blue-500/20",
-        icon: Zap, badge: "Entrada", params: ppBasico
-    },
-    {
-        id: "completo", label: "Plano Completo", color: "text-secondary",
-        bgColor: "bg-secondary/10", borderColor: "border-secondary/20",
-        icon: Star, badge: "Recomendado", params: ppCompleto
+        icon: Zap, badge: "Plano Único", params: ppBasico
     },
 ];
 
@@ -204,15 +193,6 @@ const PricingParametersPage = () => {
                 });
                 return changed ? { ...pl, params: newParams } : pl;
             }
-            if (pl.id === "completo") {
-                let changed = false;
-                const newParams = pl.params.map(p => {
-                    if (p.id === "pm1" && p.value !== cMatStr) { changed = true; return { ...p, value: cMatStr }; }
-                    if (p.id === "pm2" && p.value !== cLabStr) { changed = true; return { ...p, value: cLabStr }; }
-                    return p;
-                });
-                return changed ? { ...pl, params: newParams } : pl;
-            }
             return pl;
         }));
     }, []);
@@ -329,20 +309,8 @@ const PricingParametersPage = () => {
                             </div>
                         </div>
 
-                        {/* Seletor de plano */}
                         <div className="flex flex-wrap gap-3 mb-6">
-                            {plans.map(plan => {
-                                const PIcon = plan.icon;
-                                return (
-                                    <button key={plan.id} onClick={() => setSimPlan(plan.id)}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-sm transition-all ${simPlan === plan.id
-                                            ? `${plan.bgColor} ${plan.color} ${plan.borderColor} shadow-md scale-105`
-                                            : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-muted/60"
-                                            }`}>
-                                        <PIcon className="w-4 h-4" /> {plan.label}
-                                    </button>
-                                );
-                            })}
+                            <Badge className="bg-secondary/10 text-secondary border-secondary/20 px-4 py-2 text-sm font-black uppercase">Simulando: Plano Entrega Facilitada</Badge>
                         </div>
 
                         {/* Cards de resultado */}
@@ -369,32 +337,19 @@ const PricingParametersPage = () => {
                             </div>
                         )}
 
-                        {/* Comparativo */}
+                        {/* Resumo Dash */}
                         <div className="mt-6 pt-5 border-t border-border/30">
-                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-3">Comparativo de Planos</p>
-                            <div className="flex flex-col sm:flex-row gap-3 mb-3">
-                                {planPcs.map(plan => {
-                                    const PIcon = plan.icon;
-                                    return (
-                                        <div key={plan.id} className="flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl bg-background/50 border border-border/40 gap-1">
-                                            <div className={`flex items-center gap-1.5 ${plan.color}`}>
-                                                <PIcon className="w-3.5 h-3.5" />
-                                                <span className="text-xs font-bold">{plan.label}</span>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="font-mono font-extrabold text-base text-foreground">R$ {plan.pc.toFixed(2)}</div>
-                                                <div className="text-[10px] text-muted-foreground">valor total</div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
                             <div className="flex flex-col sm:flex-row gap-3">
                                 {planPcs.map(plan => (
-                                    <div key={plan.id} className={`flex-1 flex items-center justify-between sm:flex-col sm:items-center p-3 rounded-xl border gap-1 ${plan.bgColor} ${plan.borderColor}`}>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{installments}x de</span>
-                                        <span className={`font-mono font-extrabold text-lg ${plan.color}`}>R$ {plan.monthly.toFixed(2)}</span>
-                                        <span className="text-[10px] text-muted-foreground">/mês</span>
+                                    <div key={plan.id} className={`flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 ${plan.bgColor} ${plan.borderColor}`}>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido</span>
+                                            <span className={`font-mono font-extrabold text-3xl ${plan.color}`}>R$ {plan.monthly.toFixed(2)}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
+                                            <div className="font-heading font-black text-lg text-foreground">{installments}x Recorrentes</div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
