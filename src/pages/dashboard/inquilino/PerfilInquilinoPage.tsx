@@ -155,7 +155,14 @@ const PerfilInquilinoPage = () => {
                                     <Upload className="w-5 h-5 text-white mb-1" />
                                     <span className="text-[10px] font-bold text-white uppercase tracking-wider">Alterar</span>
                                 </label>
-                                <input id="avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
+                                <input
+                                    id="avatar-upload"
+                                    type="file"
+                                    className="hidden"
+                                    style={{ display: 'none' }}
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                />
                             </div>
                             <h3 className="font-bold text-lg leading-tight">{profile.full_name || "Cliente EF"}</h3>
                             <p className="text-sm text-muted-foreground mt-1 truncate max-w-full px-2">{profile.email}</p>

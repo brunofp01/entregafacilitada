@@ -53,7 +53,7 @@ const PerfilPage = () => {
 
     setLoading(true);
     toast.info("Otimizando logo (preservando transparência)...");
-    
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -151,7 +151,14 @@ const PerfilPage = () => {
                 <Label htmlFor="logo-upload" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                   <Upload className="text-white w-6 h-6" />
                 </Label>
-                <input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  style={{ display: 'none' }}
+                  onChange={handleLogoUpload}
+                />
               </div>
               <p className="text-xs text-center text-muted-foreground italic">Clique para alterar a logo</p>
             </CardContent>
@@ -164,28 +171,28 @@ const PerfilPage = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Nome Fantasia</Label>
-                <Input value={profile.nome_fantasia} onChange={e => setProfile({...profile, nome_fantasia: e.target.value})} placeholder="Nome da Imobiliária" />
+                <Input value={profile.nome_fantasia} onChange={e => setProfile({ ...profile, nome_fantasia: e.target.value })} placeholder="Nome da Imobiliária" />
               </div>
-              
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>CNPJ</Label>
-                  <Input value={profile.cnpj} onChange={e => setProfile({...profile, cnpj: e.target.value})} placeholder="00.000.000/0000-00" />
+                  <Input value={profile.cnpj} onChange={e => setProfile({ ...profile, cnpj: e.target.value })} placeholder="00.000.000/0000-00" />
                 </div>
                 <div className="space-y-2">
                   <Label>WhatsApp (Comercial)</Label>
-                  <Input value={profile.whatsapp} onChange={e => setProfile({...profile, whatsapp: e.target.value})} placeholder="(00) 00000-0000" />
+                  <Input value={profile.whatsapp} onChange={e => setProfile({ ...profile, whatsapp: e.target.value })} placeholder="(00) 00000-0000" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>E-mail Suporte</Label>
-                <Input value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})} type="email" placeholder="contato@imobiliaria.com" />
+                <Input value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} type="email" placeholder="contato@imobiliaria.com" />
               </div>
 
               <div className="space-y-2">
                 <Label>Endereço Completo</Label>
-                <Input value={profile.endereco_completo} onChange={e => setProfile({...profile, endereco_completo: e.target.value})} placeholder="Av. Principal, 123 - Centro" />
+                <Input value={profile.endereco_completo} onChange={e => setProfile({ ...profile, endereco_completo: e.target.value })} placeholder="Av. Principal, 123 - Centro" />
               </div>
 
               <Button className="w-full bg-secondary font-bold gap-2 py-6 text-lg shadow-lg shadow-secondary/20" onClick={handleSave} disabled={loading}>
