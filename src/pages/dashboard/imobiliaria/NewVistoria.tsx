@@ -671,8 +671,7 @@ const NewVistoria = () => {
                     {!isViewOnly ? (
                       <div className="space-y-2">
                         <label
-                          htmlFor={`meter-${m.key}`}
-                          className="block cursor-pointer"
+                          className="block cursor-pointer relative"
                         >
                           <div className={`border-2 border-dashed border-border rounded-lg p-4 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors h-24 ${(medidores as any)[m.key].foto ? 'border-secondary/50 bg-secondary/5' : ''}`}>
                             {(medidores as any)[m.key].foto ? (
@@ -689,15 +688,13 @@ const NewVistoria = () => {
                               </>
                             )}
                           </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                            onChange={e => handleMeterUpload(m.key as any, e)}
+                          />
                         </label>
-                        <input
-                          id={`meter-${m.key}`}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          style={{ display: 'none' }}
-                          onChange={e => handleMeterUpload(m.key as any, e)}
-                        />
                       </div>
                     ) : (
                       (medidores as any)[m.key].foto && (
@@ -1070,24 +1067,19 @@ const NewVistoria = () => {
                                       </Label>
                                       <div className="flex gap-3 flex-wrap py-2 px-1">
                                         {!isViewOnly && (
-                                          <>
-                                            <label
-                                              htmlFor={`file-upload-${item.id}`}
-                                              className="shrink-0 w-24 h-24 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95"
-                                            >
-                                              <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
-                                              <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
-                                            </label>
+                                          <label
+                                            className="shrink-0 w-24 h-24 border-3 border-dashed border-muted rounded-2xl flex flex-col items-center justify-center bg-muted/20 hover:bg-secondary/10 hover:border-secondary/50 transition-all cursor-pointer group active:scale-95 relative"
+                                          >
+                                            <Camera className={`w-10 h-10 mb-1 ${!hasPhotos ? 'text-destructive' : 'text-muted-foreground group-hover:text-secondary'}`} />
+                                            <span className="text-[9px] font-black tracking-widest uppercase opacity-60">FOTO</span>
                                             <input
-                                              id={`file-upload-${item.id}`}
                                               type="file"
                                               multiple
                                               accept="image/*"
-                                              className="hidden"
-                                              style={{ display: 'none' }}
+                                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
                                               onChange={e => handleFileUpload(activeAmbienteId, item.id, e)}
                                             />
-                                          </>
+                                          </label>
                                         )}
 
                                         {item.fotos.map((foto, fIdx) => (
