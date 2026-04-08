@@ -337,18 +337,32 @@ const PricingParametersPage = () => {
                         {/* Resumo Dash */}
                         <div className="mt-6 pt-5 border-t border-border/30">
                             <div className="flex flex-col sm:flex-row gap-3">
-                                {planPcs.map(plan => (
-                                    <div key={plan.id} className={`flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 ${plan.bgColor} ${plan.borderColor}`}>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido</span>
-                                            <span className={`font-mono font-extrabold text-3xl ${plan.color}`}>R$ {plan.monthly.toFixed(2)}</span>
+                                {simData && (
+                                    <>
+                                        {/* 12x Card */}
+                                        <div className={`flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 ${simData.bgColor} ${simData.borderColor}`}>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido (12x)</span>
+                                                <span className={`font-mono font-extrabold text-3xl ${simData.color}`}>R$ {(simData.pc / 12).toFixed(2)}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
+                                                <div className="font-heading font-black text-lg text-foreground">12x Recorrentes</div>
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
-                                            <div className="font-heading font-black text-lg text-foreground">{installments}x Recorrentes</div>
+                                        {/* 24x Card */}
+                                        <div className={`flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 ${simData.bgColor} ${simData.borderColor}`}>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido (24x)</span>
+                                                <span className={`font-mono font-extrabold text-3xl ${simData.color}`}>R$ {(simData.pc / 24).toFixed(2)}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
+                                                <div className="font-heading font-black text-lg text-foreground">24x Recorrentes</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    </>
+                                )}
                             </div>
                         </div>
                     </CardContent>
@@ -467,8 +481,8 @@ const PricingParametersPage = () => {
                         <Settings2 className="w-5 h-5 text-muted-foreground" />
                         <h2 className="text-lg font-bold text-foreground">Prêmio Puro por Plano — Pp</h2>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {(plans || []).map(plan => {
+                    <div className="grid md:grid-cols-1 gap-6 max-w-2xl mx-auto">
+                        {(plans || []).filter(p => p.id === 'basico').map(plan => {
                             const PlanIcon = plan.icon;
                             const pp = calcPp(plan.params || [], simArea);
                             const pc = calcPc(pp, totalMs, totalCo);
@@ -479,7 +493,7 @@ const PricingParametersPage = () => {
                                         <div className="flex items-center justify-between mb-2">
                                             <div className={`flex items-center gap-2 ${plan.color}`}>
                                                 {PlanIcon && <PlanIcon className="w-5 h-5" />}
-                                                <CardTitle className="text-base">{plan.label}</CardTitle>
+                                                <CardTitle className="text-base">Plano Entrega Facilitada</CardTitle>
                                             </div>
                                             <Badge className={`text-[10px] font-bold ${plan.bgColor} ${plan.color} ${plan.borderColor}`}>{plan.badge}</Badge>
                                         </div>
