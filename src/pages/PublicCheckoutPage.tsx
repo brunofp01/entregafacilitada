@@ -252,7 +252,7 @@ const PublicCheckoutPage = () => {
                         }
                     });
 
-                    const updatedParams = plan.params.map((p: any) => {
+                    const updatedParams = (plan.params || []).map((p: any) => {
                         if (p.id === 'pb1' || p.id === 'pc1') return { ...p, value: dynamicMat.toString() };
                         if (p.id === 'pb2' || p.id === 'pc2') return { ...p, value: dynamicLabor.toString() };
                         return p;
@@ -493,7 +493,7 @@ const PublicCheckoutPage = () => {
                                                 dMat += mat; dLabor += mo;
                                             }
                                         });
-                                        const uParams = plan.params.map((p: any) => {
+                                        const uParams = (plan.params || []).map((p: any) => {
                                             if (p.id === 'pb1') return { ...p, value: dMat.toString() };
                                             if (p.id === 'pb2') return { ...p, value: dLabor.toString() };
                                             return p;
@@ -520,7 +520,7 @@ const PublicCheckoutPage = () => {
                                                 <p className="text-xs text-muted-foreground font-bold mb-8 italic">Proteção garantida em 24 parcelas recorrentes</p>
 
                                                 <div className="space-y-3 text-left">
-                                                    {compositionItems.filter(item => item.in_basico).map(item => (
+                                                    {(compositionItems || []).filter(item => item.in_basico).map(item => (
                                                         <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
                                                             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                                                             <span className="text-xs font-bold text-foreground/80">{item.nome}</span>

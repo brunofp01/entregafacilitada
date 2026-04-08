@@ -250,7 +250,7 @@ const ContratacaoPage = () => {
                 if (plan) {
                     planoObj = plan;
                     const areaN = parseFloat(imovel.area) || 0;
-                    const pp = calcPp(plan.params, areaN);
+                    const pp = calcPp(plan.params || [], areaN);
                     const ms = sumActive(parametrosGlobais.ms_params || []);
                     const co = sumActive(parametrosGlobais.co_params || []);
                     finalPc = calcPc(pp, ms, co);
@@ -571,7 +571,7 @@ const ContratacaoPage = () => {
                                     {parametrosGlobais.plans?.filter((p: any) => p.id === 'basico').map((plan: any) => {
                                         // Formules
                                         const areaNumber = parseFloat(imovel.area) || 0;
-                                        const pp = calcPp(plan.params, areaNumber);
+                                        const pp = calcPp(plan.params || [], areaNumber);
                                         const ms = sumActive(parametrosGlobais.ms_params || []);
                                         const co = sumActive(parametrosGlobais.co_params || []);
                                         const finalPc = calcPc(pp, ms, co);
@@ -611,7 +611,7 @@ const ContratacaoPage = () => {
                                                 </div>
 
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                                                    {compositionItems.filter(item => item.in_basico).map(item => (
+                                                    {(compositionItems || []).filter(item => item.in_basico).map(item => (
                                                         <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/5 border border-secondary/10">
                                                             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                                                             <span className="text-xs font-bold text-foreground/80 leading-tight">{item.nome}</span>

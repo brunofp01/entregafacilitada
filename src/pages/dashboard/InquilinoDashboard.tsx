@@ -140,7 +140,7 @@ const InquilinoDashboard = () => {
               <p className={cn("font-black text-lg", statusConfig.text)}>{statusConfig.label}</p>
               {inquilino && (
                 <span className="text-xs font-bold text-muted-foreground bg-background/60 px-3 py-1 rounded-full border border-border/50">
-                  Contrato #{inquilino.id.split("-")[0].toUpperCase()}
+                  Contrato #{inquilino?.id?.split("-")[0].toUpperCase() || "---"}
                 </span>
               )}
             </div>
