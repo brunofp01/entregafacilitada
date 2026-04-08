@@ -99,11 +99,13 @@ const ImobiliariasPage = () => {
                             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                             Atualizar
                         </Button>
-                        <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20" asChild>
-                            <Link to="/admin/imobiliarias/nova">
-                                Cadastrar Imobiliária
-                            </Link>
-                        </Button>
+                        {localStorage.getItem('userRole') === 'admin_master' && (
+                            <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20" asChild>
+                                <Link to="/admin/imobiliarias/nova">
+                                    Cadastrar Imobiliária
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </header>
 
