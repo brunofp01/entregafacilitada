@@ -123,8 +123,8 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     integrante_imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: ShoppingCart, label: "Contratar EF", href: "/imobiliaria/contratar" },
-      { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
       { icon: Users, label: "Gestão de Clientes EF", href: "/imobiliaria/inquilinos" },
+      { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
       { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
       { icon: User, label: "Meu Perfil", href: "/imobiliaria/meu-perfil" },
     ],
