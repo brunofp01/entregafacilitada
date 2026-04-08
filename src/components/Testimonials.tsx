@@ -56,21 +56,21 @@ const Testimonials = () => {
             text: "Eu estava apavorado com a vistoria de entrega. No apartamento anterior, paguei R$ 3.500 à vista só para pintar e tampar os furos. Com a Entrega Facilitada, eu paguei aos poucos durante o contrato e não tirei um centavo do bolso na hora de mudar. Perfeito.",
             name: "Marcelo T.",
             role: "Apartamento 3 quartos",
-            avatar: "/src/assets/testimonials/marcelo.png"
+            avatar: "/testimonials/marcelo.png"
         },
         {
             highlightText: "entregaram o laudo aprovado de primeira",
             text: "A imobiliária que eu alugava era famosa por reprovar tudo na saída. Deixei a chave com o pessoal da Entrega Facilitada e fui cuidar da minha casa nova. Eles entregaram o laudo aprovado de primeira. Recomendo de olhos fechados!",
             name: "Camila R.",
             role: "Casa 4 quartos",
-            avatar: "/src/assets/testimonials/camila.png"
+            avatar: "/testimonials/camila.png"
         },
         {
             highlightText: "A única coisa que eu fiz foi empacotar minhas caixas",
             text: "O pior da mudança é ter que voltar no apartamento velho para limpar e lidar com pedreiro. O plano cobriu toda a estética e a limpeza pesada. A única coisa que eu fiz foi empacotar minhas caixas.",
             name: "Fernando S.",
             role: "Studio",
-            avatar: "/src/assets/testimonials/fernando.png"
+            avatar: "/testimonials/fernando.png"
         }
     ];
 
