@@ -74,6 +74,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const menuItems = {
     admin: [
       { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
+      { icon: Building2, label: "Cadastrar Imobiliária", href: "/admin/imobiliarias/nova" },
       { icon: ShoppingCart, label: "Contratar EF", href: "/imobiliaria/contratar" },
       { icon: Calculator, label: "Parâmetros", href: "/admin/parametros" },
       { icon: Package, label: "Gestão de Planos", href: "/admin/planos" },

@@ -72,7 +72,7 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/admin/imobiliarias/nova" element={
-            <ProtectedRoute allowedRole="admin_master">
+            <ProtectedRoute allowedRole={["admin_master", "admin"]}>
               <NovaImobiliariaPage />
             </ProtectedRoute>
           } />

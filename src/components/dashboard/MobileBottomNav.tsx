@@ -13,8 +13,8 @@ export const MobileBottomNav = ({ role, onMenuOpen }: MobileBottomNavProps) => {
   const navItems = {
     admin: [
       { icon: LayoutDashboard, label: "Home", href: "/admin" },
+      { icon: Building2, label: "Nova Imob", href: "/admin/imobiliarias/nova" },
       { icon: Building2, label: "Imobs", href: "/admin/imobiliarias" },
-      { icon: Users, label: "Users", href: "/admin/usuarios" },
     ],
     admin_master: [
       { icon: LayoutDashboard, label: "Home", href: "/admin" },
