@@ -297,7 +297,7 @@ const PricingParametersPage = () => {
                             <Slider
                                 value={[simArea]}
                                 onValueChange={v => setSimArea(v[0])}
-                                min={20} max={300} step={5}
+                                min={20} max={300} step={1}
                                 className="[&_[role=slider]]:bg-secondary [&_[role=slider]]:border-secondary [&_.relative>div]:bg-secondary"
                             />
                             <div className="flex justify-between mt-1">
@@ -340,10 +340,10 @@ const PricingParametersPage = () => {
                                 {simData && (
                                     <>
                                         {/* 12x Card */}
-                                        <div className={`flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 ${simData.bgColor} ${simData.borderColor}`}>
+                                        <div className="flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 bg-violet-500/10 border-violet-500/20">
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido (12x)</span>
-                                                <span className={`font-mono font-extrabold text-3xl ${simData.color}`}>R$ {(simData.pc / 12).toFixed(2)}</span>
+                                                <span className="font-mono font-extrabold text-3xl text-violet-500">R$ {(simData.pc / 12).toFixed(2)}</span>
                                             </div>
                                             <div className="text-right">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
@@ -375,46 +375,6 @@ const PricingParametersPage = () => {
                         <h2 className="text-lg font-bold text-foreground">Parâmetros Comuns a Todos os Planos</h2>
                     </div>
 
-                    {/* Número de Parcelas */}
-                    <div className="mb-6">
-                        <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-md">
-                            <CardHeader className="pb-3 border-b border-border/30">
-                                <div className="flex items-center gap-2">
-                                    <CalendarDays className="w-5 h-5 text-violet-500" />
-                                    <CardTitle className="text-base">Número de Parcelas</CardTitle>
-                                </div>
-                                <CardDescription className="text-xs">
-                                    Divide o Pc final por este número para calcular a mensalidade. Aplica-se a todos os planos.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="pt-4">
-                                <div className="flex items-center gap-6">
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <label className="text-sm font-semibold text-foreground">Opções de Parcelamento</label>
-                                            <span className="font-mono font-bold text-violet-500 text-lg">{installments}x</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 w-full">
-                                            <Button
-                                                variant={installments === 12 ? "default" : "outline"}
-                                                className={`flex-1 transition-all ${installments === 12 ? "bg-violet-500 hover:bg-violet-600 text-white shadow-md shadow-violet-500/20" : "border-border/50 hover:bg-black/5 dark:hover:bg-white/5"}`}
-                                                onClick={() => { setInstallments(12); touch(); }}
-                                            >
-                                                12 Parcelas
-                                            </Button>
-                                            <Button
-                                                variant={installments === 24 ? "default" : "outline"}
-                                                className={`flex-1 transition-all ${installments === 24 ? "bg-violet-500 hover:bg-violet-600 text-white shadow-md shadow-violet-500/20" : "border-border/50 hover:bg-black/5 dark:hover:bg-white/5"}`}
-                                                onClick={() => { setInstallments(24); touch(); }}
-                                            >
-                                                24 Parcelas
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                         {/* Ms */}
