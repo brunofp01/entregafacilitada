@@ -199,9 +199,7 @@ const styles = StyleSheet.create({
   },
   itemContent: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    paddingTop: 2,
   },
   itemName: {
     fontSize: 9,
@@ -212,6 +210,12 @@ const styles = StyleSheet.create({
   itemObs: {
     fontSize: 9,
     color: '#475569',
+    lineHeight: 1.4,
+  },
+  photoRefsText: {
+    fontSize: 8,
+    color: '#3b82f6',
+    fontWeight: 'bold',
   },
   photoGrid: {
     flexDirection: 'row',
@@ -451,8 +455,8 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           {data.ambientes.map((ambiente, aIdx) => {
             let internalPhotoCounter = 0;
             return (
-              <View key={aIdx} style={{ marginBottom: 10 }} wrap={false}>
-                <View style={styles.sectionDivider}>
+              <View key={aIdx} style={{ marginBottom: 20 }}>
+                <View style={[styles.sectionDivider, { marginTop: aIdx === 0 ? 0 : 30 }]}>
                   <Text style={styles.sectionTitle}>{ambiente.nome}</Text>
                 </View>
 
@@ -470,29 +474,29 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                     };
                     const colors = getStatusColor(item.estado);
 
-                    const photoRefs = [];
+                    const itemPhotos = [];
                     if (item.fotos.length > 0) {
                       for (let p = 0; p < item.fotos.length; p++) {
                         internalPhotoCounter++;
-                        photoRefs.push(`FOTO ${internalPhotoCounter}`);
+                        itemPhotos.push(`FOTO ${internalPhotoCounter}`);
                       }
                     }
 
                     return (
-                      <View key={iIdx} style={styles.itemRow}>
+                      <View key={iIdx} style={styles.itemRow} wrap={false}>
                         <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
                           <Text style={{ color: colors.text }}>{item.estado.toUpperCase()}</Text>
                         </View>
                         <View style={styles.itemContent}>
-                          <Text style={styles.itemName}>{item.nome}:</Text>
                           <Text style={styles.itemObs}>
+                            <Text style={styles.itemName}>{item.nome}: </Text>
                             Obs: {item.observacao || 'Nenhuma observação técnica.'}
+                            {itemPhotos.length > 0 && (
+                              <Text style={styles.photoRefsText}>
+                                {" "}(Ver {itemPhotos.join(', ')})
+                              </Text>
+                            )}
                           </Text>
-                          {photoRefs.length > 0 && (
-                            <Text style={{ fontSize: 8, color: '#3b82f6', fontWeight: 'bold', marginLeft: 4 }}>
-                              (Ver {photoRefs.join(', ')})
-                            </Text>
-                          )}
                         </View>
                       </View>
                     );
@@ -508,7 +512,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                         item.fotos.map((foto, fIdx) => {
                           gridCounter++;
                           return (
-                            <View key={`${item.id}-${fIdx}`} style={styles.photoContainer}>
+                            <View key={`${item.id}-${fIdx}`} style={styles.photoContainer} wrap={false}>
                               <Image src={foto} style={styles.photo} />
                               <View style={styles.photoLegendBox}>
                                 <Text style={styles.photoLegend}>FOTO {gridCounter} - {item.nome.toUpperCase()}</Text>
