@@ -16,37 +16,66 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20 40',
+    padding: '25 40',
     backgroundColor: '#F8FAFC',
     borderBottom: '1pt solid #E2E8F0',
   },
-  coBranding: {
+  partnerSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 15,
   },
-  logoEf: {
-    width: 24,
-    height: 24,
-    objectFit: 'contain',
-  },
-  logoPartner: {
+  partnerLogo: {
     width: 100,
-    height: 45,
+    height: 50,
     objectFit: 'contain',
   },
-  headerText: {
-    textAlign: 'right',
+  partnerInfo: {
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
-  headerTitle: {
+  agencyName: {
     fontSize: 10,
     fontWeight: 'bold',
     color: '#0F172A',
+    marginBottom: 2,
   },
-  headerSubtitle: {
+  agencyDetails: {
     fontSize: 7,
-    color: '#64748B',
-    marginTop: 2,
+    color: '#475569',
+    lineHeight: 1.3,
+  },
+  techSection: {
+    alignItems: 'flex-end',
+  },
+  techLabel: {
+    fontSize: 7,
+    color: '#94A3B8',
+    marginBottom: 4,
+  },
+  brandingEf: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  logoEf: {
+    width: 16,
+    height: 16,
+    objectFit: 'contain',
+  },
+  brandTextEf: {
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  brandTextPart2: {
+    color: '#F6A823',
+  },
+  efUrl: {
+    fontSize: 8,
+    color: '#F6A823',
+    fontWeight: 'bold',
+    textDecoration: 'none',
   },
   docHeader: {
     marginTop: 20,
@@ -155,32 +184,34 @@ const styles = StyleSheet.create({
   },
   itemRow: {
     flexDirection: 'row',
-    padding: '10 15',
+    padding: '8 15',
     borderBottom: '0.5pt solid #F1F5F9',
     alignItems: 'center',
   },
   statusBadge: {
-    width: 70,
+    width: 65,
     padding: '4 0',
     textAlign: 'center',
     borderRadius: 6,
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: 'bold',
     marginRight: 15,
   },
   itemContent: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   itemName: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
-    color: '#1E293B',
+    color: '#0F172A',
+    textTransform: 'uppercase',
   },
   itemObs: {
-    fontSize: 8,
-    color: '#64748B',
-    marginTop: 2,
-    fontStyle: 'italic',
+    fontSize: 9,
+    color: '#475569',
   },
   photoGrid: {
     flexDirection: 'row',
@@ -213,11 +244,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   promoBanner: {
-    marginTop: 40,
     padding: 30,
     backgroundColor: '#0F172A',
     borderRadius: 16,
     color: '#FFFFFF',
+    marginTop: 20,
   },
   promoTitle: {
     fontSize: 16,
@@ -342,20 +373,35 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
   return (
     <Document title={`Laudo de Vistoria - ${data.rua}`}>
       <Page size="A4" style={styles.page}>
-        {/* Novo Cabeçalho Co-Branding */}
+        {/* Cabeçalho Bifurcado v4 */}
         <View style={styles.header}>
-          <View style={styles.coBranding}>
-            <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.logoEf} />
-            <View style={{ width: 1, height: 20, backgroundColor: '#CBD5E1' }} />
+          {/* Lado Esquerdo - O Protagonista B2B */}
+          <View style={styles.partnerSection}>
             {data.perfil?.logo_url ? (
-              <Image src={data.perfil.logo_url} style={styles.logoPartner} />
+              <Image src={data.perfil.logo_url} style={styles.partnerLogo} />
             ) : (
-              <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#64748B' }}>{data.perfil?.nome_fantasia}</Text>
+              <View style={[styles.partnerLogo, { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center', borderRadius: 8 }]}>
+                <Text style={{ fontSize: 8, color: '#94A3B8', fontWeight: 'bold' }}>LOGO</Text>
+              </View>
             )}
+            <View style={styles.partnerInfo}>
+              <Text style={styles.agencyName}>{data.perfil?.nome_fantasia || 'Imobiliária Parceira'}</Text>
+              <Text style={styles.agencyDetails}>CNPJ: {data.perfil?.cnpj || 'Consulte Imobiliária'}</Text>
+              <Text style={styles.agencyDetails}>{data.perfil?.endereco_completo || 'Endereço não informado'}</Text>
+              <Text style={styles.agencyDetails}>{data.perfil?.email || 'Contato via sistema'}</Text>
+            </View>
           </View>
-          <View style={styles.headerText}>
-            <Text style={styles.headerTitle}>{data.perfil?.nome_fantasia || 'Imobiliária Parceira'}</Text>
-            <Text style={styles.headerSubtitle}>Laudo gerado via tecnologia Entrega Facilitada</Text>
+
+          {/* Lado Direito - O Selo de Tecnologia */}
+          <View style={styles.techSection}>
+            <Text style={styles.techLabel}>Laudo gerado via tecnologia Entrega Facilitada</Text>
+            <View style={styles.brandingEf}>
+              <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.logoEf} />
+              <Text style={styles.brandTextEf}>
+                Entrega <Text style={styles.brandTextPart2}>Facilitada</Text>
+              </Text>
+            </View>
+            <Text style={styles.efUrl}>entregafacilitada.vercel.app</Text>
           </View>
         </View>
 
@@ -421,7 +467,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                   <Text style={styles.sectionTitle}>{ambiente.nome}</Text>
                 </View>
 
-                {/* Itens do Ambiente */}
+                {/* Itens do Ambiente v4 (Clínico/Legal) */}
                 <View>
                   {ambiente.itens.map((item, iIdx) => {
                     const getStatusColor = (status: string) => {
@@ -441,8 +487,12 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                           <Text style={{ color: colors.text }}>{item.estado.toUpperCase()}</Text>
                         </View>
                         <View style={styles.itemContent}>
-                          <Text style={styles.itemName}>{item.nome}</Text>
-                          {item.observacao && <Text style={styles.itemObs}>{item.observacao}</Text>}
+                          <Text style={styles.itemName}>
+                            {item.nome}:
+                          </Text>
+                          <Text style={styles.itemObs}>
+                            Obs: {item.observacao || 'Nenhuma observação técnica.'}
+                          </Text>
                         </View>
                       </View>
                     );
@@ -470,9 +520,11 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
               </View>
             );
           })}
+        </View>
 
-          {/* Página 4: Fluxo Entrega Facilitada (Sincronizado) */}
-          <View style={styles.promoBanner} wrap={false}>
+        {/* Página de Marketing (Forçar Quebra de Página) */}
+        <View break style={{ padding: '40 40 0 40' }}>
+          <View style={styles.promoBanner}>
             <Text style={styles.promoTitle}>O jeito inteligente de encerrar seu contrato</Text>
 
             <View style={styles.timelineItem}>
