@@ -364,231 +364,251 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           if (item.fotos[i] === items.find(it => it.id === item.id).fotos[photoIdx] && item.id === item.id) {
             // Este não é o jeito mais robusto de achar, vamos simplificar
           }
-        }
-      }
-    }
-    return globalCounter;
-  };
+          return (
+            <Document title={`Laudo de Vistoria - ${data.rua}`}>
+              <Page size="A4" style={styles.page}>
+                {/* Cabeçalho Bifurcado v4 com Link Clicável */}
+                <View style={styles.header}>
+                  {/* Lado Esquerdo - O Protagonista B2B */}
+                  <View style={styles.partnerSection}>
+                    {data.perfil?.logo_url ? (
+                      <Image src={data.perfil.logo_url} style={styles.partnerLogo} />
+                    ) : (
+                      <View style={[styles.partnerLogo, { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center', borderRadius: 8 }]}>
+                        <Text style={{ fontSize: 8, color: '#94A3B8', fontWeight: 'bold' }}>LOGO</Text>
+                      </View>
+                    )}
+                    <View style={styles.partnerInfo}>
+                      <Text style={styles.agencyName}>{data.perfil?.nome_fantasia || 'Imobiliária Parceira'}</Text>
+                      <Text style={styles.agencyDetails}>CNPJ: {data.perfil?.cnpj || 'Consulte Imobiliária'}</Text>
+                      <Text style={styles.agencyDetails}>{data.perfil?.endereco_completo || 'Endereço não informado'}</Text>
+                      <Text style={styles.agencyDetails}>{data.perfil?.email || 'Contato via sistema'}</Text>
+                    </View>
+                  </View>
 
-  return (
-    <Document title={`Laudo de Vistoria - ${data.rua}`}>
-      <Page size="A4" style={styles.page}>
-        {/* Cabeçalho Bifurcado v4 */}
-        <View style={styles.header}>
-          {/* Lado Esquerdo - O Protagonista B2B */}
-          <View style={styles.partnerSection}>
-            {data.perfil?.logo_url ? (
-              <Image src={data.perfil.logo_url} style={styles.partnerLogo} />
-            ) : (
-              <View style={[styles.partnerLogo, { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center', borderRadius: 8 }]}>
-                <Text style={{ fontSize: 8, color: '#94A3B8', fontWeight: 'bold' }}>LOGO</Text>
-              </View>
-            )}
-            <View style={styles.partnerInfo}>
-              <Text style={styles.agencyName}>{data.perfil?.nome_fantasia || 'Imobiliária Parceira'}</Text>
-              <Text style={styles.agencyDetails}>CNPJ: {data.perfil?.cnpj || 'Consulte Imobiliária'}</Text>
-              <Text style={styles.agencyDetails}>{data.perfil?.endereco_completo || 'Endereço não informado'}</Text>
-              <Text style={styles.agencyDetails}>{data.perfil?.email || 'Contato via sistema'}</Text>
-            </View>
-          </View>
-
-          {/* Lado Direito - O Selo de Tecnologia */}
-          <View style={styles.techSection}>
-            <Text style={styles.techLabel}>Laudo gerado via tecnologia Entrega Facilitada</Text>
-            <View style={styles.brandingEf}>
-              <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.logoEf} />
-              <Text style={styles.brandTextEf}>
-                Entrega <Text style={styles.brandTextPart2}>Facilitada</Text>
-              </Text>
-            </View>
-            <Text style={styles.efUrl}>entregafacilitada.vercel.app</Text>
-          </View>
-        </View>
-
-        <View style={styles.content}>
-          <View style={styles.docHeader}>
-            <Text style={styles.docTitle}>Laudo de Vistoria</Text>
-            <Text style={styles.docSubtitle}>Registro Fotográfico e Técnico do Imóvel</Text>
-          </View>
-
-          {/* Info do Imóvel */}
-          <View style={styles.propertyCard}>
-            <Text style={styles.propertyTitle}>Identificação do Imóvel</Text>
-            <View style={styles.propertyRow}>
-              <Text style={styles.label}>Endereço:</Text>
-              <Text style={styles.value}>{fullAddress}</Text>
-            </View>
-            <View style={styles.propertyRow}>
-              <Text style={styles.label}>Data:</Text>
-              <Text style={styles.value}>{displayDate}</Text>
-            </View>
-            <View style={styles.propertyRow}>
-              <Text style={styles.label}>Metragem:</Text>
-              <Text style={styles.value}>{data.metragem ? `${data.metragem} m²` : '--'}</Text>
-              <Text style={[styles.label, { width: 40, marginLeft: 20 }]}>Tipo:</Text>
-              <Text style={[styles.value, { textTransform: 'capitalize' }]}>{data.tipo || '--'}</Text>
-            </View>
-          </View>
-
-          {/* Medidores com Ícones */}
-          <View style={styles.meterSection}>
-            {['agua', 'luz', 'gas'].map((key) => (
-              <View key={key} style={styles.meterCard}>
-                <View style={styles.meterIcon}>
-                  {key === 'agua' && (
-                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
-                      <Path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-                    </Svg>
-                  )}
-                  {key === 'luz' && (
-                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
-                      <Path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                    </Svg>
-                  )}
-                  {key === 'gas' && (
-                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
-                      <Path d="M12 2c0 10-6 12-6 12s6 2 6 8c0-6 6-8 6-8s-6-2-6-12z" />
-                    </Svg>
-                  )}
-                </View>
-                <Text style={styles.meterLabel}>{key === 'agua' ? 'Água' : key === 'luz' ? 'Energia' : 'Gás'}</Text>
-                <Text style={styles.meterValue}>{data.medidores[key].leitura || '--'}</Text>
-                {data.medidores[key].foto && <Image src={data.medidores[key].foto} style={styles.meterPhoto} />}
-              </View>
-            ))}
-          </View>
-
-          {/* Relatório por Ambiente */}
-          {data.ambientes.map((ambiente, aIdx) => {
-            let photoCounter = 0;
-            return (
-              <View key={aIdx} style={{ marginBottom: 10 }} wrap={false}>
-                <View style={styles.sectionDivider}>
-                  <Text style={styles.sectionTitle}>{ambiente.nome}</Text>
+                  {/* Lado Direito - O Selo de Tecnologia com Link */}
+                  <View style={styles.techSection}>
+                    <Text style={styles.techLabel}>Laudo gerado via tecnologia Entrega Facilitada</Text>
+                    <View style={styles.brandingEf}>
+                      <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.logoEf} />
+                      <Text style={styles.brandTextEf}>
+                        Entrega <Text style={styles.brandTextPart2}>Facilitada</Text>
+                      </Text>
+                    </View>
+                    <Link src="https://entregafacilitada.vercel.app/" style={styles.efUrl}>
+                      entregafacilitada.vercel.app
+                    </Link>
+                  </View>
                 </View>
 
-                {/* Itens do Ambiente v4 (Clínico/Legal) */}
-                <View>
-                  {ambiente.itens.map((item, iIdx) => {
-                    const getStatusColor = (status: string) => {
-                      switch (status) {
-                        case 'Novo':
-                        case 'Bom': return { bg: '#DCFCE7', text: '#166534' };
-                        case 'Regular': return { bg: '#FEF9C3', text: '#854D0E' };
-                        case 'Ruim': return { bg: '#FEE2E2', text: '#991B1B' };
-                        default: return { bg: '#F1F5F9', text: '#475569' };
-                      }
-                    };
-                    const colors = getStatusColor(item.estado);
+                <View style={styles.content}>
+                  <View style={styles.docHeader}>
+                    <Text style={styles.docTitle}>Laudo de Vistoria</Text>
+                    <Text style={styles.docSubtitle}>Registro Fotográfico e Técnico do Imóvel</Text>
+                  </View>
 
+                  {/* Info do Imóvel */}
+                  <View style={styles.propertyCard}>
+                    <Text style={styles.propertyTitle}>Identificação do Imóvel</Text>
+                    <View style={{ marginBottom: 12 }}>
+                      <View style={styles.propertyRow}>
+                        <Text style={styles.label}>Endereço:</Text>
+                        <Text style={styles.value}>{fullAddress}</Text>
+                      </View>
+                      <View style={styles.propertyRow}>
+                        <Text style={styles.label}>Data:</Text>
+                        <Text style={styles.value}>{displayDate}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.propertyRow}>
+                      <Text style={styles.label}>Metragem:</Text>
+                      <Text style={styles.value}>{data.metragem ? `${data.metragem} m²` : '--'}</Text>
+                      <Text style={[styles.label, { width: 40, marginLeft: 20 }]}>Tipo:</Text>
+                      <Text style={[styles.value, { textTransform: 'capitalize' }]}>{data.tipo || '--'}</Text>
+                    </View>
+                  </View>
+
+                  {/* Medidores com Ícones */}
+                  <View style={styles.meterSection}>
+                    {['agua', 'luz', 'gas'].map((key) => (
+                      <View key={key} style={styles.meterCard}>
+                        <View style={styles.meterIcon}>
+                          {key === 'agua' && (
+                            <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+                              <Path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                            </Svg>
+                          )}
+                          {key === 'luz' && (
+                            <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                              <Path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </Svg>
+                          )}
+                          {key === 'gas' && (
+                            <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+                              <Path d="M12 2c0 10-6 12-6 12s6 2 6 8c0-6 6-8 6-8s-6-2-6-12z" />
+                            </Svg>
+                          )}
+                        </View>
+                        <Text style={styles.meterLabel}>{key === 'agua' ? 'Água' : key === 'luz' ? 'Energia' : 'Gás'}</Text>
+                        <Text style={styles.meterValue}>{data.medidores[key].leitura || '--'}</Text>
+                        {data.medidores[key].foto && <Image src={data.medidores[key].foto} style={styles.meterPhoto} />}
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Relatório por Ambiente */}
+                  {data.ambientes.map((ambiente, aIdx) => {
+                    let internalPhotoCounter = 0;
                     return (
-                      <View key={iIdx} style={styles.itemRow}>
-                        <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
-                          <Text style={{ color: colors.text }}>{item.estado.toUpperCase()}</Text>
+                      <View key={aIdx} style={{ marginBottom: 10 }} wrap={false}>
+                        <View style={styles.sectionDivider}>
+                          <Text style={styles.sectionTitle}>{ambiente.nome}</Text>
                         </View>
-                        <View style={styles.itemContent}>
-                          <Text style={styles.itemName}>
-                            {item.nome}:
-                          </Text>
-                          <Text style={styles.itemObs}>
-                            Obs: {item.observacao || 'Nenhuma observação técnica.'}
-                          </Text>
+
+                        {/* Itens do Ambiente com Referência de Fotos */}
+                        <View>
+                          {ambiente.itens.map((item, iIdx) => {
+                            const getStatusColor = (status: string) => {
+                              switch (status) {
+                                case 'Novo':
+                                case 'Bom': return { bg: '#DCFCE7', text: '#166534' };
+                                case 'Regular': return { bg: '#FEF9C3', text: '#854D0E' };
+                                case 'Ruim': return { bg: '#FEE2E2', text: '#991B1B' };
+                                default: return { bg: '#F1F5F9', text: '#475569' };
+                              }
+                            };
+                            const colors = getStatusColor(item.estado);
+
+                            const photoRefs = [];
+                            if (item.fotos.length > 0) {
+                              for (let p = 0; p < item.fotos.length; p++) {
+                                internalPhotoCounter++;
+                                photoRefs.push(`FOTO ${internalPhotoCounter}`);
+                              }
+                            }
+
+                            return (
+                              <View key={iIdx} style={styles.itemRow}>
+                                <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
+                                  <Text style={{ color: colors.text }}>{item.estado.toUpperCase()}</Text>
+                                </View>
+                                <View style={styles.itemContent}>
+                                  <Text style={styles.itemName}>{item.nome}:</Text>
+                                  <Text style={styles.itemObs}>
+                                    Obs: {item.observacao || 'Nenhuma observação técnica.'}
+                                  </Text>
+                                  {photoRefs.length > 0 && (
+                                    <Text style={{ fontSize: 8, color: '#3b82f6', fontWeight: 'bold', marginLeft: 4 }}>
+                                      (Ver {photoRefs.join(', ')})
+                                    </Text>
+                                  )}
+                                </View>
+                              </View>
+                            );
+                          })}
                         </View>
+
+                        {/* Grid de Fotos 3 Colunas */}
+                        {ambiente.itens.some(i => i.fotos.length > 0) && (
+                          <View style={styles.photoGrid}>
+                            {(() => {
+                              let gridCounter = 0;
+                              return ambiente.itens.flatMap(item =>
+                                item.fotos.map((foto, fIdx) => {
+                                  gridCounter++;
+                                  return (
+                                    <View key={`${item.id}-${fIdx}`} style={styles.photoContainer}>
+                                      <Image src={foto} style={styles.photo} />
+                                      <View style={styles.photoLegendBox}>
+                                        <Text style={styles.photoLegend}>FOTO {gridCounter} - {item.nome.toUpperCase()}</Text>
+                                      </View>
+                                    </View>
+                                  );
+                                })
+                              );
+                            })()}
+                          </View>
+                        )}
                       </View>
                     );
                   })}
                 </View>
 
-                {/* Grid de Fotos 3 Colunas */}
-                {ambiente.itens.some(i => i.fotos.length > 0) && (
-                  <View style={styles.photoGrid}>
-                    {ambiente.itens.flatMap(item =>
-                      item.fotos.map((foto, fIdx) => {
-                        photoCounter++;
-                        return (
-                          <View key={`${item.id}-${fIdx}`} style={styles.photoContainer}>
-                            <Image src={foto} style={styles.photo} />
-                            <View style={styles.photoLegendBox}>
-                              <Text style={styles.photoLegend}>FOTO {photoCounter} - {item.nome.toUpperCase()}</Text>
-                            </View>
-                          </View>
-                        );
-                      })
-                    )}
+                {/* Rodapé Fixo */}
+                <View style={styles.footer} fixed>
+                  <Text style={styles.footerText}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
+                  <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+                </View>
+              </Page>
+
+              {/* Página de Marketing Isolada para evitar página em branco fantasma */}
+              <Page size="A4" style={styles.page}>
+                <View style={styles.content}>
+                  <View style={styles.promoBanner}>
+                    <Text style={styles.promoTitle}>O jeito inteligente de encerrar seu contrato</Text>
+
+                    <View style={styles.timelineItem}>
+                      <View style={styles.iconBlock}>
+                        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                          <Path d="M8 2v4M16 2v4M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8M3 10h18m-5 10l2 2 4-4" />
+                        </Svg>
+                      </View>
+                      <View style={styles.stepContent}>
+                        <Text style={styles.stepPreHeader}>Etapa 3</Text>
+                        <Text style={styles.stepTitle}>Solicite a desocupação</Text>
+                        <Text style={styles.stepDescription}>Acione o app no final do contrato para agendar sua vistoria de saída 100% digital.</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.timelineItem}>
+                      <View style={[styles.iconBlock, styles.iconBlockActive]}>
+                        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
+                          <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                          <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM9 14l2 2 4-4" />
+                        </Svg>
+                      </View>
+                      <View style={styles.stepContent}>
+                        <Text style={styles.stepPreHeader}>Etapa 4</Text>
+                        <Text style={styles.stepTitle}>Vistoria e Diagnóstico Automático</Text>
+                        <Text style={styles.stepDescription}>Identificamos os reparos necessários e acionamos nossa rede de especialistas parceiros.</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.timelineItem}>
+                      <View style={[styles.iconBlock, styles.iconBlockActive]}>
+                        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
+                          <Path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </Svg>
+                      </View>
+                      <View style={styles.stepContent}>
+                        <Text style={styles.stepPreHeader}>Etapa 5</Text>
+                        <Text style={styles.stepTitle}>Execução Garantida</Text>
+                        <Text style={styles.stepDescription}>Pintura, limpeza e pequenos reparos realizados por profissionais, sem custos extras surpresa.</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.timelineItem}>
+                      <View style={[styles.iconBlock, styles.iconBlockActive]}>
+                        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
+                          <Path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <Path d="M22 4L12 14.01l-3-3" />
+                        </Svg>
+                      </View>
+                      <View style={styles.stepContent}>
+                        <Text style={styles.stepPreHeader}>Etapa 6</Text>
+                        <Text style={styles.stepTitle}>Nada Consta Emitido</Text>
+                        <Text style={styles.stepDescription}>Entrega das chaves sem estresse e quitação total do contrato de locação.</Text>
+                      </View>
+                    </View>
                   </View>
-                )}
-              </View>
-            );
-          })}
-        </View>
+                </View>
 
-        {/* Página de Marketing (Forçar Quebra de Página) */}
-        <View break style={{ padding: '40 40 0 40' }}>
-          <View style={styles.promoBanner}>
-            <Text style={styles.promoTitle}>O jeito inteligente de encerrar seu contrato</Text>
-
-            <View style={styles.timelineItem}>
-              <View style={styles.iconBlock}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
-                  <Path d="M8 2v4M16 2v4M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8M3 10h18m-5 10l2 2 4-4" />
-                </Svg>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 3</Text>
-                <Text style={styles.stepTitle}>Solicite a desocupação</Text>
-                <Text style={styles.stepDescription}>Acione o app no final do contrato para agendar sua vistoria de saída 100% digital.</Text>
-              </View>
-            </View>
-
-            <View style={styles.timelineItem}>
-              <View style={[styles.iconBlock, styles.iconBlockActive]}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
-                  <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                  <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM9 14l2 2 4-4" />
-                </Svg>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 4</Text>
-                <Text style={styles.stepTitle}>Vistoria e Diagnóstico Automático</Text>
-                <Text style={styles.stepDescription}>Identificamos os reparos necessários e acionamos nossa rede de especialistas parceiros.</Text>
-              </View>
-            </View>
-
-            <View style={styles.timelineItem}>
-              <View style={[styles.iconBlock, styles.iconBlockActive]}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
-                  <Path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </Svg>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 5</Text>
-                <Text style={styles.stepTitle}>Execução Garantida</Text>
-                <Text style={styles.stepDescription}>Pintura, limpeza e pequenos reparos realizados por profissionais, sem custos extras surpresa.</Text>
-              </View>
-            </View>
-
-            <View style={styles.timelineItem}>
-              <View style={[styles.iconBlock, styles.iconBlockActive]}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
-                  <Path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <Path d="M22 4L12 14.01l-3-3" />
-                </Svg>
-              </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 6</Text>
-                <Text style={styles.stepTitle}>Nada Consta Emitido</Text>
-                <Text style={styles.stepDescription}>Entrega das chaves sem estresse e quitação total do contrato de locação.</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Rodapé Moderno */}
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
-          <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
-        </View>
-      </Page>
-    </Document>
-  );
-};
+                {/* Rodapé fixo também na última página */}
+                <View style={styles.footer} fixed>
+                  <Text style={styles.footerText}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
+                  <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+                </View>
+              </Page>
+            </Document>
+          );
+        };
