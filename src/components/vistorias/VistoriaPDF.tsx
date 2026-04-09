@@ -3,267 +3,287 @@ import { Document, Page, Text, View, StyleSheet, Image, Link, Font, Svg, Path, C
 // Configuração de Estilos Profissionais
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
-    paddingBottom: 75,
+    padding: 0,
     backgroundColor: '#ffffff',
     fontFamily: 'Helvetica',
-    fontSize: 10,
-    color: '#1a1a1a',
+    fontSize: 9,
+    color: '#334155',
+  },
+  content: {
+    padding: '30 40',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    borderBottom: '1pt solid #e5e7eb',
-    paddingBottom: 15,
+    padding: '20 40',
+    backgroundColor: '#F8FAFC',
+    borderBottom: '1pt solid #E2E8F0',
   },
-  headerLogo: {
-    width: 120,
-    height: 60,
+  coBranding: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  logoEf: {
+    width: 24,
+    height: 24,
     objectFit: 'contain',
   },
-  headerInfo: {
+  logoPartner: {
+    width: 100,
+    height: 45,
+    objectFit: 'contain',
+  },
+  headerText: {
     textAlign: 'right',
-    maxWidth: 250,
   },
-  agencyName: {
-    fontSize: 14,
+  headerTitle: {
+    fontSize: 10,
     fontWeight: 'bold',
-    color: '#142542',
-    marginBottom: 4,
+    color: '#0F172A',
   },
-  agencyDetails: {
-    fontSize: 8,
-    color: '#6b7280',
-    lineHeight: 1.4,
+  headerSubtitle: {
+    fontSize: 7,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  docHeader: {
+    marginTop: 20,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   docTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#142542',
+    fontSize: 16,
+    fontWeight: 'black',
+    color: '#0F172A',
     textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  docSubtitle: {
+    fontSize: 8,
+    color: '#64748B',
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   propertyCard: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#ffffff',
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 20,
-    border: '0.5pt solid #e5e7eb',
+    border: '1pt solid #E2E8F0',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
   },
   propertyTitle: {
-    fontSize: 12,
+    fontSize: 9,
     fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#374151',
+    marginBottom: 10,
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   propertyRow: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 6,
+    alignItems: 'center',
   },
   label: {
-    width: 80,
+    width: 70,
     fontWeight: 'bold',
-    color: '#6b7280',
-    fontSize: 9,
+    color: '#94A3B8',
+    fontSize: 8,
   },
   value: {
     flex: 1,
-    color: '#111827',
+    color: '#1E293B',
     fontSize: 9,
+    fontWeight: 'medium',
   },
   meterSection: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
+    gap: 12,
+    marginBottom: 24,
   },
   meterCard: {
     flex: 1,
-    padding: 10,
-    border: '0.5pt solid #e5e7eb',
-    borderRadius: 6,
+    padding: 12,
+    backgroundColor: '#F8FAFC',
+    border: '1pt solid #E2E8F0',
+    borderRadius: 10,
     alignItems: 'center',
   },
+  meterIcon: {
+    width: 20,
+    height: 20,
+    marginBottom: 6,
+  },
   meterLabel: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: 'bold',
-    color: '#6b7280',
-    marginBottom: 5,
+    color: '#64748B',
     textTransform: 'uppercase',
+    marginBottom: 4,
   },
   meterValue: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
+    color: '#0F172A',
     marginBottom: 8,
   },
   meterPhoto: {
     width: '100%',
-    height: 70,
-    objectFit: 'contain',
+    height: 80,
+    objectFit: 'cover',
+    borderRadius: 6,
+  },
+  sectionDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    padding: '8 15',
+    marginVertical: 15,
     borderRadius: 4,
   },
-  roomHeader: {
-    padding: '12 0',
-    fontSize: 18,
+  sectionTitle: {
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#1A1A1A',
-    marginTop: 25,
-    marginBottom: 10,
-    borderBottom: '1pt solid #E0E0E0',
-    width: '100%',
+    color: '#0F172A',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   itemRow: {
     flexDirection: 'row',
-    padding: '8 10',
-    borderBottom: '0.5pt solid #f3f4f6',
-    alignItems: 'flex-start',
+    padding: '10 15',
+    borderBottom: '0.5pt solid #F1F5F9',
+    alignItems: 'center',
   },
   statusBadge: {
-    width: 65,
-    padding: '3 8',
+    width: 70,
+    padding: '4 0',
     textAlign: 'center',
-    borderRadius: 12,
-    fontSize: 9,
+    borderRadius: 6,
+    fontSize: 8,
     fontWeight: 'bold',
-    marginRight: 12,
-    textTransform: 'uppercase',
+    marginRight: 15,
   },
-  itemText: {
+  itemContent: {
     flex: 1,
-    fontSize: 10,
   },
   itemName: {
+    fontSize: 10,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#1E293B',
   },
   itemObs: {
-    color: '#4A4A4A',
+    fontSize: 8,
+    color: '#64748B',
+    marginTop: 2,
     fontStyle: 'italic',
-    marginTop: 4,
-    fontSize: 9,
   },
   photoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
     marginTop: 15,
-    marginBottom: 20,
-    paddingLeft: 5,
-    paddingRight: 5,
+    padding: '0 5',
   },
   photoContainer: {
-    width: '31.3%', // Exatamente 3 colunas por linha
-    marginBottom: 15,
+    width: '31.3%',
+    marginBottom: 10,
+    border: '1pt solid #E2E8F0',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   photo: {
     width: '100%',
-    borderRadius: 4,
-    border: '0.5pt solid #e5e7eb',
+    height: 100,
+    objectFit: 'cover',
+  },
+  photoLegendBox: {
+    backgroundColor: '#F8FAFC',
+    padding: 5,
+    borderTop: '1pt solid #E2E8F0',
   },
   photoLegend: {
-    fontSize: 7,
+    fontSize: 6,
     textAlign: 'center',
-    marginTop: 5,
-    color: '#4b5563',
+    color: '#64748B',
     fontWeight: 'bold',
   },
   promoBanner: {
     marginTop: 40,
-    padding: 24,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    position: 'relative',
-    overflow: 'hidden'
-  },
-  promoTitleContainer: {
-    marginBottom: 24,
+    padding: 30,
+    backgroundColor: '#0F172A',
+    borderRadius: 16,
+    color: '#FFFFFF',
   },
   promoTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#0F172A',
-    textAlign: 'left',
+    marginBottom: 30,
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 20,
-    alignItems: 'flex-start',
-    zIndex: 2,
+    marginBottom: 24,
+    alignItems: 'center',
   },
-  iconBlockPrimary: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: '#1E293B',
+  iconBlock: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 20,
   },
-  iconBlockSecondary: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
+  iconBlockActive: {
     backgroundColor: '#F5A524',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
   },
   stepContent: {
     flex: 1,
-    flexDirection: 'column',
-    paddingTop: 0,
   },
   stepPreHeader: {
     fontSize: 7,
     fontWeight: 'bold',
-    color: '#64748B',
+    color: '#94A3B8',
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 2,
+    letterSpacing: 2,
   },
   stepTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#0F172A',
-    marginBottom: 2,
+    color: '#FFFFFF',
+    marginTop: 2,
   },
   stepDescription: {
     fontSize: 9,
-    color: '#64748B',
+    color: '#94A3B8',
+    marginTop: 4,
     lineHeight: 1.4,
   },
   footer: {
     position: 'absolute',
-    bottom: 25,
-    left: 40,
-    right: 40,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: '15 40',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderTop: '0.5pt solid #e5e7eb',
-    paddingTop: 10,
-    gap: 10,
+    backgroundColor: '#F8FAFC',
+    borderTop: '1pt solid #E2E8F0',
   },
-  footerLogo: {
-    width: 25,
-    height: 25,
-    objectFit: 'contain',
-  },
-  footerSales: {
-    fontSize: 9,
-    color: '#52525B',
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-    maxWidth: '70%',
+  footerText: {
+    fontSize: 8,
+    color: '#64748B',
   },
   footerPage: {
-    fontSize: 9,
-    color: '#71717A',
-    width: 60,
-    textAlign: 'right',
+    fontSize: 8,
+    color: '#94A3B8',
   }
 });
 
@@ -322,215 +342,199 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
   return (
     <Document title={`Laudo de Vistoria - ${data.rua}`}>
       <Page size="A4" style={styles.page}>
-        {/* Pilar 3: Cabeçalho com Perfil da Imobiliária */}
+        {/* Novo Cabeçalho Co-Branding */}
         <View style={styles.header}>
-          {data.perfil?.logo_url ? (
-            <Image src={data.perfil.logo_url} style={styles.headerLogo} />
-          ) : (
-            <View style={[styles.headerLogo, { backgroundColor: '#f3f4f6', justifyContent: 'center', alignItems: 'center' }]}>
-              <Text style={{ fontSize: 8, color: '#9ca3af' }}>Logo Imobiliária</Text>
+          <View style={styles.coBranding}>
+            <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.logoEf} />
+            <View style={{ width: 1, height: 20, backgroundColor: '#CBD5E1' }} />
+            {data.perfil?.logo_url ? (
+              <Image src={data.perfil.logo_url} style={styles.logoPartner} />
+            ) : (
+              <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#64748B' }}>{data.perfil?.nome_fantasia}</Text>
+            )}
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.headerTitle}>{data.perfil?.nome_fantasia || 'Imobiliária Parceira'}</Text>
+            <Text style={styles.headerSubtitle}>Laudo gerado via tecnologia Entrega Facilitada</Text>
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.docHeader}>
+            <Text style={styles.docTitle}>Laudo de Vistoria</Text>
+            <Text style={styles.docSubtitle}>Registro Fotográfico e Técnico do Imóvel</Text>
+          </View>
+
+          {/* Info do Imóvel */}
+          <View style={styles.propertyCard}>
+            <Text style={styles.propertyTitle}>Identificação do Imóvel</Text>
+            <View style={styles.propertyRow}>
+              <Text style={styles.label}>Endereço:</Text>
+              <Text style={styles.value}>{fullAddress}</Text>
             </View>
-          )}
-          <View style={styles.headerInfo}>
-            <Text style={styles.agencyName}>{data.perfil?.nome_fantasia || 'Imobiliária Parceira'}</Text>
-            <Text style={styles.agencyDetails}>CNPJ: {data.perfil?.cnpj || 'N/A'}</Text>
-            <Text style={styles.agencyDetails}>{data.perfil?.endereco_completo || ''}</Text>
-            <Text style={styles.agencyDetails}>{data.perfil?.email || ''} | {data.perfil?.whatsapp || ''}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.docTitle}>LAUDO DE VISTORIA RESIDENCIAL</Text>
-
-        {/* Info do Imóvel */}
-        <View style={styles.propertyCard}>
-          <Text style={styles.propertyTitle}>DADOS DO IMÓVEL</Text>
-          <View style={styles.propertyRow}>
-            <Text style={styles.label}>Endereço:</Text>
-            <Text style={styles.value}>{fullAddress}</Text>
-          </View>
-          <View style={styles.propertyRow}>
-            <Text style={styles.label}>Data:</Text>
-            <Text style={styles.value}>{displayDate}</Text>
-          </View>
-          <View style={styles.propertyRow}>
-            <Text style={styles.label}>Metragem:</Text>
-            <Text style={styles.value}>{data.metragem ? `${data.metragem} m²` : '--'}</Text>
-          </View>
-          <View style={styles.propertyRow}>
-            <Text style={styles.label}>Tipo:</Text>
-            <Text style={[styles.value, { textTransform: 'capitalize', fontWeight: 'bold' }]}>{data.tipo || '--'}</Text>
-          </View>
-        </View>
-
-        {/* Pilar 1: Medidores */}
-        <View style={styles.meterSection}>
-          {['agua', 'luz', 'gas'].map((key) => (
-            <View key={key} style={styles.meterCard}>
-              <Text style={styles.meterLabel}>{key === 'agua' ? 'Água' : key === 'luz' ? 'Energia' : 'Gás'}</Text>
-              <Text style={styles.meterValue}>{data.medidores[key].leitura || '--'}</Text>
-              {data.medidores[key].foto && <Image src={data.medidores[key].foto} style={styles.meterPhoto} />}
+            <View style={styles.propertyRow}>
+              <Text style={styles.label}>Data:</Text>
+              <Text style={styles.value}>{displayDate}</Text>
             </View>
-          ))}
-        </View>
+            <View style={styles.propertyRow}>
+              <Text style={styles.label}>Metragem:</Text>
+              <Text style={styles.value}>{data.metragem ? `${data.metragem} m²` : '--'}</Text>
+              <Text style={[styles.label, { width: 40, marginLeft: 20 }]}>Tipo:</Text>
+              <Text style={[styles.value, { textTransform: 'capitalize' }]}>{data.tipo || '--'}</Text>
+            </View>
+          </View>
 
-        {/* Pilar 1 & 4: Relatório por Ambiente */}
-        {data.ambientes.map((ambiente, aIdx) => {
-          let photoCounter = 0;
-          return (
-            <View key={aIdx} style={{ marginBottom: 20 }}>
-              <Text style={styles.roomHeader}>{ambiente.nome.toUpperCase()}</Text>
-
-              {/* Subseção A: Relatório Textual */}
-              <View style={{ marginBottom: 10 }}>
-                {ambiente.itens.map((item, iIdx) => {
-                  const itemPhotoCount = item.fotos.length;
-                  const photoRefs = [];
-                  if (itemPhotoCount > 0) {
-                    for (let p = 0; p < itemPhotoCount; p++) {
-                      photoCounter++;
-                      photoRefs.push(`Foto ${photoCounter}`);
-                    }
-                  }
-
-                  const getStatusColor = (status: string) => {
-                    switch (status) {
-                      case 'Novo': return { bg: 'rgba(209, 250, 229, 0.4)', text: '#065f46' }; // Green
-                      case 'Bom': return { bg: 'rgba(219, 234, 254, 0.4)', text: '#1e40af' }; // Blue
-                      case 'Regular': return { bg: 'rgba(254, 249, 195, 0.4)', text: '#854d0e' }; // Yellow
-                      case 'Ruim': return { bg: 'rgba(254, 226, 226, 0.4)', text: '#991b1b' }; // Red
-                      default: return { bg: 'rgba(243, 244, 246, 0.4)', text: '#374151' };
-                    }
-                  };
-                  const colors = getStatusColor(item.estado);
-
-                  return (
-                    <View key={iIdx} style={styles.itemRow}>
-                      <Text style={[styles.statusBadge, { backgroundColor: colors.bg, color: colors.text }]}>
-                        {item.estado.toUpperCase()}
-                      </Text>
-                      <View style={styles.itemText}>
-                        <Text>
-                          <Text style={styles.itemName}>{item.nome}</Text>
-                          {photoRefs.length > 0 && <Text style={{ color: '#3b82f6', fontWeight: 'bold' }}> (Ver {photoRefs.join(', ')})</Text>}
-                        </Text>
-                        {item.observacao && <Text style={styles.itemObs}>Obs: {item.observacao}</Text>}
-                      </View>
-                    </View>
-                  );
-                })}
+          {/* Medidores com Ícones */}
+          <View style={styles.meterSection}>
+            {['agua', 'luz', 'gas'].map((key) => (
+              <View key={key} style={styles.meterCard}>
+                <View style={styles.meterIcon}>
+                  {key === 'agua' && (
+                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+                      <Path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                    </Svg>
+                  )}
+                  {key === 'luz' && (
+                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                      <Path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </Svg>
+                  )}
+                  {key === 'gas' && (
+                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+                      <Path d="M12 2c0 10-6 12-6 12s6 2 6 8c0-6 6-8 6-8s-6-2-6-12z" />
+                    </Svg>
+                  )}
+                </View>
+                <Text style={styles.meterLabel}>{key === 'agua' ? 'Água' : key === 'luz' ? 'Energia' : 'Gás'}</Text>
+                <Text style={styles.meterValue}>{data.medidores[key].leitura || '--'}</Text>
+                {data.medidores[key].foto && <Image src={data.medidores[key].foto} style={styles.meterPhoto} />}
               </View>
+            ))}
+          </View>
 
-              {/* Subseção B: Grade de Fotos do Ambiente */}
-              {ambiente.itens.some(i => i.fotos.length > 0) && (
-                <View style={styles.photoGrid}>
-                  {(() => {
-                    let gridCounter = 0;
-                    return ambiente.itens.flatMap(item =>
+          {/* Relatório por Ambiente */}
+          {data.ambientes.map((ambiente, aIdx) => {
+            let photoCounter = 0;
+            return (
+              <View key={aIdx} style={{ marginBottom: 10 }} wrap={false}>
+                <View style={styles.sectionDivider}>
+                  <Text style={styles.sectionTitle}>{ambiente.nome}</Text>
+                </View>
+
+                {/* Itens do Ambiente */}
+                <View>
+                  {ambiente.itens.map((item, iIdx) => {
+                    const getStatusColor = (status: string) => {
+                      switch (status) {
+                        case 'Novo':
+                        case 'Bom': return { bg: '#DCFCE7', text: '#166534' };
+                        case 'Regular': return { bg: '#FEF9C3', text: '#854D0E' };
+                        case 'Ruim': return { bg: '#FEE2E2', text: '#991B1B' };
+                        default: return { bg: '#F1F5F9', text: '#475569' };
+                      }
+                    };
+                    const colors = getStatusColor(item.estado);
+
+                    return (
+                      <View key={iIdx} style={styles.itemRow}>
+                        <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
+                          <Text style={{ color: colors.text }}>{item.estado.toUpperCase()}</Text>
+                        </View>
+                        <View style={styles.itemContent}>
+                          <Text style={styles.itemName}>{item.nome}</Text>
+                          {item.observacao && <Text style={styles.itemObs}>{item.observacao}</Text>}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Grid de Fotos 3 Colunas */}
+                {ambiente.itens.some(i => i.fotos.length > 0) && (
+                  <View style={styles.photoGrid}>
+                    {ambiente.itens.flatMap(item =>
                       item.fotos.map((foto, fIdx) => {
-                        gridCounter++;
+                        photoCounter++;
                         return (
                           <View key={`${item.id}-${fIdx}`} style={styles.photoContainer}>
                             <Image src={foto} style={styles.photo} />
-                            <Text style={styles.photoLegend}>Foto {gridCounter} - {item.nome}</Text>
+                            <View style={styles.photoLegendBox}>
+                              <Text style={styles.photoLegend}>FOTO {photoCounter} - {item.nome.toUpperCase()}</Text>
+                            </View>
                           </View>
                         );
                       })
-                    );
-                  })()}
-                </View>
-              )}
-            </View>
-          );
-        })}
+                    )}
+                  </View>
+                )}
+              </View>
+            );
+          })}
 
-        {/* Selo de Fechamento (Timeline Estilo Landing Page) */}
-        <View style={styles.promoBanner} wrap={false}>
-          <View style={styles.promoTitleContainer}>
-            <Text style={styles.promoTitle}>
-              Veja como funciona com a <Text style={{ color: '#3b82f6' }}>Entrega Facilitada</Text>:
-            </Text>
-          </View>
+          {/* Página 4: Fluxo Entrega Facilitada (Sincronizado) */}
+          <View style={styles.promoBanner} wrap={false}>
+            <Text style={styles.promoTitle}>O jeito inteligente de encerrar seu contrato</Text>
 
-          {/* Etapa 3 */}
-          <View style={styles.timelineItem}>
-            <View style={styles.iconBlockPrimary}>
-              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F8FAFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <Path d="M8 2v4" />
-                <Path d="M16 2v4" />
-                <Path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" />
-                <Path d="M3 10h18" />
-                <Path d="m16 20 2 2 4-4" />
-              </Svg>
+            <View style={styles.timelineItem}>
+              <View style={styles.iconBlock}>
+                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+                  <Path d="M8 2v4M16 2v4M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8M3 10h18m-5 10l2 2 4-4" />
+                </Svg>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepPreHeader}>Etapa 3</Text>
+                <Text style={styles.stepTitle}>Solicite a desocupação</Text>
+                <Text style={styles.stepDescription}>Acione o app no final do contrato para agendar sua vistoria de saída 100% digital.</Text>
+              </View>
             </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepPreHeader}>Etapa 3</Text>
-              <Text style={styles.stepTitle}>Solicite a desocupação</Text>
-              <Text style={styles.stepDescription}>Ao final do contrato, acione o app e agende a vistoria de saída de forma 100% digital.</Text>
-            </View>
-          </View>
 
-          {/* Separador */}
-          <View style={[styles.timelineItem, { marginBottom: 16, marginTop: -4 }]}>
-            <Text style={[styles.stepPreHeader, { color: '#F5A524', marginLeft: 52, letterSpacing: 1.5 }]}>DAQUI EM DIANTE É COM A ENTREGA FACILITADA ↓</Text>
-          </View>
+            <View style={styles.timelineItem}>
+              <View style={[styles.iconBlock, styles.iconBlockActive]}>
+                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
+                  <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM9 14l2 2 4-4" />
+                </Svg>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepPreHeader}>Etapa 4</Text>
+                <Text style={styles.stepTitle}>Vistoria e Diagnóstico Automático</Text>
+                <Text style={styles.stepDescription}>Identificamos os reparos necessários e acionamos nossa rede de especialistas parceiros.</Text>
+              </View>
+            </View>
 
-          <View style={styles.timelineItem}>
-            <View style={styles.iconBlockSecondary}>
-              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" />
-                <Path d="m9 14 2 2 4-4" />
-              </Svg>
+            <View style={styles.timelineItem}>
+              <View style={[styles.iconBlock, styles.iconBlockActive]}>
+                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
+                  <Path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </Svg>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepPreHeader}>Etapa 5</Text>
+                <Text style={styles.stepTitle}>Execução Garantida</Text>
+                <Text style={styles.stepDescription}>Pintura, limpeza e pequenos reparos realizados por profissionais, sem custos extras surpresa.</Text>
+              </View>
             </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepPreHeader}>Etapa 4</Text>
-              <Text style={styles.stepTitle}>Vistoria e diagnóstico</Text>
-              <Text style={styles.stepDescription}>Nossa equipe realiza a vistoria, documenta o estado do imóvel e gera o orçamento dos reparos cobertos.</Text>
-            </View>
-          </View>
 
-          <View style={styles.timelineItem}>
-            <View style={styles.iconBlockSecondary}>
-              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <Path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3Z" />
-                <Path d="M9 8c-2 3-4 3.5-7 4l8 8c.5-3 1-5 4-7" />
-              </Svg>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepPreHeader}>Etapa 5</Text>
-              <Text style={styles.stepTitle}>Execução dos reparos</Text>
-              <Text style={styles.stepDescription}>Profissionais credenciados cuidam de pintura, limpeza e reparos — tudo dentro do pacote contratado.</Text>
-            </View>
-          </View>
-
-          <View style={[styles.timelineItem, { marginBottom: 0 }]}>
-            <View style={styles.iconBlockSecondary}>
-              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <Path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
-                <Path d="m21 2-9.6 9.6" />
-                <Circle cx="7.5" cy="15.5" r="5.5" />
-              </Svg>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepPreHeader}>Etapa 6</Text>
-              <Text style={styles.stepTitle}>Chaves entregues, Nada Consta emitido</Text>
-              <Text style={styles.stepDescription}>Certificado automático de quitação. Entregue as chaves sem estresse e sem cobranças extras.</Text>
+            <View style={styles.timelineItem}>
+              <View style={[styles.iconBlock, styles.iconBlockActive]}>
+                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
+                  <Path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <Path d="M22 4L12 14.01l-3-3" />
+                </Svg>
+              </View>
+              <View style={styles.stepContent}>
+                <Text style={styles.stepPreHeader}>Etapa 6</Text>
+                <Text style={styles.stepTitle}>Nada Consta Emitido</Text>
+                <Text style={styles.stepDescription}>Entrega das chaves sem estresse e quitação total do contrato de locação.</Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* Rodapé Fixo (Footer Universal) - 3 Colunas: Logo | Texto Interativo Centrado | Página */}
+        {/* Rodapé Moderno */}
         <View style={styles.footer} fixed>
-          <Image src="https://entregafacilitada.vercel.app/favicon.png" style={styles.footerLogo} />
-          <View style={styles.footerSales}>
-            <Text>Entrega Facilitada: Da contratação à desocupação descomplicada.</Text>
-            <Link src="https://entregafacilitada.vercel.app/" style={{ color: '#3b82f6', textDecoration: 'none' }}>
-              <Text>Acesse: entregafacilitada.vercel.app</Text>
-            </Link>
-          </View>
-          <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => (
-            `Página ${pageNumber} de ${totalPages}`
-          )} />
+          <Text style={styles.footerText}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
+          <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
         </View>
       </Page>
     </Document>

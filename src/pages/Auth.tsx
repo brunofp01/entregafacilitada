@@ -116,13 +116,13 @@ const Auth = () => {
           <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">
             Entrega <span className="text-secondary">Facilitada</span>
           </h1>
-          <p className="text-muted-foreground">Acesse sua conta para gerenciar suas entregas.</p>
+          <p className="text-muted-foreground">O jeito inteligente de encerrar um contrato de aluguel.</p>
         </div>
 
         <Card className="border-border/50 shadow-2xl backdrop-blur-sm bg-card/80">
           <CardHeader>
             <CardTitle className="text-2xl font-bold italic text-foreground">Acesse sua Conta</CardTitle>
-            <CardDescription>Insira suas credenciais para gerenciar suas entregas.</CardDescription>
+            <CardDescription>Bem-vindo ao seu ambiente seguro. Insira seus dados para continuar.</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
