@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   efUrl: {
     fontSize: 8,
-    color: '#F6A823',
+    color: '#94A3B8',
     fontWeight: 'bold',
     textDecoration: 'none',
   },
