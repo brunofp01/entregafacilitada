@@ -4,7 +4,7 @@ import { Document, Page, Text, View, StyleSheet, Image, Link, Font, Svg, Path, C
 const styles = StyleSheet.create({
   page: {
     padding: 0,
-    paddingTop: 30,
+    paddingTop: 35,
     paddingBottom: 60,
     backgroundColor: '#ffffff',
     fontFamily: 'Helvetica',
@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '25 40',
+    marginTop: -35,
     backgroundColor: '#F8FAFC',
     borderBottom: '1pt solid #E2E8F0',
   },
