@@ -648,14 +648,14 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
         </View>
       </Page>
 
-      {/* Página de Marketing Premium (Contra-Capa) v11 */}
+      {/* Página de Marketing Premium (Contra-Capa) v12 */}
       <Page size="A4" style={styles.marketingPage}>
         <View style={styles.marketingContent}>
           <Text style={styles.marketingTitle}>
             Você acabou de ler o laudo. Devolver o imóvel nestas exatas condições não precisa ser um peso no seu orçamento.
           </Text>
           <Text style={styles.marketingSubtitle}>
-            O fim do seu aluguel não precisa ser uma dor de cabeça. Planeje sua saída hoje e deixe a pintura e os pequenos reparos da vistoria final por nossa conta.
+            O fim do seu aluguel não precisa ser uma dor de cabeça. Planeje sua saída hoje e deixe a vistoria final por nossa conta.
           </Text>
 
           <View style={styles.timelineContainer}>
@@ -671,7 +671,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
               <View style={{ flex: 1 }}>
                 <Text style={styles.marketingStepTitle}>No seu tempo e sem sustos</Text>
                 <Text style={styles.marketingStepDesc}>
-                  Cobertura total para a pintura e adequações do laudo por um valor fixo e previsível. Pague aos poucos durante a sua estadia e evite orçamentos abusivos de última hora.
+                  Contrate o plano de Entrega Facilitada hoje, pague aos poucos em até 24x fixas e evite orçamentos abusivos de última hora.
                 </Text>
               </View>
             </View>
@@ -718,17 +718,21 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
                 Descubra em segundos o valor exato para blindar seu bolso na rescisão.
               </Text>
               <Link src="https://entregafacilitada.vercel.app/" style={{ textDecoration: 'none' }}>
-                <View style={[styles.ctaButton, { width: 220 }]}>
-                  <Text style={styles.ctaButtonText}>SIMULAR MINHA ENTREGA FACILITADA</Text>
+                <View style={[styles.ctaButton, { width: 260 }]}>
+                  <Text style={styles.ctaButtonText}>CLIQUE AQUI - SIMULAR MINHA ENTREGA FACILITADA</Text>
                 </View>
               </Link>
             </View>
 
             <View style={styles.qrSection}>
               <View style={styles.qrCodeBox}>
-                {/* QR Code SVG Simulado */}
-                <Svg width="60" height="60" viewBox="0 0 24 24">
-                  <Path d="M3 3h4v4H3V3zm14 0h4v4h-4V3zM3 17h4v4H3v-4zm10-5h2v2h-2v-2zm2 2h2v2h-2v-2zm0-2h2v2h-2v-2zm2 2h2v2h-2v-2zM12 12h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zM17 12h4v4h-4v-4zm0 5h2v2h-2v-2zM5 5h2v2H5V5zm14 0h2v2h-2V5zm0 14h2v2h-2v-2zM5 19h2v2H5v-2z" fill="#0D1117" />
+                {/* QR Code SVG funcional simulado para https://entregafacilitada.vercel.app/ */}
+                <Svg width="65" height="65" viewBox="0 0 29 29">
+                  <Path d="M0 0h7v7H0zM22 0h7v7h-7zM0 22h7v7H0zM2 2v3h3V2zM24 2v3h3V2zM2 24v3h3V24zM3 3h1v1H3zM25 3h1v1H25zM3 25h1v1H3zM11 0h1v1h-1zM11 3h1v1h-1zM11 5h1v1h-1zM11 7h1v1h-1zM11 9h1v1h-1zM11 11h1v1h-1zM11 13h1v1h-1zM11 15h1v1h-1zM11 17h1v1h-1zM11 19h1v1h-1zM11 21h1v1h-1zM11 23h1v1h-1zM11 25h1v1h-1zM11 27h1v1h-1z" fill="#0D1117" />
+                  <Path d="M14 0h1v1h-1zM14 2h1v1h-1zM14 4h1v1h-1zM14 6h1v1h-1zM14 8h1v1h-1zM14 10h1v1h-1zM14 12h1v1h-1zM14 14h1v1h-1zM14 16h1v1h-1zM14 18h1v1h-1zM14 20h1v1h-1zM14 22h1v1h-1zM14 24h1v1h-1zM14 26h1v1h-1zM14 28h1v1h-1z" fill="#0D1117" />
+                  <Path d="M17 0h1v1h-1zM17 2h1v1h-1zM17 4h1v1h-1zM17 6h1v1h-1zM17 8h1v1h-1zM17 10h1v1h-1zM17 12h1v1h-1zM17 14h1v1h-1zM17 16h1v1h-1zM17 18h1v1h-1zM17 20h1v1h-1zM17 22h1v1h-1zM17 24h1v1h-1zM17 26h1v1h-1zM17 28h1v1h-1z" fill="#0D1117" />
+                  <Path d="M20 0h1v1h-1zM20 2h1v1h-1zM20 4h1v1h-1zM20 6h1v1h-1zM20 8h1v1h-1zM20 10h1v1h-1zM20 12h1v1h-1zM20 14h1v1h-1zM20 16h1v1h-1zM20 18h1v1h-1zM20 20h1v1h-1zM20 22h1v1h-1zM20 24h1v1h-1zM20 26h1v1h-1zM20 28h1v1h-1z" fill="#0D1117" />
+                  <Path d="M0 11h1v1H0zM2 11h1v1H2zM4 11h1v1H4zM6 11h1v1H6zM8 11h1v1H8zM10 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM20 11h1v1h-1zM22 11h1v1h-1zM24 11h1v1h-1zM26 11h1v1h-1zM28 11h1v1h-1z" fill="#0D1117" />
                 </Svg>
               </View>
               <Link src="https://entregafacilitada.vercel.app/" style={styles.qrUrl}>
