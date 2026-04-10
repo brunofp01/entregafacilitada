@@ -644,7 +644,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
         {/* Rodapé Fixo */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
+          <Text style={styles.footerText}>Laudo gerado via tecnologia Entrega Facilitada</Text>
           <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
         </View>
       </Page>
@@ -741,7 +741,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
         {/* Rodapé customizado para Dark Mode */}
         <View style={[styles.footer, { backgroundColor: '#161B22', borderTop: '1pt solid #30363D' }]} fixed>
-          <Text style={[styles.footerText, { color: '#94A3B8' }]}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
+          <Text style={[styles.footerText, { color: '#94A3B8' }]}>Laudo gerado via tecnologia Entrega Facilitada</Text>
           <Text style={[styles.footerPage, { color: '#475569' }]} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
         </View>
       </Page>
