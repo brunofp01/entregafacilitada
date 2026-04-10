@@ -4,6 +4,7 @@ import { Document, Page, Text, View, StyleSheet, Image, Link, Font, Svg, Path, C
 const styles = StyleSheet.create({
   page: {
     padding: 0,
+    paddingTop: 30,
     paddingBottom: 60,
     backgroundColor: '#ffffff',
     fontFamily: 'Helvetica',
