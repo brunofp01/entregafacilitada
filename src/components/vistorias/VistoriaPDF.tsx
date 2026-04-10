@@ -648,7 +648,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
         </View>
       </Page>
 
-      {/* Página de Marketing Premium (Contra-Capa) v12 */}
+      {/* Página de Marketing Premium (Contra-Capa) v13 */}
       <Page size="A4" style={styles.marketingPage}>
         <View style={styles.marketingContent}>
           <Text style={styles.marketingTitle}>
@@ -726,14 +726,10 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
 
             <View style={styles.qrSection}>
               <View style={styles.qrCodeBox}>
-                {/* QR Code SVG funcional simulado para https://entregafacilitada.vercel.app/ */}
-                <Svg width="65" height="65" viewBox="0 0 29 29">
-                  <Path d="M0 0h7v7H0zM22 0h7v7h-7zM0 22h7v7H0zM2 2v3h3V2zM24 2v3h3V2zM2 24v3h3V24zM3 3h1v1H3zM25 3h1v1H25zM3 25h1v1H3zM11 0h1v1h-1zM11 3h1v1h-1zM11 5h1v1h-1zM11 7h1v1h-1zM11 9h1v1h-1zM11 11h1v1h-1zM11 13h1v1h-1zM11 15h1v1h-1zM11 17h1v1h-1zM11 19h1v1h-1zM11 21h1v1h-1zM11 23h1v1h-1zM11 25h1v1h-1zM11 27h1v1h-1z" fill="#0D1117" />
-                  <Path d="M14 0h1v1h-1zM14 2h1v1h-1zM14 4h1v1h-1zM14 6h1v1h-1zM14 8h1v1h-1zM14 10h1v1h-1zM14 12h1v1h-1zM14 14h1v1h-1zM14 16h1v1h-1zM14 18h1v1h-1zM14 20h1v1h-1zM14 22h1v1h-1zM14 24h1v1h-1zM14 26h1v1h-1zM14 28h1v1h-1z" fill="#0D1117" />
-                  <Path d="M17 0h1v1h-1zM17 2h1v1h-1zM17 4h1v1h-1zM17 6h1v1h-1zM17 8h1v1h-1zM17 10h1v1h-1zM17 12h1v1h-1zM17 14h1v1h-1zM17 16h1v1h-1zM17 18h1v1h-1zM17 20h1v1h-1zM17 22h1v1h-1zM17 24h1v1h-1zM17 26h1v1h-1zM17 28h1v1h-1z" fill="#0D1117" />
-                  <Path d="M20 0h1v1h-1zM20 2h1v1h-1zM20 4h1v1h-1zM20 6h1v1h-1zM20 8h1v1h-1zM20 10h1v1h-1zM20 12h1v1h-1zM20 14h1v1h-1zM20 16h1v1h-1zM20 18h1v1h-1zM20 20h1v1h-1zM20 22h1v1h-1zM20 24h1v1h-1zM20 26h1v1h-1zM20 28h1v1h-1z" fill="#0D1117" />
-                  <Path d="M0 11h1v1H0zM2 11h1v1H2zM4 11h1v1H4zM6 11h1v1H6zM8 11h1v1H8zM10 11h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM20 11h1v1h-1zM22 11h1v1h-1zM24 11h1v1h-1zM26 11h1v1h-1zM28 11h1v1h-1z" fill="#0D1117" />
-                </Svg>
+                <Image
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://entregafacilitada.vercel.app/"
+                  style={{ width: '100%', height: '100%' }}
+                />
               </View>
               <Link src="https://entregafacilitada.vercel.app/" style={styles.qrUrl}>
                 entregafacilitada.vercel.app
