@@ -4,6 +4,7 @@ import { Document, Page, Text, View, StyleSheet, Image, Link, Font, Svg, Path, C
 const styles = StyleSheet.create({
   page: {
     padding: 0,
+    paddingBottom: 60,
     backgroundColor: '#ffffff',
     fontFamily: 'Helvetica',
     fontSize: 9,
@@ -12,7 +13,7 @@ const styles = StyleSheet.create({
   content: {
     paddingTop: 30,
     paddingHorizontal: 40,
-    paddingBottom: 70,
+    paddingBottom: 0,
   },
   header: {
     flexDirection: 'row',
