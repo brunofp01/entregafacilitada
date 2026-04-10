@@ -719,7 +719,7 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
               </Text>
               <Link src="https://entregafacilitada.vercel.app/" style={{ textDecoration: 'none' }}>
                 <View style={[styles.ctaButton, { width: 260 }]}>
-                  <Text style={styles.ctaButtonText}>CLIQUE AQUI - SIMULAR MINHA ENTREGA FACILITADA</Text>
+                  <Text style={styles.ctaButtonText}>Clique aqui para simular</Text>
                 </View>
               </Link>
             </View>
