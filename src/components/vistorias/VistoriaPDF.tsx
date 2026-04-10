@@ -304,6 +304,114 @@ const styles = StyleSheet.create({
     marginTop: 4,
     lineHeight: 1.4,
   },
+  marketingPage: {
+    padding: 0,
+    backgroundColor: '#0D1117',
+    fontFamily: 'Helvetica',
+    fontSize: 9,
+    color: '#FFFFFF',
+  },
+  marketingContent: {
+    padding: '60 50',
+    flex: 1,
+  },
+  marketingTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 15,
+    lineHeight: 1.2,
+  },
+  marketingSubtitle: {
+    fontSize: 11,
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginBottom: 50,
+    lineHeight: 1.4,
+    paddingHorizontal: 40,
+  },
+  timelineContainer: {
+    marginTop: 20,
+    paddingHorizontal: 10,
+  },
+  marketingTimelineItem: {
+    flexDirection: 'row',
+    marginBottom: 40,
+    gap: 25,
+  },
+  marketingIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(246, 168, 35, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  marketingStepTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#F6A823',
+    marginBottom: 6,
+  },
+  marketingStepDesc: {
+    fontSize: 10,
+    color: '#CBD5E1',
+    lineHeight: 1.5,
+  },
+  ctaCard: {
+    marginTop: 'auto',
+    backgroundColor: '#161B22',
+    borderRadius: 20,
+    padding: 30,
+    border: '1pt solid #30363D',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 20,
+  },
+  ctaTextContent: {
+    flex: 1,
+  },
+  ctaHeading: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 20,
+  },
+  ctaButton: {
+    backgroundColor: '#F6A823',
+    padding: '12 25',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 180,
+  },
+  ctaButtonText: {
+    color: '#0D1117',
+    fontSize: 11,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  qrSection: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  qrCodeBox: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  qrUrl: {
+    fontSize: 7,
+    color: '#94A3B8',
+    textDecoration: 'none',
+    marginTop: 4,
+  },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -540,72 +648,93 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
         </View>
       </Page>
 
-      {/* Página de Marketing Isolada para evitar página em branco fantasma */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.content}>
-          <View style={styles.promoBanner}>
-            <Text style={styles.promoTitle}>O jeito inteligente de encerrar seu contrato</Text>
+      {/* Página de Marketing Premium (Contra-Capa) v10 */}
+      <Page size="A4" style={styles.marketingPage}>
+        <View style={styles.marketingContent}>
+          <Text style={styles.marketingTitle}>
+            Já está pensando no trabalho que vai dar para entregar o imóvel exatamente assim?
+          </Text>
+          <Text style={styles.marketingSubtitle}>
+            A conta da vistoria final sempre chega. Mas ela não precisa ser uma surpresa e nem esvaziar o seu bolso de uma vez.
+          </Text>
 
-            <View style={styles.timelineItem}>
-              <View style={styles.iconBlock}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
-                  <Path d="M8 2v4M16 2v4M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8M3 10h18m-5 10l2 2 4-4" />
+          <View style={styles.timelineContainer}>
+            {/* Passo 1 - Escudo */}
+            <View style={styles.marketingTimelineItem}>
+              <View style={styles.marketingIconWrapper}>
+                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
+                  <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </Svg>
               </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 3</Text>
-                <Text style={styles.stepTitle}>Solicite a desocupação</Text>
-                <Text style={styles.stepDescription}>Acione o app no final do contrato para agendar sua vistoria de saída 100% digital.</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.marketingStepTitle}>Antecipe e Proteja-se Hoje</Text>
+                <Text style={styles.marketingStepDesc}>
+                  Transforme os altos custos de adequação (pintura e pequenos reparos) em uma cobertura de valor fixo mensal durante a sua estadia.
+                </Text>
               </View>
             </View>
 
-            <View style={styles.timelineItem}>
-              <View style={[styles.iconBlock, styles.iconBlockActive]}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
-                  <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                  <Path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM9 14l2 2 4-4" />
+            {/* Passo 2 - Casa/Sofá */}
+            <View style={styles.marketingTimelineItem}>
+              <View style={styles.marketingIconWrapper}>
+                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
+                  <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <Path d="M9 22V12h6v10" />
                 </Svg>
               </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 4</Text>
-                <Text style={styles.stepTitle}>Vistoria e Diagnóstico Automático</Text>
-                <Text style={styles.stepDescription}>Identificamos os reparos necessários e acionamos nossa rede de especialistas parceiros.</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.marketingStepTitle}>Viva sem Preocupações</Text>
+                <Text style={styles.marketingStepDesc}>
+                  Aproveite sua casa nova sabendo que a dor de cabeça com pedreiros, pintores e faxina na hora da mudança já está resolvida.
+                </Text>
               </View>
             </View>
 
-            <View style={styles.timelineItem}>
-              <View style={[styles.iconBlock, styles.iconBlockActive]}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
-                  <Path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            {/* Passo 3 - Chave/Check */}
+            <View style={styles.marketingTimelineItem}>
+              <View style={styles.marketingIconWrapper}>
+                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
+                  <Path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3m-3-3l2.25-2.25" />
                 </Svg>
               </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 5</Text>
-                <Text style={styles.stepTitle}>Execução Garantida</Text>
-                <Text style={styles.stepDescription}>Pintura, limpeza e pequenos reparos realizados por profissionais, sem custos extras surpresa.</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.marketingStepTitle}>Saída Garantida</Text>
+                <Text style={styles.marketingStepDesc}>
+                  No fim do contrato, nós assumimos os itens estéticos do laudo. Entregamos a pintura, os reparos superficiais e a limpeza impecáveis, garantindo a aprovação destes itens sem custos extras.
+                </Text>
               </View>
             </View>
+          </View>
 
-            <View style={styles.timelineItem}>
-              <View style={[styles.iconBlock, styles.iconBlockActive]}>
-                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2">
-                  <Path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <Path d="M22 4L12 14.01l-3-3" />
+          {/* CTA Card */}
+          <View style={styles.ctaCard}>
+            <View style={styles.ctaTextContent}>
+              <Text style={styles.ctaHeading}>Simule agora a sua proteção e blinde a sua devolução.</Text>
+              <Link src="https://entregafacilitada.vercel.app/" style={{ textDecoration: 'none' }}>
+                <View style={styles.ctaButton}>
+                  <Text style={styles.ctaButtonText}>Simular Minha Entrega</Text>
+                </View>
+              </Link>
+            </View>
+
+            <View style={styles.qrSection}>
+              <View style={styles.qrCodeBox}>
+                {/* QR Code SVG Simulado */}
+                <Svg width="60" height="60" viewBox="0 0 24 24">
+                  <Path d="M3 3h4v4H3V3zm14 0h4v4h-4V3zM3 17h4v4H3v-4zm10-5h2v2h-2v-2zm2 2h2v2h-2v-2zm0-2h2v2h-2v-2zm2 2h2v2h-2v-2zM12 12h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zM17 12h4v4h-4v-4zm0 5h2v2h-2v-2zM5 5h2v2H5V5zm14 0h2v2h-2V5zm0 14h2v2h-2v-2zM5 19h2v2H5v-2z" fill="#0D1117" />
                 </Svg>
               </View>
-              <View style={styles.stepContent}>
-                <Text style={styles.stepPreHeader}>Etapa 6</Text>
-                <Text style={styles.stepTitle}>Nada Consta Emitido</Text>
-                <Text style={styles.stepDescription}>Entrega das chaves sem estresse e quitação total do contrato de locação.</Text>
-              </View>
+              <Link src="https://entregafacilitada.vercel.app/" style={styles.qrUrl}>
+                entregafacilitada.vercel.app
+              </Link>
             </View>
           </View>
         </View>
 
-        {/* Rodapé fixo também na última página */}
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
-          <Text style={styles.footerPage} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+        {/* Rodapé customizado para Dark Mode */}
+        <View style={[styles.footer, { backgroundColor: '#161B22', borderTop: '1pt solid #30363D' }]} fixed>
+          <Text style={[styles.footerText, { color: '#94A3B8' }]}>© {new Date().getFullYear()} Entrega Facilitada Tecnologia</Text>
+          <Text style={[styles.footerPage, { color: '#475569' }]} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
         </View>
       </Page>
     </Document>
