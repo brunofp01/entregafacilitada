@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Save, ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -23,27 +23,21 @@ const NovaImobiliariaPage = () => {
         setLoading(true);
 
         try {
-            // 1. Criar usuário no Auth (idealmente via edge function para não deslogar o admin, 
-            // mas aqui usaremos a abordagem de signUp que pode exigir re-auth se não configurado como 'definer' no banco)
-            // NOTA: Em Supabase, cadastrar outro usuário via client costuma deslogar o atual.
-            // Para resolver isso, usaremos o rpc 'create_user_admin' que deve ser criado no banco.
-
-            const { data: userId, error } = await supabase.rpc('create_new_user', {
-                user_email: formData.email,
-                user_password: formData.password,
-                user_full_name: formData.nome,
-                user_role: 'imobiliaria'
+            // Usar a API server-side para criar o usuário sem deslogar o admin
+            const response = await fetch('/api/create-imobiliaria', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: formData.nome,
+                    email: formData.email,
+                    password: formData.password
+                })
             });
 
-            if (error) throw error;
+            const result = await response.json();
 
-            // Garantir que o perfil foi criado corretamente com o nome e role
-            // Às vezes a trigger pode demorar um pouco ou o RPC não setar o nome no profile
-            if (userId) {
-                await supabase.from('profiles').update({
-                    full_name: formData.nome,
-                    role: 'imobiliaria'
-                }).eq('id', userId);
+            if (!response.ok) {
+                throw new Error(result.error || 'Erro ao cadastrar imobiliária.');
             }
 
             // Enviar e-mail de boas-vindas
@@ -61,7 +55,7 @@ const NovaImobiliariaPage = () => {
                 console.error("Erro ao disparar e-mail de boas-vindas:", e);
             }
 
-            toast.success("Imobiliária cadastrada com sucesso!");
+            toast.success(`Imobiliária "${formData.nome}" cadastrada com sucesso!`);
             navigate("/admin/imobiliarias");
         } catch (error: any) {
             console.error(error);
