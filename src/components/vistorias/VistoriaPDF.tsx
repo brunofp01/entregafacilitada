@@ -648,59 +648,63 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
         </View>
       </Page>
 
-      {/* Página de Marketing Premium (Contra-Capa) v10 */}
+      {/* Página de Marketing Premium (Contra-Capa) v11 */}
       <Page size="A4" style={styles.marketingPage}>
         <View style={styles.marketingContent}>
           <Text style={styles.marketingTitle}>
-            Já está pensando no trabalho que vai dar para entregar o imóvel exatamente assim?
+            Você acabou de ler o laudo. Devolver o imóvel nestas exatas condições não precisa ser um peso no seu orçamento.
           </Text>
           <Text style={styles.marketingSubtitle}>
-            A conta da vistoria final sempre chega. Mas ela não precisa ser uma surpresa e nem esvaziar o seu bolso de uma vez.
+            O fim do seu aluguel não precisa ser uma dor de cabeça. Planeje sua saída hoje e deixe a pintura e os pequenos reparos da vistoria final por nossa conta.
           </Text>
 
           <View style={styles.timelineContainer}>
-            {/* Passo 1 - Escudo */}
+            {/* Passo 1 - Carteira */}
+            <View style={styles.marketingTimelineItem}>
+              <View style={styles.marketingIconWrapper}>
+                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
+                  <Path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                  <Path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                  <Path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+                </Svg>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.marketingStepTitle}>No seu tempo e sem sustos</Text>
+                <Text style={styles.marketingStepDesc}>
+                  Cobertura total para a pintura e adequações do laudo por um valor fixo e previsível. Pague aos poucos durante a sua estadia e evite orçamentos abusivos de última hora.
+                </Text>
+              </View>
+            </View>
+
+            {/* Passo 2 - Pintura */}
+            <View style={styles.marketingTimelineItem}>
+              <View style={styles.marketingIconWrapper}>
+                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
+                  <Path d="M12 19l7-7 3 3-7 7-3-3z" />
+                  <Path d="M18 13l-1.5-1.5" />
+                  <Path d="M2 8a5 5 0 0 1 10 0v2a5 5 0 0 1-10 0V8z" />
+                </Svg>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.marketingStepTitle}>Laudo Garantido</Text>
+                <Text style={styles.marketingStepDesc}>
+                  Profissionais homologados assumem a adequação do imóvel para deixá-lo idêntico a este Laudo de Vistoria Inicial. Você não perde tempo buscando mão de obra.
+                </Text>
+              </View>
+            </View>
+
+            {/* Passo 3 - Risco Zero */}
             <View style={styles.marketingTimelineItem}>
               <View style={styles.marketingIconWrapper}>
                 <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
                   <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <Path d="M12 8v4l3 3" />
                 </Svg>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.marketingStepTitle}>Antecipe e Proteja-se Hoje</Text>
+                <Text style={styles.marketingStepTitle}>Risco Zero na entrega das chaves</Text>
                 <Text style={styles.marketingStepDesc}>
-                  Transforme os altos custos de adequação (pintura e pequenos reparos) em uma cobertura de valor fixo mensal durante a sua estadia.
-                </Text>
-              </View>
-            </View>
-
-            {/* Passo 2 - Casa/Sofá */}
-            <View style={styles.marketingTimelineItem}>
-              <View style={styles.marketingIconWrapper}>
-                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
-                  <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <Path d="M9 22V12h6v10" />
-                </Svg>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.marketingStepTitle}>Viva sem Preocupações</Text>
-                <Text style={styles.marketingStepDesc}>
-                  Aproveite sua casa nova sabendo que a dor de cabeça com pedreiros, pintores e faxina na hora da mudança já está resolvida.
-                </Text>
-              </View>
-            </View>
-
-            {/* Passo 3 - Chave/Check */}
-            <View style={styles.marketingTimelineItem}>
-              <View style={styles.marketingIconWrapper}>
-                <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F6A823" strokeWidth="2">
-                  <Path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3m-3-3l2.25-2.25" />
-                </Svg>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.marketingStepTitle}>Saída Garantida</Text>
-                <Text style={styles.marketingStepDesc}>
-                  No fim do contrato, nós assumimos os itens estéticos do laudo. Entregamos a pintura, os reparos superficiais e a limpeza impecáveis, garantindo a aprovação destes itens sem custos extras.
+                  Garantia de aprovação: se o fiscal for rigoroso e a imobiliária exigir qualquer retoque dentro do que foi contratado, nós voltamos e resolvemos rápido. Sem te cobrar nada a mais.
                 </Text>
               </View>
             </View>
@@ -709,10 +713,13 @@ export const VistoriaPDF = ({ data }: { data: VistoriaData }) => {
           {/* CTA Card */}
           <View style={styles.ctaCard}>
             <View style={styles.ctaTextContent}>
-              <Text style={styles.ctaHeading}>Simule agora a sua proteção e blinde a sua devolução.</Text>
+              <Text style={styles.ctaHeading}>Garantir minha Entrega Facilitada</Text>
+              <Text style={{ fontSize: 9, color: '#94A3B8', marginBottom: 15, marginTop: -10 }}>
+                Descubra em segundos o valor exato para blindar seu bolso na rescisão.
+              </Text>
               <Link src="https://entregafacilitada.vercel.app/" style={{ textDecoration: 'none' }}>
-                <View style={styles.ctaButton}>
-                  <Text style={styles.ctaButtonText}>Simular Minha Entrega</Text>
+                <View style={[styles.ctaButton, { width: 220 }]}>
+                  <Text style={styles.ctaButtonText}>SIMULAR MINHA ENTREGA FACILITADA</Text>
                 </View>
               </Link>
             </View>
