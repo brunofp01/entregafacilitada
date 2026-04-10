@@ -28,7 +28,7 @@ const NovaImobiliariaPage = () => {
             // NOTA: Em Supabase, cadastrar outro usuário via client costuma deslogar o atual.
             // Para resolver isso, usaremos o rpc 'create_user_admin' que deve ser criado no banco.
 
-            const { data, error } = await supabase.rpc('create_new_user', {
+            const { data: userId, error } = await supabase.rpc('create_new_user', {
                 user_email: formData.email,
                 user_password: formData.password,
                 user_full_name: formData.nome,
@@ -36,6 +36,15 @@ const NovaImobiliariaPage = () => {
             });
 
             if (error) throw error;
+
+            // Garantir que o perfil foi criado corretamente com o nome e role
+            // Às vezes a trigger pode demorar um pouco ou o RPC não setar o nome no profile
+            if (userId) {
+                await supabase.from('profiles').update({
+                    full_name: formData.nome,
+                    role: 'imobiliaria'
+                }).eq('id', userId);
+            }
 
             // Enviar e-mail de boas-vindas
             try {
