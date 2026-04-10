@@ -29,7 +29,7 @@ const Auth = () => {
 
         if (profile?.role) {
           localStorage.setItem('userRole', profile.role);
-          if (profile.role === "admin") navigate("/admin");
+          if (profile.role === "admin_master" || profile.role === "admin") navigate("/admin");
           else if (profile.role === "imobiliaria" || profile.role === "integrante_imobiliaria") navigate("/imobiliaria");
           else navigate("/inquilino");
         } else {
@@ -74,7 +74,7 @@ const Auth = () => {
           localStorage.setItem('userRole', profile.role);
         }
 
-        if (profile?.role === "admin") {
+        if (profile?.role === "admin_master" || profile?.role === "admin") {
           navigate("/admin");
         } else if (profile?.role === "imobiliaria" || profile?.role === "integrante_imobiliaria") {
           navigate("/imobiliaria");
