@@ -399,7 +399,7 @@ const ContratoEFPage = () => {
                         </div>
 
                         {/* Pagamentos Section - Only visible if Approved */}
-                        {isAtivo || data.status_pagamento === 'pago' ? (
+                        {isAtivo || isAprovadoPendentePagamento || data.status_pagamento === 'pago' ? (
                             <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
                                 <CardHeader className="border-b border-border/50 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div>
