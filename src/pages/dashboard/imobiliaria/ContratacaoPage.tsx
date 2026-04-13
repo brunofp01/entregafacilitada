@@ -156,7 +156,7 @@ const ContratacaoPage = () => {
             // 0. Check if we need to create an Auth user (only for Admin/Imobiliaria creating for someone else)
             if (userRole !== 'inquilino' && inquilino.email) {
                 try {
-                    await fetch('/api/create-sale', {
+                    const authRes = await fetch('/api/create-sale', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -166,9 +166,17 @@ const ContratacaoPage = () => {
                             imobiliaria_id: imobiliariaPerfil?.imobiliaria_id || imobiliariaPerfil?.id
                         })
                     });
+                    const resData = await authRes.json();
+
+                    if (!authRes.ok) {
+                        console.error("Auth creation failed:", resData);
+                        setLoading(false);
+                        toast.error("Erro na criação do acesso: " + (resData.error || "Limite de segurança/Spam atingido. Tente novamente mais tarde."), { id: toastId, duration: 8000 });
+                        return; // Stop the contract logic if we can't create the user
+                    }
                     console.log("Auth check/creation completed via API.");
                 } catch (e) {
-                    console.warn("Auth creation/check failed, proceeding with DB insert anyway:", e);
+                    console.error("Auth creation/check failed, proceeding with DB insert anyway:", e);
                 }
             }
 
