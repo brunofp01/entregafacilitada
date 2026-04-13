@@ -18,6 +18,7 @@ interface InquilinoData {
   plano_nome: string;
   plano_mensalidade: number;
   plano_parcelas: number;
+  status_pagamento?: string;
 }
 
 interface ProfileData {
@@ -76,7 +77,7 @@ const InquilinoDashboard = () => {
         if (!user?.email) return;
 
         const [{ data: inqRow }, { data: profileRow }] = await Promise.all([
-          supabase.from("inquilinos").select("id, nome, status_assinatura, aprovacao_ef, plano_nome, plano_mensalidade, plano_parcelas, plano_id")
+          supabase.from("inquilinos").select("id, nome, status_assinatura, aprovacao_ef, plano_nome, plano_mensalidade, plano_parcelas, plano_id, status_pagamento")
             .eq("email", user.email).order("created_at", { ascending: false }).limit(1).single(),
           supabase.from("profiles").select("full_name").eq("id", user.id).single(),
         ]);
@@ -111,16 +112,28 @@ const InquilinoDashboard = () => {
 
   const isAssinaturaPendente = !inquilino || inquilino.status_assinatura !== "assinado";
   const isAnalise = inquilino?.status_assinatura === "assinado" && inquilino?.aprovacao_ef === "pendente";
-  const isAtivo = inquilino?.status_assinatura === "assinado" && inquilino?.aprovacao_ef === "aprovado";
+
+  // New state: Approved but waiting for first payment
+  const isAprovadoPendentePagamento = inquilino?.status_assinatura === "assinado" &&
+    inquilino?.aprovacao_ef === "aprovado" &&
+    inquilino?.status_pagamento !== "pago";
+
+  // Only active when approved AND paid
+  const isAtivo = inquilino?.status_assinatura === "assinado" &&
+    inquilino?.aprovacao_ef === "aprovado" &&
+    inquilino?.status_pagamento === "pago";
+
   const isRecusado = inquilino?.aprovacao_ef === "recusado";
 
   const statusConfig = isAtivo
     ? { bg: "bg-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-600", Icon: ShieldCheck, label: "Plano Ativo", cta: null, spin: false }
-    : isAnalise
-      ? { bg: "bg-violet-500/10", border: "border-violet-500/30", text: "text-violet-600", Icon: Loader2, label: "Em Análise pela EF", cta: "Sua documentação está em revisão. Você será notificado quando o plano for ativado.", spin: true }
-      : isRecusado
-        ? { bg: "bg-destructive/10", border: "border-destructive/30", text: "text-destructive", Icon: AlertTriangle, label: "Plano Recusado", cta: "Seu contrato foi recusado. Entre em contato pelo Atendimento.", spin: false }
-        : { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-600", Icon: Clock, label: "Aguardando Assinatura", cta: "Enviamos o contrato para seu e-mail via Autentique. Por favor, assine para ativar sua cobertura.", spin: false };
+    : isAprovadoPendentePagamento
+      ? { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-600", Icon: CreditCard, label: "Plano Aprovado (Pendente Pagamento)", cta: "Sua documentação foi aprovada! Pague a primeira parcela para ativar a cobertura.", spin: false }
+      : isAnalise
+        ? { bg: "bg-violet-500/10", border: "border-violet-500/30", text: "text-violet-600", Icon: Loader2, label: "Em Análise pela EF", cta: "Sua documentação está em revisão. Você será notificado sobre a aprovação.", spin: true }
+        : isRecusado
+          ? { bg: "bg-destructive/10", border: "border-destructive/30", text: "text-destructive", Icon: AlertTriangle, label: "Plano Recusado", cta: "Seu contrato foi recusado. Entre em contato pelo Atendimento.", spin: false }
+          : { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-600", Icon: Clock, label: "Aguardando Assinatura", cta: "Enviamos o contrato para seu e-mail via Autentique. Assine para prosseguir.", spin: false };
 
   const firstName = (profile?.full_name || inquilino?.nome || "Cliente")?.split(" ")[0];
   const now = new Date();
@@ -222,7 +235,20 @@ const InquilinoDashboard = () => {
                     <div className="flex-1">
                       <p className="font-bold">Assinatura Confirmada — Em Análise</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Sua documentação foi recebida e está sendo revisada. Você será notificado quando o plano for ativado.
+                        Sua documentação foi recebida e está sendo revisada. Você será notificado sobre a aprovação.
+                      </p>
+                    </div>
+                  </>
+                )}
+                {isAprovadoPendentePagamento && (
+                  <>
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <CreditCard className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-amber-600">Libere seu Plano — Pague a 1ª Parcela</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        A documentação foi aprovada! Faça o pagamento da primeira parcela para ativar sua cobertura imediatamente.
                       </p>
                     </div>
                   </>

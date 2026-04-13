@@ -52,6 +52,7 @@ interface StripeInvoice {
 const steps = [
     { key: "assinatura", label: "Assinatura do Contrato" },
     { key: "analise", label: "Análise pela Equipe EF" },
+    { key: "pagamento", label: "Pagamento 1ª Parcela" },
     { key: "ativo", label: "Plano Ativo" },
 ];
 
@@ -209,18 +210,30 @@ const ContratoEFPage = () => {
 
     const isAssinaturaPendente = !data || data.status_assinatura !== "assinado";
     const isAnalise = data?.status_assinatura === "assinado" && data?.aprovacao_ef === "pendente";
-    const isAtivo = data?.status_assinatura === "assinado" && data?.aprovacao_ef === "aprovado";
+
+    // New state: Approved but waiting for first payment
+    const isAprovadoPendentePagamento = data?.status_assinatura === "assinado" &&
+        data?.aprovacao_ef === "aprovado" &&
+        data?.status_pagamento !== "pago";
+
+    // Only active when approved AND paid
+    const isAtivo = data?.status_assinatura === "assinado" &&
+        data?.aprovacao_ef === "aprovado" &&
+        data?.status_pagamento === "pago";
+
     const isRecusado = data?.aprovacao_ef === "recusado";
 
-    const currentStep = isAtivo ? 2 : isAnalise ? 1 : 0;
+    const currentStep = isAtivo ? 4 : isAprovadoPendentePagamento ? 2 : isAnalise ? 1 : 0;
 
     const statusConfig = isAtivo
         ? { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-600", Icon: ShieldCheck, label: "Plano Ativo", desc: "Sua cobertura EF está ativa. Você está protegido.", spin: false }
-        : isAnalise
-            ? { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-600", Icon: Loader2, label: "Em Análise", desc: "Sua documentação está em revisão pela equipe Entrega Facilitada.", spin: true }
-            : isRecusado
-                ? { bg: "bg-destructive/10", border: "border-destructive/20", text: "text-destructive", Icon: AlertTriangle, label: "Reprovado", desc: "Seu contrato foi recusado. Entre em contato com o suporte EF.", spin: false }
-                : { bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-600", Icon: Clock, label: "Aguardando Assinatura", desc: "Verifique seu e-mail e assine o contrato digitalmente via Autentique.", spin: false };
+        : isAprovadoPendentePagamento
+            ? { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-600", Icon: CreditCard, label: "Aprovado: Pague a 1ª Parcela", desc: "Sua documentação foi aprovada. Pague a primeira parcela para ativar a proteção.", spin: false }
+            : isAnalise
+                ? { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-600", Icon: Loader2, label: "Em Análise", desc: "Sua documentação está em revisão pela equipe Entrega Facilitada.", spin: true }
+                : isRecusado
+                    ? { bg: "bg-destructive/10", border: "border-destructive/20", text: "text-destructive", Icon: AlertTriangle, label: "Reprovado", desc: "Seu contrato foi recusado. Entre em contato com o suporte EF.", spin: false }
+                    : { bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-600", Icon: Clock, label: "Aguardando Assinatura", desc: "Verifique seu e-mail e assine o contrato digitalmente via Autentique.", spin: false };
 
     if (loading) {
         return (
