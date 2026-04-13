@@ -30,7 +30,7 @@ const ImobiliariaDashboard = () => {
       // Buscar Inquilinos (Contratos)
       const { data: inqs } = await supabase
         .from('inquilinos')
-        .select('status_assinatura, aprovacao_ef')
+        .select('status_assinatura, aprovacao_ef, status_pagamento')
         .eq('imobiliaria_id', imobiliariaId);
 
       // Buscar Vistorias
@@ -43,7 +43,7 @@ const ImobiliariaDashboard = () => {
         setStats({
           vistoriasAprovadas: vists?.filter(v => v.status === 'concluida').length || 0,
           pendentesAprovacao: vists?.filter(v => v.status !== 'concluida').length || 0,
-          contratosAtivos: inqs.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado').length,
+          contratosAtivos: inqs.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado' && i.status_pagamento === 'pago').length,
           pendentesAssinatura: inqs.filter(i => i.status_assinatura !== 'assinado' && i.status_assinatura !== 'rejeitado').length,
         });
       }

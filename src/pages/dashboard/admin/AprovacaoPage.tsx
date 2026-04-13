@@ -48,6 +48,7 @@ interface ContratoParaAprovacao {
     plano_valor_pc?: number;
     plano_parcelas?: number;
     plano_mensalidade?: number;
+    status_pagamento?: string;
 }
 
 const fmtMoney = (v?: number) => v != null ? `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "—";
@@ -59,8 +60,11 @@ const planIcon = (id?: string) => {
     return <Package className="w-3.5 h-3.5 text-muted-foreground" />;
 };
 
-const aprovacaoBadge = (status?: string) => {
-    if (status === "aprovado") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovado</Badge>;
+const aprovacaoBadge = (status?: string, pagto?: string) => {
+    if (status === "aprovado") {
+        if (pagto === "pago") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Plano Ativo</Badge>;
+        return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando Pagto</Badge>;
+    }
     if (status === "recusado") return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado</Badge>;
     return <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando EF</Badge>;
 };
@@ -330,7 +334,7 @@ const AprovacaoPage = () => {
                                                     <span className="font-mono font-bold text-xs">{fmtMoney(c.plano_mensalidade)}</span>
                                                 </td>
                                                 <td className="px-5 py-4">
-                                                    {aprovacaoBadge(c.aprovacao_ef)}
+                                                    {aprovacaoBadge(c.aprovacao_ef, c.status_pagamento)}
                                                 </td>
                                                 <td className="px-5 py-4 hidden md:table-cell text-xs text-muted-foreground">
                                                     {fmtDate(c.created_at)}
@@ -368,7 +372,7 @@ const AprovacaoPage = () => {
                                     {selected.nome}
                                 </SheetTitle>
                                 <SheetDescription className="flex items-center gap-2">
-                                    {aprovacaoBadge(selected.aprovacao_ef)}
+                                    {aprovacaoBadge(selected.aprovacao_ef, selected.status_pagamento)}
                                     {selected.plano_nome && (
                                         <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground">
                                             {planIcon(selected.plano_id)} {selected.plano_nome}

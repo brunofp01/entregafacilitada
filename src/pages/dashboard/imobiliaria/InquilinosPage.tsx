@@ -34,6 +34,7 @@ interface InquilinoRow {
     vistoria_id?: string;
     vistoria_upload_url?: string;
     created_at: string;
+    status_pagamento?: string;
 }
 
 const InquilinosPage = () => {
@@ -178,7 +179,13 @@ const InquilinosPage = () => {
             return <Badge variant="outline" className="text-muted-foreground border-border/50">Aguardando Assinatura</Badge>;
         }
         const ef = inquilino.aprovacao_ef || 'pendente';
-        if (ef === 'aprovado') return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovado — Cobrança Ativa</Badge>;
+        const pagto = inquilino.status_pagamento;
+        if (ef === 'aprovado') {
+            if (pagto === 'pago') {
+                return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Plano Ativo</Badge>;
+            }
+            return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aprovado — Aguardando Pagamento</Badge>;
+        }
         if (ef === 'recusado') return (
             <div className="flex flex-col gap-1 items-start">
                 <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold">
@@ -249,7 +256,7 @@ const InquilinosPage = () => {
                             <CardDescription className="font-bold uppercase tracking-wider text-[10px] text-emerald-600">Contratos Ativos</CardDescription>
                             <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
                                 <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
-                                {inquilinos.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado').length}
+                                {inquilinos.filter(i => i.status_assinatura === 'assinado' && i.aprovacao_ef === 'aprovado' && i.status_pagamento === 'pago').length}
                             </CardTitle>
                         </CardHeader>
                     </Card>

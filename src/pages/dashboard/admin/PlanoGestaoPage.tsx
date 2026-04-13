@@ -53,21 +53,28 @@ interface ClienteContrato {
     motivo_recusa?: string;
     aprovacao_ef?: string;
     vistorias?: { relatorio_url: string };
+    status_pagamento?: string;
 }
 
 const statusBadge = (item: ClienteContrato) => {
     const status = item.status_assinatura;
     const ef = item.aprovacao_ef || 'pendente';
+    const pagto = item.status_pagamento;
 
     if (status === "rejeitado" || status === "recusado" || ef === "recusado")
         return <Badge className="bg-red-500/10 text-red-600 border-red-500/20 font-bold"><XCircle className="w-3 h-3 mr-1" />Recusado</Badge>;
 
     if (status === "assinado") {
-        if (ef === "aprovado") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovado</Badge>;
+        if (ef === "aprovado") {
+            if (pagto === "pago") {
+                return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Plano Ativo</Badge>;
+            }
+            return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando Pagto</Badge>;
+        }
         return <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando EF</Badge>;
     }
 
-    return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Assinatura Pendente</Badge>;
+    return <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Assinatura Pendente</Badge>;
 };
 
 const planIcon = (planoId?: string) => {
@@ -174,7 +181,7 @@ const PlanoGestaoPage = () => {
 
     // ── KPIs (react to date filter) ────────────────────────────────────────────────
     const kpis = useMemo(() => {
-        const ativos = dateFiltered.filter(c => c.status_assinatura === "assinado" && c.aprovacao_ef === "aprovado");
+        const ativos = dateFiltered.filter(c => c.status_assinatura === "assinado" && c.aprovacao_ef === "aprovado" && c.status_pagamento === "pago");
         const aguardandoEF = dateFiltered.filter(c => c.status_assinatura === "assinado" && (!c.aprovacao_ef || c.aprovacao_ef === "pendente"));
         const pendentesAssinatura = dateFiltered.filter(c => c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado");
         const mrrTotal = ativos.reduce((s, c) => s + (c.plano_mensalidade || 0), 0);
