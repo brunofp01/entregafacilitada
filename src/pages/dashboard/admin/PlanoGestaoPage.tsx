@@ -94,6 +94,7 @@ const PlanoGestaoPage = () => {
     const [imobiliarias, setImobiliarias] = useState<{ id: string; nome: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
+    const [hasAutoSynced, setHasAutoSynced] = useState(false);
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("todos");
     const [filterPlano, setFilterPlano] = useState("todos");
@@ -168,6 +169,17 @@ const PlanoGestaoPage = () => {
     };
 
     useEffect(() => { fetchAll(); }, []);
+
+    // ── Auto Sync Effect ────────────────────────────────────────────────────────
+    useEffect(() => {
+        if (!loading && clientes.length > 0 && !hasAutoSynced && !syncing) {
+            const pendentes = clientes.filter(c => c.status_assinatura !== "assinado" && c.autentique_document_id);
+            if (pendentes.length > 0) {
+                handleSync();
+                setHasAutoSynced(true);
+            }
+        }
+    }, [loading, clientes, hasAutoSynced, syncing]);
 
     // ── Date-filtered base (feeds KPIs + table) ───────────────────────────────────
     const dateFiltered = useMemo(() => {

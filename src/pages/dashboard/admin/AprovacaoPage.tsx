@@ -60,7 +60,8 @@ const planIcon = (id?: string) => {
     return <Package className="w-3.5 h-3.5 text-muted-foreground" />;
 };
 
-const aprovacaoBadge = (status?: string, pagto?: string) => {
+const aprovacaoBadge = (status?: string, pagto?: string, assinatura?: string) => {
+    if (assinatura !== "assinado" && assinatura !== "rejeitado") return <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Pendente Assinatura</Badge>;
     if (status === "aprovado") {
         if (pagto === "pago") return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold"><CheckCircle2 className="w-3 h-3 mr-1" />Plano Ativo</Badge>;
         return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold"><Clock className="w-3 h-3 mr-1" />Aguardando Pagto</Badge>;
@@ -81,11 +82,13 @@ const AprovacaoPage = () => {
     const [recusaOpen, setRecusaOpen] = useState(false);
     const [motivoRecusa, setMotivoRecusa] = useState("");
     const [processing, setProcessing] = useState(false);
+    const [syncing, setSyncing] = useState(false);
+    const [hasAutoSynced, setHasAutoSynced] = useState(false);
 
     const fetchAll = async () => {
         setLoading(true);
         try {
-            // Only contracts that are signed (eligible for approval)
+            // Fetch all contracts so we can sync pending signatures as well
             const { data, error } = await supabase
                 .from("inquilinos")
                 .select(`
@@ -94,7 +97,6 @@ const AprovacaoPage = () => {
                         relatorio_url
                     )
                 `)
-                .eq("status_assinatura", "assinado")
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
@@ -124,11 +126,12 @@ const AprovacaoPage = () => {
 
     // KPIs
     const kpis = useMemo(() => {
-        const pendentes = contratos.filter(c => !c.aprovacao_ef || c.aprovacao_ef === "pendente");
-        const aprovados = contratos.filter(c => c.aprovacao_ef === "aprovado");
+        const pendentesAssinatura = contratos.filter(c => c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado");
+        const pendentes = contratos.filter(c => c.status_assinatura === "assinado" && (!c.aprovacao_ef || c.aprovacao_ef === "pendente"));
+        const aprovados = contratos.filter(c => c.status_assinatura === "assinado" && c.aprovacao_ef === "aprovado");
         const recusados = contratos.filter(c => c.aprovacao_ef === "recusado");
         const mrrAprovado = aprovados.reduce((s, c) => s + (c.plano_mensalidade || 0), 0);
-        return { total: contratos.length, pendentes: pendentes.length, aprovados: aprovados.length, recusados: recusados.length, mrrAprovado };
+        return { total: contratos.length, pendentesAssinatura: pendentesAssinatura.length, pendentes: pendentes.length, aprovados: aprovados.length, recusados: recusados.length, mrrAprovado };
     }, [contratos]);
 
     // Filtered
@@ -136,9 +139,12 @@ const AprovacaoPage = () => {
         return contratos.filter(c => {
             const q = search.toLowerCase();
             const matchSearch = !q || c.nome.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || (c.cpf || "").includes(q);
+
             const ef = c.aprovacao_ef || "pendente";
-            const matchStatus = filterStatus === "todos" || ef === filterStatus;
-            return matchSearch && matchStatus;
+            if (filterStatus === "todos") return matchSearch;
+            if (filterStatus === "assinatura") return matchSearch && c.status_assinatura !== "assinado" && c.status_assinatura !== "rejeitado";
+
+            return matchSearch && c.status_assinatura === "assinado" && ef === filterStatus;
         });
     }, [contratos, search, filterStatus]);
 
@@ -177,11 +183,48 @@ const AprovacaoPage = () => {
     };
 
     const statusTabs = [
-        { key: "pendente", label: "Aguardando", count: kpis.pendentes },
+        { key: "assinatura", label: "Aguardando Assinatura", count: kpis.pendentesAssinatura },
+        { key: "pendente", label: "Aguardando EF", count: kpis.pendentes },
         { key: "aprovado", label: "Aprovados", count: kpis.aprovados },
         { key: "recusado", label: "Recusados", count: kpis.recusados },
         { key: "todos", label: "Todos", count: kpis.total },
     ];
+
+    // ── Sync Autentique ───────────────────────────────────────────────────────
+    const handleSync = async () => {
+        setSyncing(true);
+        try {
+            const pendentes = contratos.filter(c => c.status_assinatura !== "assinado" && c.autentique_document_id);
+            if (!pendentes.length) return;
+            const res = await fetch("/api/sync-autentique", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ documentIds: pendentes.map(c => c.autentique_document_id) })
+            });
+            const data = await res.json();
+            if (data.success) {
+                let n = 0;
+                for (const s of data.statuses || []) {
+                    if (s.status === "assinado" || s.status === "rejeitado") {
+                        await supabase.from("inquilinos").update({ status_assinatura: s.status }).eq("autentique_document_id", s.id);
+                        n++;
+                    }
+                }
+                if (n > 0) { toast.success(`${n} contrato(s) assinados via Autentique!`); fetchAll(); }
+            }
+        } catch { console.error("Erro na sincronização Autentique."); }
+        finally { setSyncing(false); }
+    };
+
+    useEffect(() => {
+        if (!loading && contratos.length > 0 && !hasAutoSynced && !syncing) {
+            const pendentes = contratos.filter(c => c.status_assinatura !== "assinado" && c.autentique_document_id);
+            if (pendentes.length > 0) {
+                handleSync();
+                setHasAutoSynced(true);
+            }
+        }
+    }, [loading, contratos, hasAutoSynced, syncing]);
 
     return (
         <DashboardLayout role="admin">
@@ -334,7 +377,7 @@ const AprovacaoPage = () => {
                                                     <span className="font-mono font-bold text-xs">{fmtMoney(c.plano_mensalidade)}</span>
                                                 </td>
                                                 <td className="px-5 py-4">
-                                                    {aprovacaoBadge(c.aprovacao_ef, c.status_pagamento)}
+                                                    {aprovacaoBadge(c.aprovacao_ef, c.status_pagamento, c.status_assinatura)}
                                                 </td>
                                                 <td className="px-5 py-4 hidden md:table-cell text-xs text-muted-foreground">
                                                     {fmtDate(c.created_at)}
@@ -372,7 +415,7 @@ const AprovacaoPage = () => {
                                     {selected.nome}
                                 </SheetTitle>
                                 <SheetDescription className="flex items-center gap-2">
-                                    {aprovacaoBadge(selected.aprovacao_ef, selected.status_pagamento)}
+                                    {aprovacaoBadge(selected.aprovacao_ef, selected.status_pagamento, selected.status_assinatura)}
                                     {selected.plano_nome && (
                                         <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground">
                                             {planIcon(selected.plano_id)} {selected.plano_nome}
@@ -487,7 +530,7 @@ const AprovacaoPage = () => {
                             <Separator />
 
                             {/* Action Buttons */}
-                            {(!selected.aprovacao_ef || selected.aprovacao_ef === "pendente") && (
+                            {selected.status_assinatura === "assinado" && (!selected.aprovacao_ef || selected.aprovacao_ef === "pendente") && (
                                 <div className="grid grid-cols-2 gap-3">
                                     <Button
                                         variant="outline"
