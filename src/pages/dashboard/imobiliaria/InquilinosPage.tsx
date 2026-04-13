@@ -210,12 +210,12 @@ const InquilinosPage = () => {
                         <h1 className="text-3xl font-heading font-extrabold text-foreground mb-2">Gestão de Clientes EF</h1>
                         <p className="text-muted-foreground">Acompanhe os contratos, assinaturas e o status de aprovação da Entrega Facilitada.</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Button variant="outline" onClick={handleSyncAssinaturas} disabled={syncing || loading} className="border-border/50 bg-background/50 backdrop-blur-sm shadow-sm transition-all hover:bg-secondary/5">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                        <Button variant="outline" onClick={handleSyncAssinaturas} disabled={syncing || loading} className="w-full sm:w-auto border-border/50 bg-background/50 backdrop-blur-sm shadow-sm transition-all hover:bg-secondary/5">
                             <RefreshCw className={`w-4 h-4 mr-2 text-secondary ${syncing ? 'animate-spin' : ''}`} />
                             {syncing ? 'Sincronizando...' : 'Atualizar Assinaturas'}
                         </Button>
-                        <Button asChild className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold shadow-lg shadow-secondary/20">
+                        <Button asChild className="w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold shadow-lg shadow-secondary/20">
                             <Link to="/imobiliaria/contratar">
                                 Novo Contrato <ArrowRight className="w-4 h-4 ml-2" />
                             </Link>

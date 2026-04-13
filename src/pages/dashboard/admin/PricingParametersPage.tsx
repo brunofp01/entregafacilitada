@@ -353,25 +353,25 @@ const PricingParametersPage = () => {
                                 {simData && (
                                     <>
                                         {/* 12x Card */}
-                                        <div className="flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 bg-violet-500/10 border-violet-500/20">
+                                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 rounded-2xl border gap-4 bg-violet-500/10 border-violet-500/20 items-start">
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido (12x)</span>
-                                                <span className="font-mono font-extrabold text-3xl text-violet-500">R$ {(simData.pc / 12).toFixed(2)}</span>
+                                                <span className="font-mono font-extrabold text-2xl md:text-3xl text-violet-500">R$ {(simData.pc / 12).toFixed(2)}</span>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="sm:text-right">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
-                                                <div className="font-heading font-black text-lg text-foreground">12x Recorrentes</div>
+                                                <div className="font-heading font-black text-base md:text-lg text-foreground">12x Recorrentes</div>
                                             </div>
                                         </div>
                                         {/* 24x Card */}
-                                        <div className={`flex-1 flex items-center justify-between p-6 rounded-2xl border gap-4 ${simData.bgColor} ${simData.borderColor}`}>
+                                        <div className={`flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between p-6 rounded-2xl border gap-4 ${simData.bgColor} ${simData.borderColor} items-start`}>
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Custo Mensal Sugerido (24x)</span>
-                                                <span className={`font-mono font-extrabold text-3xl ${simData.color}`}>R$ {(simData.pc / 24).toFixed(2)}</span>
+                                                <span className={`font-mono font-extrabold text-2xl md:text-3xl ${simData.color}`}>R$ {(simData.pc / 24).toFixed(2)}</span>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="sm:text-right">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Parcelamento</span>
-                                                <div className="font-heading font-black text-lg text-foreground">24x Recorrentes</div>
+                                                <div className="font-heading font-black text-base md:text-lg text-foreground">24x Recorrentes</div>
                                             </div>
                                         </div>
                                     </>
@@ -512,10 +512,10 @@ const PricingParametersPage = () => {
                         </div>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row items-center gap-8">
-                            <div className="flex-1">
-                                <p className="font-mono font-extrabold text-3xl md:text-4xl text-foreground tracking-tight mb-4">
-                                    P<sub className="text-lg">c</sub> = <span className="text-secondary">P<sub className="text-lg">p</sub> × (1 + M<sub className="text-lg">s</sub>)</span> / (1 − C<sub className="text-lg">o</sub>)
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+                            <div className="flex-1 w-full overflow-x-auto pb-4 md:pb-0">
+                                <p className="font-mono font-extrabold text-2xl md:text-4xl text-foreground tracking-tight mb-4 whitespace-nowrap md:whitespace-normal">
+                                    P<sub className="text-base md:text-lg">c</sub> = <span className="text-secondary">P<sub className="text-base md:text-lg">p</sub> × (1 + M<sub className="text-base md:text-lg">s</sub>)</span> / (1 − C<sub className="text-base md:text-lg">o</sub>)
                                 </p>
                                 <p className="text-sm text-muted-foreground">
                                     <strong className="text-foreground">Pc</strong> = Preço final &nbsp;|&nbsp;

@@ -207,7 +207,7 @@ const AprovacaoPage = () => {
                                 <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Aguardando</p>
                                 <Clock className="w-4 h-4 text-violet-500" />
                             </div>
-                            <p className="text-3xl font-extrabold font-mono text-violet-600">{kpis.pendentes}</p>
+                            <p className="text-2xl md:text-3xl font-extrabold font-mono text-violet-600">{kpis.pendentes}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">para revisar</p>
                         </CardContent>
                     </Card>
@@ -217,7 +217,7 @@ const AprovacaoPage = () => {
                                 <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Aprovados</p>
                                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             </div>
-                            <p className="text-3xl font-extrabold font-mono text-emerald-600">{kpis.aprovados}</p>
+                            <p className="text-2xl md:text-3xl font-extrabold font-mono text-emerald-600">{kpis.aprovados}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">com cobrança ativa</p>
                         </CardContent>
                     </Card>
@@ -227,7 +227,7 @@ const AprovacaoPage = () => {
                                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">MRR Aprovado</p>
                                 <DollarSign className="w-4 h-4 text-secondary" />
                             </div>
-                            <p className="text-2xl font-extrabold font-mono text-secondary">{fmtMoney(kpis.mrrAprovado)}</p>
+                            <p className="text-xl md:text-2xl font-extrabold font-mono text-secondary">{fmtMoney(kpis.mrrAprovado)}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">mensalidade consolidada</p>
                         </CardContent>
                     </Card>
@@ -237,7 +237,7 @@ const AprovacaoPage = () => {
                                 <p className="text-xs font-bold uppercase tracking-wider text-red-600">Recusados</p>
                                 <XCircle className="w-4 h-4 text-red-500" />
                             </div>
-                            <p className="text-3xl font-extrabold font-mono text-red-600">{kpis.recusados}</p>
+                            <p className="text-2xl md:text-3xl font-extrabold font-mono text-red-600">{kpis.recusados}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">contratos negados</p>
                         </CardContent>
                     </Card>
@@ -245,7 +245,7 @@ const AprovacaoPage = () => {
 
                 {/* Tabs + Search */}
                 <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
-                    <div className="flex gap-1 bg-muted/30 p-1 rounded-xl border border-border/30">
+                    <div className="flex flex-wrap gap-1 bg-muted/30 p-1 rounded-xl border border-border/30 w-full md:w-auto">
                         {statusTabs.map(t => (
                             <button
                                 key={t.key}

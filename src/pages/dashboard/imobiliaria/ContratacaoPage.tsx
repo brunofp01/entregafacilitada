@@ -786,8 +786,8 @@ const ContratacaoPage = () => {
                     </Card>
 
                     {/* Action Footer */}
-                    <div className="flex justify-end pt-6">
-                        <Button type="submit" size="lg" disabled={loading} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold shadow-xl shadow-secondary/20">
+                    <div className="flex flex-col sm:flex-row justify-end pt-6">
+                        <Button type="submit" size="lg" disabled={loading} className="w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold shadow-xl shadow-secondary/20">
                             {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
                             Gerar Contrato e Enviar para Assinatura Eletrônica
                         </Button>
