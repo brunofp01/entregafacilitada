@@ -49,65 +49,95 @@ export default async function handler(req, res) {
     }
 
     // Handle the events
-    const relevantEvents = ['checkout.session.completed', 'invoice.paid', 'invoice.payment_succeeded'];
+    const sessionOrInvoice = event.data.object;
+    let inquilinoId = sessionOrInvoice.client_reference_id ||
+        (sessionOrInvoice.metadata && sessionOrInvoice.metadata.inquilino_id) ||
+        (sessionOrInvoice.subscription_details?.metadata?.inquilino_id);
 
-    if (relevantEvents.includes(event.type)) {
-        const sessionOrInvoice = event.data.object;
+    // Se ainda não temos o ID e existe uma assinatura, buscamos nos metadados da assinatura
+    if (!inquilinoId && sessionOrInvoice.subscription && typeof sessionOrInvoice.subscription === 'string') {
+        try {
+            const subscription = await stripe.subscriptions.retrieve(sessionOrInvoice.subscription);
+            inquilinoId = subscription.metadata?.inquilino_id;
+        } catch (err) {
+            console.error('⚠️ Could not retrieve subscription metadata:', err.message);
+        }
+    }
 
-        // Inquilino ID can be in client_reference_id (Session) or in metadata (Session/Invoice)
-        // Note: For subscriptions, metadata needs to be explicitly passed to the subscription
-        let inquilinoId = sessionOrInvoice.client_reference_id ||
-            (sessionOrInvoice.metadata && sessionOrInvoice.metadata.inquilino_id);
+    const customerEmail = sessionOrInvoice.customer_email || sessionOrInvoice.billing_details?.email;
+    console.log(`🔔 Event ${event.type} received. InquilinoID: ${inquilinoId}, Email: ${customerEmail}`);
 
-        // If it's an invoice, we might need to find the inquilino by email if metadata is missing
-        const customerEmail = sessionOrInvoice.customer_email || sessionOrInvoice.billing_details?.email;
+    if (supabaseUrl && supabaseServiceKey) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-        console.log(`🔔 Event ${event.type} received. InquilinoID: ${inquilinoId}, Email: ${customerEmail}`);
+        switch (event.type) {
+            case 'checkout.session.completed':
+            case 'invoice.paid':
+            case 'invoice.payment_succeeded': {
+                let query = supabase.from('inquilinos').update({
+                    status_pagamento: 'pago',
+                    aprovacao_ef: 'aprovado'
+                });
 
-        if (supabaseUrl && supabaseServiceKey) {
-            const supabase = createClient(supabaseUrl, supabaseServiceKey);
+                if (inquilinoId) {
+                    query = query.eq('id', inquilinoId);
+                } else if (customerEmail) {
+                    query = query.eq('email', customerEmail);
+                } else {
+                    console.error('❌ Could not identify inquilino for success event');
+                    return res.json({ received: true, error: 'identity_missing' });
+                }
 
-            let query = supabase.from('inquilinos').update({
-                status_pagamento: 'pago',
-                aprovacao_ef: 'aprovado'
-            });
+                const { error } = await query;
+                if (error) console.error(`❌ Error updating inquilino (success):`, error.message);
+                else console.log(`✅ Inquilino marked as PAID via ${event.type}.`);
 
-            if (inquilinoId) {
-                query = query.eq('id', inquilinoId);
-            } else if (customerEmail) {
-                query = query.eq('email', customerEmail);
-            } else {
-                console.error('❌ Could not identify inquilino by ID or Email');
-                return res.json({ received: true, error: 'identity_missing' });
-            }
-
-            const { error } = await query;
-
-            if (error) {
-                console.error(`❌ Error updating inquilino:`, error.message);
-            } else {
-                console.log(`✅ Inquilino updated successfully via ${event.type}.`);
-
-                // --- NEW: Fix Subscription Term (cancel_at) ---
+                // Fix Subscription Term (cancel_at) on first checkout
                 if (event.type === 'checkout.session.completed' && sessionOrInvoice.mode === 'subscription' && sessionOrInvoice.subscription) {
                     try {
                         const months = Number(sessionOrInvoice.metadata?.plano_parcelas) || 12;
                         const endDate = new Date();
                         endDate.setMonth(endDate.getMonth() + months);
                         const cancelAtSeconds = Math.floor(endDate.getTime() / 1000);
-
-                        console.log(`📅 Setting cancel_at to ${new Date(cancelAtSeconds * 1000).toLocaleDateString()} for sub: ${sessionOrInvoice.subscription}`);
-
-                        await stripe.subscriptions.update(sessionOrInvoice.subscription, {
-                            cancel_at: cancelAtSeconds,
-                        });
-                        console.log(`✅ Subscription ${sessionOrInvoice.subscription} updated with cancel_at.`);
+                        await stripe.subscriptions.update(sessionOrInvoice.subscription, { cancel_at: cancelAtSeconds });
+                        console.log(`📅 Subscription ${sessionOrInvoice.subscription} set to cancel in ${months} months.`);
                     } catch (subErr) {
                         console.error(`❌ Error updating subscription term:`, subErr.message);
                     }
                 }
-                // ----------------------------------------------
+                break;
             }
+
+            case 'invoice.payment_failed': {
+                let query = supabase.from('inquilinos').update({ status_pagamento: 'vencido' });
+                if (inquilinoId) query = query.eq('id', inquilinoId);
+                else if (customerEmail) query = query.eq('email', customerEmail);
+                else break;
+
+                const { error } = await query;
+                if (error) console.error(`❌ Error updating inquilino (fail):`, error.message);
+                else console.log(`⚠️ Inquilino marked as OVERDUE (payment failed).`);
+                break;
+            }
+
+            case 'customer.subscription.deleted': {
+                let query = supabase.from('inquilinos').update({
+                    status_pagamento: 'cancelado',
+                    // Opcional: tirar a aprovação se quiser que eles tenham que passar por nova análise
+                    // aprovacao_ef: 'pendente' 
+                });
+                if (inquilinoId) query = query.eq('id', inquilinoId);
+                else if (customerEmail) query = query.eq('email', customerEmail);
+                else break;
+
+                const { error } = await query;
+                if (error) console.error(`❌ Error updating inquilino (deleted):`, error.message);
+                else console.log(`🚫 Inquilino marked as CANCELLED (subscription deleted).`);
+                break;
+            }
+
+            default:
+                console.log(`ℹ️ Unhandled event type: ${event.type}`);
         }
     }
 

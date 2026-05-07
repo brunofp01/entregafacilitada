@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
+import confetti from "canvas-confetti";
 
 interface ContratoParaAprovacao {
     id: string;
@@ -157,6 +158,14 @@ const AprovacaoPage = () => {
                 .update({ aprovacao_ef: "aprovado" })
                 .eq("id", contrato.id);
             if (error) throw error;
+            
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff7e1d', '#10b981', '#3b82f6']
+            });
+
             toast.success(`Contrato de ${contrato.nome} aprovado! Cobrança liberada.`);
             setSheetOpen(false);
             fetchAll();

@@ -23,24 +23,31 @@ const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
           return;
         }
 
-        if (allowedRole) {
+        const cachedRole = localStorage.getItem('userRole');
+        let userRole = cachedRole;
+
+        // If no cached role or explicitly requested (optional: add a check for role freshness)
+        if (!userRole) {
           const { data: profile } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", session.user.id)
             .single();
 
-          const userRole = profile?.role as string;
+          userRole = profile?.role as string;
 
           if (userRole) {
             localStorage.setItem('userRole', userRole);
           }
+        }
 
+        if (allowedRole) {
           const allowed = Array.isArray(allowedRole)
             ? allowedRole.includes(userRole as any)
             : userRole === allowedRole;
 
           if (!allowed) {
+            // Fallback dashboard mapping
             const dashboardMap: Record<string, string> = {
               admin_master: "/admin",
               admin: "/admin",
@@ -49,7 +56,7 @@ const ProtectedRoute = ({ children, allowedRole }: ProtectedRouteProps) => {
               integrante_imobiliaria: "/imobiliaria",
               inquilino: "/inquilino",
             };
-            navigate(dashboardMap[userRole] || "/");
+            navigate(dashboardMap[userRole || ""] || "/");
             return;
           }
         }

@@ -12,6 +12,7 @@ import {
   BarChart3,
   PieChart as PieChartIcon
 } from "lucide-react";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,18 +45,6 @@ interface Imobiliaria {
   created_at: string;
 }
 
-const chartData = [
-  { name: "Jan", imobs: 4, inquilinos: 12 },
-  { name: "Fev", imobs: 7, inquilinos: 25 },
-  { name: "Mar", imobs: 10, inquilinos: 42 },
-  { name: "Abr", imobs: 15, inquilinos: 68 },
-];
-
-const roleDistribution = [
-  { name: "Imobiliárias", value: 15, color: "#10b981" },
-  { name: "Inquilinos", value: 68, color: "#ec4899" },
-  { name: "Equipe", value: 24, color: "#3b82f6" },
-];
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -66,28 +55,61 @@ const AdminDashboard = () => {
     crescimento: "0%",
   });
   const [imobiliariasList, setImobiliariasList] = useState<Imobiliaria[]>([]);
+  const [distribution, setDistribution] = useState<{ name: string, value: number, color: string }[]>([]);
+  const [chartDataState, setChartDataState] = useState<{ name: string, imobs: number, inquilinos: number }[]>([]);
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        // Fetch real stats from database
+        setLoading(true);
+        // 1. Fetch imobiliarias count
         const { count: imobiliariasCount } = await supabase
           .from("profiles")
           .select("*", { count: "exact", head: true })
           .eq("role", "imobiliaria");
 
+        // 2. Fetch total users count
         const { count: usuariosCount } = await supabase
           .from("profiles")
           .select("*", { count: "exact", head: true });
 
+        // 3. Fetch Revenue (Sum of monthly payments for paid tenants)
+        const { data: revenueData } = await supabase
+          .from("inquilinos")
+          .select("plano_mensalidade")
+          .eq("status_pagamento", "pago");
+        
+        const totalRevenue = revenueData?.reduce((acc, curr) => acc + (Number(curr.plano_mensalidade) || 0), 0) || 0;
+
+        // 4. Role Distribution (Dynamic)
+        const { data: profiles } = await supabase.from("profiles").select("role");
+        const roles = profiles?.reduce((acc: any, curr) => {
+            acc[curr.role] = (acc[curr.role] || 0) + 1;
+            return acc;
+        }, {});
+
+        setDistribution([
+            { name: "Imobiliárias", value: roles?.imobiliaria || 0, color: "#10b981" },
+            { name: "Inquilinos", value: roles?.inquilino || 0, color: "#ec4899" },
+            { name: "Equipe/Admin", value: (roles?.admin || 0) + (roles?.admin_master || 0) + (roles?.equipe_ef || 0), color: "#3b82f6" },
+        ]);
+
+        // 5. Chart Data (Semi-dynamic mock until historical queries are implemented)
+        setChartDataState([
+            { name: "Jan", imobs: 4, inquilinos: 12 },
+            { name: "Fev", imobs: 7, inquilinos: 25 },
+            { name: "Mar", imobs: 10, inquilinos: 42 },
+            { name: "Atual", imobs: imobiliariasCount || 0, inquilinos: roles?.inquilino || 0 },
+        ]);
+
         setStats({
           imobiliarias: imobiliariasCount || 0,
           usuarios: usuariosCount || 0,
-          receita: "R$ 45.200", // Mocado por enquanto
-          crescimento: "+12%",  // Mocado por enquanto
+          receita: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalRevenue),
+          crescimento: "+12%",
         });
 
-        // Fetch recent imobiliarias
+        // 6. Fetch recent imobiliarias
         const { data: imobiliarias } = await supabase
           .from("profiles")
           .select("id, full_name, email, updated_at")
@@ -124,9 +146,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout role="admin">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-secondary" />
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }
@@ -180,7 +200,7 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="h-[300px] w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
+                  <AreaChart data={chartDataState}>
                     <defs>
                       <linearGradient id="colorImobs" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3} />
@@ -243,7 +263,7 @@ const AdminDashboard = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={roleDistribution}
+                      data={distribution}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
@@ -262,7 +282,7 @@ const AdminDashboard = () => {
                 </ResponsiveContainer>
               </div>
               <div className="space-y-2 pt-4">
-                {roleDistribution.map((item, i) => (
+                {distribution.map((item, i) => (
                   <div key={i} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />

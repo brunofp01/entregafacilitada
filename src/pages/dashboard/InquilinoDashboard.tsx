@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   ShieldCheck, Clock, AlertTriangle, Loader2, FileText,
   CreditCard, Key, MessageSquare, ChevronRight, CheckCircle2, User,
@@ -9,6 +10,7 @@ import {
 import { supabase } from "@/lib/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { StatusTracker } from "@/components/dashboard/inquilino/StatusTracker";
 
 interface InquilinoData {
   id: string;
@@ -18,11 +20,18 @@ interface InquilinoData {
   plano_nome: string;
   plano_mensalidade: number;
   plano_parcelas: number;
+  plano_id: string;
   status_pagamento?: string;
 }
 
 interface ProfileData {
   full_name: string;
+}
+
+interface SolicitacaoData {
+  id: string;
+  status: string;
+  data_pretendida: string;
 }
 
 const quickLinks = [
@@ -69,6 +78,7 @@ const InquilinoDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [inquilino, setInquilino] = useState<InquilinoData | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [solicitacao, setSolicitacao] = useState<SolicitacaoData | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,22 +87,34 @@ const InquilinoDashboard = () => {
         if (!user?.email) return;
 
         const [{ data: inqRow }, { data: profileRow }] = await Promise.all([
-          supabase.from("inquilinos").select("id, nome, status_assinatura, aprovacao_ef, plano_nome, plano_mensalidade, plano_parcelas, plano_id, status_pagamento")
+          supabase.from("inquilinos").select("*")
             .eq("email", user.email).order("created_at", { ascending: false }).limit(1).single(),
           supabase.from("profiles").select("full_name").eq("id", user.id).single(),
         ]);
 
         if (inqRow) {
           setInquilino(inqRow as InquilinoData);
-          // If no plan is selected yet, redirect to hiring page
           if (!inqRow.plano_id) {
             navigate("/inquilino/contratar");
+            return;
           }
+
+          // Fetch active delivery request
+          const { data: solRow } = await supabase
+            .from("solicitacoes_entrega")
+            .select("id, status, data_pretendida")
+            .eq("inquilino_id", inqRow.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
+          
+          if (solRow) setSolicitacao(solRow);
         } else {
-          // No inquilino record at all? Also redirect
           navigate("/inquilino/contratar");
         }
         if (profileRow) setProfile(profileRow as ProfileData);
+      } catch (err) {
+        console.error("Dashboard error:", err);
       } finally {
         setLoading(false);
       }
@@ -112,17 +134,12 @@ const InquilinoDashboard = () => {
 
   const isAssinaturaPendente = !inquilino || inquilino.status_assinatura !== "assinado";
   const isAnalise = inquilino?.status_assinatura === "assinado" && inquilino?.aprovacao_ef === "pendente";
-
-  // New state: Approved but waiting for first payment
   const isAprovadoPendentePagamento = inquilino?.status_assinatura === "assinado" &&
     inquilino?.aprovacao_ef === "aprovado" &&
     inquilino?.status_pagamento !== "pago";
-
-  // Only active when approved AND paid
   const isAtivo = inquilino?.status_assinatura === "assinado" &&
     inquilino?.aprovacao_ef === "aprovado" &&
     inquilino?.status_pagamento === "pago";
-
   const isRecusado = inquilino?.aprovacao_ef === "recusado";
 
   const statusConfig = isAtivo
@@ -145,15 +162,23 @@ const InquilinoDashboard = () => {
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
         {/* Welcome */}
-        <div>
-          <h1 className="text-3xl font-heading font-extrabold text-foreground mb-1">
-            {greeting}, {firstName}! 👋
-          </h1>
-          <p className="text-muted-foreground">Bem-vindo ao seu portal de cliente Entrega Facilitada.</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-heading font-extrabold text-foreground mb-1">
+              {greeting}, {firstName}! 👋
+            </h1>
+            <p className="text-muted-foreground">Bem-vindo ao seu portal de cliente Entrega Facilitada.</p>
+          </div>
+          {isAtivo && (
+            <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 px-4 py-2 rounded-full border border-emerald-500/20 shadow-sm">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Cobertura Ativa</span>
+            </div>
+          )}
         </div>
 
         {/* Status Banner */}
-        <div className={cn("rounded-2xl border p-5 flex items-start gap-4", statusConfig.bg, statusConfig.border)}>
+        <div className={cn("rounded-2xl border p-5 flex items-start gap-4 shadow-sm", statusConfig.bg, statusConfig.border)}>
           <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", statusConfig.bg)}>
             <statusConfig.Icon className={cn("w-6 h-6", statusConfig.text, statusConfig.spin && "animate-spin")} />
           </div>
@@ -167,7 +192,7 @@ const InquilinoDashboard = () => {
               )}
             </div>
             {statusConfig.cta && (
-              <p className="text-sm text-muted-foreground mt-1">{statusConfig.cta}</p>
+              <p className="text-sm text-muted-foreground mt-1 font-medium">{statusConfig.cta}</p>
             )}
             {isAtivo && inquilino && (
               <div className="flex flex-wrap gap-4 mt-2">
@@ -182,24 +207,50 @@ const InquilinoDashboard = () => {
           </div>
         </div>
 
+        {/* Delivery Progress Tracker */}
+        {solicitacao && (
+          <Card className="border-secondary/20 bg-secondary/5 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="pb-2 border-b border-secondary/10 bg-secondary/10">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Key className="w-5 h-5 text-secondary" /> Progresso da Entrega
+                        </CardTitle>
+                    </div>
+                    {solicitacao.status === 'concluida' ? (
+                        <Badge className="bg-emerald-500 text-white font-bold">Concluído</Badge>
+                    ) : (
+                        <Badge className="bg-secondary text-white font-bold animate-pulse">Em Processo</Badge>
+                    )}
+                </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+                <StatusTracker 
+                    currentStatus={solicitacao.status} 
+                    dataPretendida={solicitacao.data_pretendida} 
+                />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Quick Links Grid */}
         <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-4">Acesso Rápido</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-4 ml-1">Acesso Rápido</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickLinks.map((item) => (
               <Link key={item.href} to={item.href}>
                 <Card className={cn(
-                  "border-border/50 bg-gradient-to-br backdrop-blur-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group",
+                  "border-border/50 bg-gradient-to-br backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group",
                   item.color
                 )}>
                   <CardContent className="pt-6 pb-5">
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4", item.iconBg)}>
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", item.iconBg)}>
                       <item.Icon className={cn("w-5 h-5", item.iconColor)} />
                     </div>
                     <p className="font-bold text-base">{item.label}</p>
                     <p className="text-xs text-muted-foreground mt-1 mb-4 leading-relaxed">{item.desc}</p>
                     <div className={cn("flex items-center gap-1 text-xs font-bold", item.iconColor)}>
-                      Acessar <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                      Acessar <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </CardContent>
                 </Card>
@@ -210,7 +261,7 @@ const InquilinoDashboard = () => {
 
         {/* Next Step Card */}
         {!isAtivo && (
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm shadow-lg">
             <CardContent className="pt-6 pb-6">
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-4">Próximo Passo</p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -220,8 +271,8 @@ const InquilinoDashboard = () => {
                       <Clock className="w-5 h-5 text-orange-500" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold">Assine o Contrato EF</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="font-bold text-lg">Assine o Contrato EF</p>
+                      <p className="text-sm text-muted-foreground mt-1 font-medium">
                         Verifique seu e-mail — enviamos o contrato via Autentique. Após a assinatura digital, sua cobertura entra em análise.
                       </p>
                     </div>
@@ -233,8 +284,8 @@ const InquilinoDashboard = () => {
                       <CheckCircle2 className="w-5 h-5 text-violet-500" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold">Assinatura Confirmada — Em Análise</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="font-bold text-lg text-violet-500">Assinatura Confirmada — Em Análise</p>
+                      <p className="text-sm text-muted-foreground mt-1 font-medium">
                         Sua documentação foi recebida e está sendo revisada. Você será notificado sobre a aprovação.
                       </p>
                     </div>
@@ -246,20 +297,20 @@ const InquilinoDashboard = () => {
                       <CreditCard className="w-5 h-5 text-amber-500" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold text-amber-600">Libere seu Plano — Pague a 1ª Parcela</p>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="font-bold text-lg text-amber-600">Libere seu Plano — Pague a 1ª Parcela</p>
+                      <p className="text-sm text-muted-foreground mt-1 font-medium">
                         A documentação foi aprovada! Faça o pagamento da primeira parcela para ativar sua cobertura imediatamente.
                       </p>
                     </div>
                   </>
                 )}
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="font-bold border-border/50 hover:text-secondary whitespace-nowrap shrink-0"
+                  variant="default"
+                  size="lg"
+                  className="font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg shadow-secondary/20 whitespace-nowrap shrink-0 h-12 px-6 rounded-xl"
                   asChild
                 >
-                  <Link to="/inquilino/contrato">Ver Contrato</Link>
+                  <Link to="/inquilino/contrato">Ver Meu Contrato</Link>
                 </Button>
               </div>
             </CardContent>

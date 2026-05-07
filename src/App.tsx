@@ -24,6 +24,7 @@ import ContratacaoPage from "./pages/dashboard/imobiliaria/ContratacaoPage.tsx";
 import InquilinosPage from "./pages/dashboard/imobiliaria/InquilinosPage.tsx";
 import SegurosPage from "./pages/dashboard/imobiliaria/SegurosPage.tsx";
 import MeuPerfilPage from "./pages/dashboard/imobiliaria/MeuPerfilPage.tsx";
+import SolicitacoesPage from "./pages/dashboard/imobiliaria/SolicitacoesPage.tsx";
 import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
 import PerfilInquilinoPage from "./pages/dashboard/inquilino/PerfilInquilinoPage.tsx";
 import ContratoEFPage from "./pages/dashboard/inquilino/ContratoEFPage.tsx";
@@ -38,13 +39,15 @@ import LeadsAdminPage from "./pages/dashboard/admin/LeadsAdminPage.tsx";
 import NovaImobiliariaPage from "./pages/dashboard/admin/NovaImobiliariaPage.tsx";
 
 import { PwaHandler } from "./components/pwa/PwaHandler.tsx";
+import { AuthProvider } from "./contexts/AuthContext.tsx";
 
 // Deploy Force Sync: 2026-04-02 13:53
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -116,6 +119,11 @@ const App = () => (
               <LeadsAdminPage />
             </ProtectedRoute>
           } />
+          <Route path="/admin/solicitacoes" element={
+            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+              <SolicitacoesPage />
+            </ProtectedRoute>
+          } />
 
           <Route path="/imobiliaria/vistorias" element={
             <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
@@ -140,6 +148,11 @@ const App = () => (
           <Route path="/imobiliaria/seguros" element={
             <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
               <SegurosPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/imobiliaria/solicitacoes" element={
+            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+              <SolicitacoesPage />
             </ProtectedRoute>
           } />
 
@@ -215,7 +228,8 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </TooltipProvider>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

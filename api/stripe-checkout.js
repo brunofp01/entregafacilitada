@@ -59,6 +59,9 @@ export default async function handler(req, res) {
                     plano_parcelas: months
                 }
             },
+            payment_settings: {
+                save_default_payment_method: 'on_subscription',
+            },
             success_url: `https://entregafacilitada.vercel.app/inquilino/pagamento-sucesso?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `https://entregafacilitada.vercel.app/inquilino/pagamentos?canceled=true`,
             metadata: {

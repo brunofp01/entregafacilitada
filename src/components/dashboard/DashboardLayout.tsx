@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -12,20 +11,20 @@ import {
   Menu,
   X,
   User,
-  Bell,
   Calculator,
   Package,
   ClipboardCheck,
   Shield,
-  CreditCard,
   Key,
   MessageSquare,
   ShoppingCart,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { MobileMenuDrawer } from "./MobileMenuDrawer";
+import { NotificationBell } from "./NotificationBell";
+import { CommandSearch } from "./CommandSearch";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -35,39 +34,12 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole') || null);
+  const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const getProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, role")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        setUserName(profile.full_name || user.email?.split("@")[0] || "Usuário");
-        setUserRole(profile.role);
-        localStorage.setItem('userRole', profile.role);
-      } else {
-        setUserName(user.email?.split("@")[0] || "Usuário");
-      }
-    };
-    getProfile();
-  }, [navigate]);
-
   const handleLogout = async () => {
-    localStorage.removeItem('userRole');
-    await supabase.auth.signOut();
+    await signOut();
     navigate("/");
   };
 
@@ -104,8 +76,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
     equipe_ef: [
       { icon: LayoutDashboard, label: "Visão Geral", href: "/admin" },
-      { icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
-      { icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
+      {icon: ClipboardCheck, label: "Aprovações", href: "/admin/aprovacoes" },
+      {icon: Key, label: "Solicitações de Entrega", href: "/admin/solicitacoes" },
+      {icon: Building2, label: "Imobiliárias", href: "/admin/imobiliarias" },
       { icon: MessageSquare, label: "Leads Simulador", href: "/admin/leads" },
       { icon: Users, label: "Usuários", href: "/admin/usuarios" },
       { icon: User, label: "Meu Perfil", href: "/admin/perfil" },
@@ -113,8 +86,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: ShoppingCart, label: "Contratar EF", href: "/imobiliaria/contratar" },
-      { icon: Users, label: "Clientes EF", href: "/imobiliaria/inquilinos" },
-      { icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
+      {icon: Users, label: "Clientes EF", href: "/imobiliaria/inquilinos" },
+      {icon: Key, label: "Solicitações de Entrega", href: "/imobiliaria/solicitacoes" },
+      {icon: FileText, label: "Vistorias", href: "/imobiliaria/vistorias" },
       { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
       { icon: Users, label: "Minha Equipe", href: "/imobiliaria/equipe" },
       { icon: Building2, label: "Perfil da Imobiliária", href: "/imobiliaria/perfil" },
@@ -123,8 +97,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     integrante_imobiliaria: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/imobiliaria" },
       { icon: ShoppingCart, label: "Contratar EF", href: "/imobiliaria/contratar" },
-      { icon: Users, label: "Gestão de Clientes EF", href: "/imobiliaria/inquilinos" },
-      { icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
+      {icon: Users, label: "Gestão de Clientes EF", href: "/imobiliaria/inquilinos" },
+      {icon: Key, label: "Solicitações de Entrega", href: "/imobiliaria/solicitacoes" },
+      {icon: FileText, label: "Módulo de Vistoria", href: "/imobiliaria/vistorias" },
       { icon: Shield, label: "Seguros e Garantias", href: "/imobiliaria/seguros" },
       { icon: User, label: "Meu Perfil", href: "/imobiliaria/meu-perfil" },
     ],
@@ -137,11 +112,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
     ],
   };
 
-  // Precedence: 
-  // 1. Fetched role from Database (userRole) - most accurate
-  // 2. Initial role from Prop (role) - fallback while loading or if fetch fails
-  const activeRole = (userRole || role) as keyof typeof menuItems;
+  const activeRole = (profile?.role || role) as keyof typeof menuItems;
   const items = menuItems[activeRole] || [];
+  const userName = profile?.full_name || "Usuário";
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden">
@@ -215,10 +188,8 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="text-muted-foreground relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-background" />
-            </Button>
+            <CommandSearch />
+            <NotificationBell />
 
             <Link
               to={['admin', 'admin_master', 'equipe_ef'].includes(activeRole) ? '/admin/perfil' : activeRole === 'inquilino' ? '/inquilino/perfil' : '/imobiliaria/meu-perfil'}
@@ -250,7 +221,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
         {/* Content Area */}
         <div className={cn(
           "flex-1 overflow-y-auto p-6 md:p-10",
-          "pb-24 md:pb-10" // Padding extra para não cobrir pela Bottom Nav no mobile
+          "pb-24 md:pb-10"
         )}>
           <div className="max-w-6xl mx-auto">
             {children}

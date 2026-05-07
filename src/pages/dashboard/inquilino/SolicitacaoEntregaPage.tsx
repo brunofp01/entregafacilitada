@@ -43,12 +43,12 @@ const SolicitacaoEntregaPage = () => {
                 if (!user?.email) return;
                 const { data: row } = await supabase
                     .from("inquilinos")
-                    .select("id, status_assinatura, aprovacao_ef, endereco_rua, endereco_numero, endereco_bairro, endereco_cidade")
+                    .select("id, imobiliaria_id, status_assinatura, aprovacao_ef, endereco_rua, endereco_numero, endereco_bairro, endereco_cidade")
                     .eq("email", user.email)
                     .order("created_at", { ascending: false })
                     .limit(1)
                     .single();
-                if (row) setInquilino(row as InquilinoData);
+                if (row) setInquilino(row as any);
             } finally {
                 setLoading(false);
             }
@@ -63,14 +63,38 @@ const SolicitacaoEntregaPage = () => {
             toast.error("Informe a data pretendida de entrega do imóvel.");
             return;
         }
+        if (!inquilino) return;
+
         try {
             setSending(true);
-            // In a real app this would insert to a `solicitacoes` table
-            await new Promise(r => setTimeout(r, 1200)); // simulate async request
+            
+            const { error } = await supabase.from('solicitacoes_entrega').insert({
+                inquilino_id: inquilino.id,
+                imobiliaria_id: (inquilino as any).imobiliaria_id || null, // We should fetch imobiliaria_id in useEffect
+                data_pretendida: form.dataEntrega,
+                observacoes: form.observacoes,
+                status: 'pendente'
+            });
+
+            if (error) throw error;
+
+            // Notify Imobiliaria
+            const imobId = (inquilino as any).imobiliaria_id;
+            if (imobId) {
+                await supabase.from("notifications").insert({
+                    user_id: imobId,
+                    title: "Nova Solicitação de Entrega! 🔑",
+                    message: `O locatário ${inquilino.endereco_rua}, nº ${inquilino.endereco_numero} solicitou a saída para ${new Date(form.dataEntrega).toLocaleDateString('pt-BR')}.`,
+                    type: "info",
+                    link: "/imobiliaria/solicitacoes"
+                });
+            }
+
             setSubmitted(true);
             toast.success("Solicitação enviada com sucesso! Nossa equipe entrará em contato em breve.");
-        } catch {
-            toast.error("Erro ao enviar a solicitação. Tente novamente.");
+        } catch (error: any) {
+            console.error("Erro ao enviar solicitação:", error);
+            toast.error("Erro ao enviar a solicitação: " + error.message);
         } finally {
             setSending(false);
         }
