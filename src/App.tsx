@@ -1,233 +1,243 @@
+import { Suspense, lazy } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import Auth from "./pages/Auth.tsx";
-import AdminDashboard from "./pages/dashboard/AdminDashboard.tsx";
-import PricingParametersPage from "./pages/dashboard/admin/PricingParametersPage.tsx";
-import ImobiliariasPage from "./pages/dashboard/admin/ImobiliariasPage.tsx";
-import UsuariosPage from "./pages/dashboard/admin/UsuariosPage.tsx";
-import RelatoriosPage from "./pages/dashboard/admin/RelatoriosPage.tsx";
-import ConfiguracoesPage from "./pages/dashboard/admin/ConfiguracoesPage.tsx";
-import AdminPerfilPage from "./pages/dashboard/admin/PerfilPage.tsx";
-import PlanoGestaoPage from "./pages/dashboard/admin/PlanoGestaoPage.tsx";
-import AprovacaoPage from "./pages/dashboard/admin/AprovacaoPage.tsx";
-import ContratoPadraoPage from "./pages/dashboard/admin/ContratoPadraoPage.tsx";
-import ImobiliariaDashboard from "./pages/dashboard/ImobiliariaDashboard.tsx";
-import EquipePage from "./pages/dashboard/imobiliaria/EquipePage.tsx";
-import VistoriasPage from "./pages/dashboard/imobiliaria/VistoriasPage.tsx";
-import NewVistoria from "./pages/dashboard/imobiliaria/NewVistoria.tsx";
-import PerfilPage from "./pages/dashboard/imobiliaria/PerfilPage.tsx";
-import ContratacaoPage from "./pages/dashboard/imobiliaria/ContratacaoPage.tsx";
-import InquilinosPage from "./pages/dashboard/imobiliaria/InquilinosPage.tsx";
-import SegurosPage from "./pages/dashboard/imobiliaria/SegurosPage.tsx";
-import MeuPerfilPage from "./pages/dashboard/imobiliaria/MeuPerfilPage.tsx";
-import SolicitacoesPage from "./pages/dashboard/imobiliaria/SolicitacoesPage.tsx";
-import InquilinoDashboard from "./pages/dashboard/InquilinoDashboard.tsx";
-import PerfilInquilinoPage from "./pages/dashboard/inquilino/PerfilInquilinoPage.tsx";
-import ContratoEFPage from "./pages/dashboard/inquilino/ContratoEFPage.tsx";
-import SolicitacaoEntregaPage from "./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx";
-import AtendimentoPage from "./pages/dashboard/inquilino/AtendimentoPage.tsx";
-import PagamentoSucessoPage from "./pages/dashboard/inquilino/PagamentoSucessoPage.tsx";
-import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import PublicCheckoutPage from "./pages/PublicCheckoutPage.tsx";
-import SuccessPage from "./pages/SuccessPage.tsx";
-import LeadsAdminPage from "./pages/dashboard/admin/LeadsAdminPage.tsx";
-import NovaImobiliariaPage from "./pages/dashboard/admin/NovaImobiliariaPage.tsx";
-
 import { PwaHandler } from "./components/pwa/PwaHandler.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
+import { DashboardSkeleton } from "./components/dashboard/DashboardSkeleton";
 
-// Deploy Force Sync: 2026-04-02 13:53
+// --- Lazy Pages ---
+const Index = lazy(() => import("./pages/Index.tsx"));
+const Auth = lazy(() => import("./pages/Auth.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const PublicCheckoutPage = lazy(() => import("./pages/PublicCheckoutPage.tsx"));
+const SuccessPage = lazy(() => import("./pages/SuccessPage.tsx"));
+
+// Admin
+const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard.tsx"));
+const PricingParametersPage = lazy(() => import("./pages/dashboard/admin/PricingParametersPage.tsx"));
+const ImobiliariasPage = lazy(() => import("./pages/dashboard/admin/ImobiliariasPage.tsx"));
+const UsuariosPage = lazy(() => import("./pages/dashboard/admin/UsuariosPage.tsx"));
+const RelatoriosPage = lazy(() => import("./pages/dashboard/admin/RelatoriosPage.tsx"));
+const ConfiguracoesPage = lazy(() => import("./pages/dashboard/admin/ConfiguracoesPage.tsx"));
+const AdminPerfilPage = lazy(() => import("./pages/dashboard/admin/PerfilPage.tsx"));
+const PlanoGestaoPage = lazy(() => import("./pages/dashboard/admin/PlanoGestaoPage.tsx"));
+const AprovacaoPage = lazy(() => import("./pages/dashboard/admin/AprovacaoPage.tsx"));
+const ContratoPadraoPage = lazy(() => import("./pages/dashboard/admin/ContratoPadraoPage.tsx"));
+const LeadsAdminPage = lazy(() => import("./pages/dashboard/admin/LeadsAdminPage.tsx"));
+const NovaImobiliariaPage = lazy(() => import("./pages/dashboard/admin/NovaImobiliariaPage.tsx"));
+const SolicitacoesPage = lazy(() => import("./pages/dashboard/imobiliaria/SolicitacoesPage.tsx"));
+
+// Imobiliaria
+const ImobiliariaDashboard = lazy(() => import("./pages/dashboard/ImobiliariaDashboard.tsx"));
+const EquipePage = lazy(() => import("./pages/dashboard/imobiliaria/EquipePage.tsx"));
+const VistoriasPage = lazy(() => import("./pages/dashboard/imobiliaria/VistoriasPage.tsx"));
+const NewVistoria = lazy(() => import("./pages/dashboard/imobiliaria/NewVistoria.tsx"));
+const PerfilPage = lazy(() => import("./pages/dashboard/imobiliaria/PerfilPage.tsx"));
+const ContratacaoPage = lazy(() => import("./pages/dashboard/imobiliaria/ContratacaoPage.tsx"));
+const InquilinosPage = lazy(() => import("./pages/dashboard/imobiliaria/InquilinosPage.tsx"));
+const SegurosPage = lazy(() => import("./pages/dashboard/imobiliaria/SegurosPage.tsx"));
+const MeuPerfilPage = lazy(() => import("./pages/dashboard/imobiliaria/MeuPerfilPage.tsx"));
+
+// Inquilino
+const InquilinoDashboard = lazy(() => import("./pages/dashboard/InquilinoDashboard.tsx"));
+const PerfilInquilinoPage = lazy(() => import("./pages/dashboard/inquilino/PerfilInquilinoPage.tsx"));
+const ContratoEFPage = lazy(() => import("./pages/dashboard/inquilino/ContratoEFPage.tsx"));
+const SolicitacaoEntregaPage = lazy(() => import("./pages/dashboard/inquilino/SolicitacaoEntregaPage.tsx"));
+const AtendimentoPage = lazy(() => import("./pages/dashboard/inquilino/AtendimentoPage.tsx"));
+const PagamentoSucessoPage = lazy(() => import("./pages/dashboard/inquilino/PagamentoSucessoPage.tsx"));
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <PwaHandler />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/contratar-publico" element={<PublicCheckoutPage />} />
-          <Route path="/sucesso" element={<SuccessPage />} />
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <PwaHandler />
+          <Suspense fallback={<div className="p-8"><DashboardSkeleton /></div>}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/contratar-publico" element={<PublicCheckoutPage />} />
+              <Route path="/sucesso" element={<SuccessPage />} />
 
-          {/* Dashboard Routes with Protection */}
-          <Route path="/admin/*" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/parametros" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <PricingParametersPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/imobiliarias" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <ImobiliariasPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/imobiliarias/nova" element={
-            <ProtectedRoute allowedRole={["admin_master", "admin"]}>
-              <NovaImobiliariaPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/usuarios" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <UsuariosPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/relatorios" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <RelatoriosPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/configuracoes" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <ConfiguracoesPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/perfil" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <AdminPerfilPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/planos" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <PlanoGestaoPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/aprovacoes" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <AprovacaoPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/contrato-padrao" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <ContratoPadraoPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/leads" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <LeadsAdminPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/solicitacoes" element={
-            <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
-              <SolicitacoesPage />
-            </ProtectedRoute>
-          } />
+              {/* Dashboard Routes with Protection */}
+              <Route path="/admin/*" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/parametros" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <PricingParametersPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/imobiliarias" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <ImobiliariasPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/imobiliarias/nova" element={
+                <ProtectedRoute allowedRole={["admin_master", "admin"]}>
+                  <NovaImobiliariaPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/usuarios" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <UsuariosPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/relatorios" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <RelatoriosPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/configuracoes" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <ConfiguracoesPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/perfil" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <AdminPerfilPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/planos" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <PlanoGestaoPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/aprovacoes" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <AprovacaoPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/contrato-padrao" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <ContratoPadraoPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/leads" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <LeadsAdminPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/solicitacoes" element={
+                <ProtectedRoute allowedRole={["admin", "admin_master", "equipe_ef"]}>
+                  <SolicitacoesPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/imobiliaria/vistorias" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <VistoriasPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/imobiliaria/vistorias/nova" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria", "admin"]}>
-              <NewVistoria />
-            </ProtectedRoute>
-          } />
-          <Route path="/imobiliaria/contratar" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria", "admin", "admin_master", "equipe_ef"]}>
-              <ContratacaoPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/imobiliaria/inquilinos" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <InquilinosPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/imobiliaria/seguros" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <SegurosPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/imobiliaria/solicitacoes" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <SolicitacoesPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/imobiliaria/vistorias" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+                  <VistoriasPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/imobiliaria/vistorias/nova" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria", "admin"]}>
+                  <NewVistoria />
+                </ProtectedRoute>
+              } />
+              <Route path="/imobiliaria/contratar" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria", "admin", "admin_master", "equipe_ef"]}>
+                  <ContratacaoPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/imobiliaria/inquilinos" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+                  <InquilinosPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/imobiliaria/seguros" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+                  <SegurosPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/imobiliaria/solicitacoes" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+                  <SolicitacoesPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/imobiliaria/perfil" element={
-            <ProtectedRoute allowedRole="imobiliaria">
-              <PerfilPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/imobiliaria/perfil" element={
+                <ProtectedRoute allowedRole="imobiliaria">
+                  <PerfilPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/imobiliaria/meu-perfil" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <MeuPerfilPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/imobiliaria/meu-perfil" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+                  <MeuPerfilPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/imobiliaria/equipe" element={
-            <ProtectedRoute allowedRole="imobiliaria">
-              <EquipePage />
-            </ProtectedRoute>
-          } />
+              <Route path="/imobiliaria/equipe" element={
+                <ProtectedRoute allowedRole="imobiliaria">
+                  <EquipePage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/imobiliaria/*" element={
-            <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
-              <ImobiliariaDashboard />
-            </ProtectedRoute>
-          } />
-
-
-          <Route path="/inquilino/perfil" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <PerfilInquilinoPage />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/inquilino/contrato" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <ContratoEFPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/imobiliaria/*" element={
+                <ProtectedRoute allowedRole={["imobiliaria", "integrante_imobiliaria"]}>
+                  <ImobiliariaDashboard />
+                </ProtectedRoute>
+              } />
 
 
-          <Route path="/inquilino/contratar" element={
-            <ProtectedRoute allowedRole={["inquilino", "admin", "imobiliaria", "integrante_imobiliaria"]}>
-              <ContratacaoPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/inquilino/perfil" element={
+                <ProtectedRoute allowedRole="inquilino">
+                  <PerfilInquilinoPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/inquilino/pagamento-sucesso" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <PagamentoSucessoPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/inquilino/contrato" element={
+                <ProtectedRoute allowedRole="inquilino">
+                  <ContratoEFPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/inquilino/solicitacao" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <SolicitacaoEntregaPage />
-            </ProtectedRoute>
-          } />
 
-          <Route path="/inquilino/atendimento" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <AtendimentoPage />
-            </ProtectedRoute>
-          } />
+              <Route path="/inquilino/contratar" element={
+                <ProtectedRoute allowedRole={["inquilino", "admin", "imobiliaria", "integrante_imobiliaria"]}>
+                  <ContratacaoPage />
+                </ProtectedRoute>
+              } />
 
-          <Route path="/inquilino/*" element={
-            <ProtectedRoute allowedRole="inquilino">
-              <InquilinoDashboard />
-            </ProtectedRoute>
-          } />
+              <Route path="/inquilino/pagamento-sucesso" element={
+                <ProtectedRoute allowedRole="inquilino">
+                  <PagamentoSucessoPage />
+                </ProtectedRoute>
+              } />
 
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+              <Route path="/inquilino/solicitacao" element={
+                <ProtectedRoute allowedRole="inquilino">
+                  <SolicitacaoEntregaPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/inquilino/atendimento" element={
+                <ProtectedRoute allowedRole="inquilino">
+                  <AtendimentoPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/inquilino/*" element={
+                <ProtectedRoute allowedRole="inquilino">
+                  <InquilinoDashboard />
+                </ProtectedRoute>
+              } />
+
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

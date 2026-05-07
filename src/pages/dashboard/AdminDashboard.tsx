@@ -271,7 +271,7 @@ const AdminDashboard = () => {
                       paddingAngle={5}
                       dataKey="value"
                     >
-                      {roleDistribution.map((entry, index) => (
+                      {distribution.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
