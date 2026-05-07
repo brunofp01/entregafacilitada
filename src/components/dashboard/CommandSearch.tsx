@@ -8,33 +8,54 @@ import {
     CommandList,
     CommandSeparator,
 } from "@/components/ui/command";
-import { Building2, User, Key, Search, Calculator, FileText } from "lucide-react";
+import { Building2, User, Search, Calculator, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function CommandSearch() {
     const [open, setOpen] = useState(false);
     const [inquilinos, setInquilinos] = useState<{ id: string, nome: string }[]>([]);
     const [imobiliarias, setImobiliarias] = useState<{ id: string, full_name: string }[]>([]);
     const navigate = useNavigate();
+    const { profile } = useAuth();
+
+    const isAdmin = profile?.role === "admin" || profile?.role === "admin_master" || profile?.role === "equipe_ef";
+    const isImobiliaria = profile?.role === "imobiliaria" || profile?.role === "integrante_imobiliaria";
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
+                // Only allow open if not a tenant
+                if (!isAdmin && !isImobiliaria) return;
                 setOpen((open) => !open);
             }
         };
 
         document.addEventListener("keydown", down);
         return () => document.removeEventListener("keydown", down);
-    }, []);
+    }, [isAdmin, isImobiliaria]);
 
     const fetchData = async () => {
-        const { data: inq } = await supabase.from("inquilinos").select("id, nome").limit(5);
-        const { data: imob } = await supabase.from("profiles").select("id, full_name").eq("role", "imobiliaria").limit(5);
+        if (!profile) return;
+
+        // 1. Fetch Inquilinos (Filtered if Imobiliaria)
+        let inqQuery = supabase.from("inquilinos").select("id, nome").limit(5);
+        if (isImobiliaria && profile.imobiliaria_id) {
+            inqQuery = inqQuery.eq("imobiliaria_id", profile.imobiliaria_id);
+        } else if (isImobiliaria) {
+            inqQuery = inqQuery.eq("imobiliaria_id", profile.id);
+        }
+        
+        const { data: inq } = await inqQuery;
         if (inq) setInquilinos(inq);
-        if (imob) setImobiliarias(imob);
+
+        // 2. Fetch Imobiliarias (Admin only)
+        if (isAdmin) {
+            const { data: imob } = await supabase.from("profiles").select("id, full_name").eq("role", "imobiliaria").limit(5);
+            if (imob) setImobiliarias(imob);
+        }
     };
 
     useEffect(() => {
@@ -45,6 +66,9 @@ export function CommandSearch() {
         setOpen(false);
         command();
     };
+
+    // Tenants cannot see the search at all
+    if (!isAdmin && !isImobiliaria) return null;
 
     return (
         <>
@@ -65,37 +89,45 @@ export function CommandSearch() {
                     <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
                     
                     <CommandGroup heading="Atalhos">
-                        <CommandItem onSelect={() => runCommand(() => navigate("/admin/aprovacoes"))}>
-                            <FileText className="mr-2 h-4 w-4" />
-                            <span>Ver Aprovações</span>
-                        </CommandItem>
+                        {isAdmin && (
+                            <CommandItem onSelect={() => runCommand(() => navigate("/admin/aprovacoes"))}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>Ver Aprovações</span>
+                            </CommandItem>
+                        )}
                         <CommandItem onSelect={() => runCommand(() => navigate("/imobiliaria/contratar"))}>
                             <Calculator className="mr-2 h-4 w-4" />
                             <span>Nova Contratação</span>
                         </CommandItem>
                     </CommandGroup>
                     
-                    <CommandSeparator />
+                    {inquilinos.length > 0 && (
+                        <>
+                            <CommandSeparator />
+                            <CommandGroup heading="Inquilinos Recentes">
+                                {inquilinos.map((i) => (
+                                    <CommandItem key={i.id} onSelect={() => runCommand(() => navigate(`/imobiliaria/inquilinos`))}>
+                                        <User className="mr-2 h-4 w-4" />
+                                        <span>{i.nome}</span>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </>
+                    )}
                     
-                    <CommandGroup heading="Inquilinos Recentes">
-                        {inquilinos.map((i) => (
-                            <CommandItem key={i.id} onSelect={() => runCommand(() => navigate(`/imobiliaria/inquilinos`))}>
-                                <User className="mr-2 h-4 w-4" />
-                                <span>{i.nome}</span>
-                            </CommandItem>
-                        ))}
-                    </CommandGroup>
-                    
-                    <CommandSeparator />
-                    
-                    <CommandGroup heading="Imobiliárias">
-                        {imobiliarias.map((i) => (
-                            <CommandItem key={i.id} onSelect={() => runCommand(() => navigate(`/admin/imobiliarias`))}>
-                                <Building2 className="mr-2 h-4 w-4" />
-                                <span>{i.full_name}</span>
-                            </CommandItem>
-                        ))}
-                    </CommandGroup>
+                    {isAdmin && imobiliarias.length > 0 && (
+                        <>
+                            <CommandSeparator />
+                            <CommandGroup heading="Imobiliárias">
+                                {imobiliarias.map((i) => (
+                                    <CommandItem key={i.id} onSelect={() => runCommand(() => navigate(`/admin/imobiliarias`))}>
+                                        <Building2 className="mr-2 h-4 w-4" />
+                                        <span>{i.full_name}</span>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </>
+                    )}
                 </CommandList>
             </CommandDialog>
         </>

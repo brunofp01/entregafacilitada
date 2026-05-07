@@ -62,11 +62,20 @@ const InquilinosPage = () => {
             setUserRole(profile?.role || null);
             const imobiliariaId = profile?.imobiliaria_id || user.id;
 
-            const { data, error } = await supabase
+            const isAdmin = ['admin', 'admin_master', 'equipe_ef'].includes(profile?.role || '');
+
+            let query = supabase
                 .from('inquilinos')
                 .select('*')
-                .eq('imobiliaria_id', imobiliariaId)
                 .order('created_at', { ascending: false });
+
+            // Security: Isolation logic
+            if (!isAdmin) {
+                if (!imobiliariaId) throw new Error("ID de Imobiliária não encontrado.");
+                query = query.eq('imobiliaria_id', imobiliariaId);
+            }
+
+            const { data, error } = await query;
 
             if (error) throw error;
             setInquilinos(data || []);

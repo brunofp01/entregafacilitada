@@ -64,8 +64,9 @@ const SolicitacoesPage = () => {
                 `)
                 .order('created_at', { ascending: false });
 
-            // If imobiliaria, filter by imobiliaria_id
+            // Security: Strict multi-tenant isolation
             if (profile?.role === 'imobiliaria' || profile?.role === 'integrante_imobiliaria') {
+                if (!imobiliariaId) throw new Error("ID de Imobiliária não encontrado no perfil.");
                 query = query.eq('imobiliaria_id', imobiliariaId);
             }
 
